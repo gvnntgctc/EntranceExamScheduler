@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Schedule</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+  
+  <!-- Sidebar (Hidden by default) -->
+  <div class="sidebar" id="sidebar">
+    
+    
+    <div class="sidebar-header">
+      <h2><i class="fas fa-cogs"></i> Admin Panel</h2>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    
+    
+    <div class="container">
+      <h1><i class="fas fa-edit"></i> Edit Schedule</h1>
+      
+      <% if (error && error.length > 0) { %>
+        <div class="message error">
+          <i class="fas fa-exclamation-triangle"></i> <%= error %>
+        </div>
+      <% } %>
+      
+      <div class="section-card">
+        <h2><i class="fas fa-pencil-alt"></i> Update Schedule Details</h2>
+        <form action="/admin/edit-schedule/<%= schedule._id %>" method="POST" class="schedule-form">
+          <div class="form-group">
+            <label for="studentUsername"><i class="fas fa-user"></i> Student Username</label>
+            <input type="text" id="studentUsername" name="studentUsername" value="<%= schedule.studentId ? schedule.studentId.username : '' %>" placeholder="Enter student username" required>
+          </div>
+          <div class="form-group">
+            <label for="examDate"><i class="fas fa-calendar"></i> Exam Date</label>
+            <input type="date" id="examDate" name="examDate" value="<%= schedule.examDate.toISOString().split('T')[0] %>" required>
+          </div>
+         <div class="custom-timepicker" id="customTimepicker">
+  <label>ENTER TIME</label>
+  <div class="timepicker-panel">
+    <div class="timepart hour-part">
+      <input type="number" id="hourInput" class="time-input" min="1" max="12" maxlength="2" value="12" />
+      <small>Hour</small>
+    </div>
+    <div class="separator">:</div>
+    <div class="timepart minute-part">
+      <input type="number" id="minuteInput" class="time-input" min="0" max="59" maxlength="2" value="00" />
+      <small>Minute</small>
+    </div>
+    <div class="ampm-part">
+      <button type="button" class="ampm-btn active" id="amBtn">AM</button>
+      <button type="button" class="ampm-btn" id="pmBtn">PM</button>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button type="button" class="btn-cancel" id="cancelBtn">CANCEL</button>
+    <button type="button" class="btn-ok" id="okBtn">OK</button>
+  </div>
+
+  <!-- Hidden input to submit selected time -->
+  <input type="hidden" id="examTimeInput" name="examTime" value="12:00 AM" />
+</div>
+
+          <div class="form-group">
+            <label for="location"><i class="fas fa-map-marker-alt"></i> Location</label>
+            <input type="text" id="location" name="location" value="<%= schedule.location %>" placeholder="e.g., Room 101" required>
+          </div>
+          <div class="button-group">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+            <a href="/admin" class="btn cancel-btn"><i class="fas fa-times"></i> Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <script src="/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Exam Scheduler - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+      padding: 20px;
+    }
+
+    .wrapper {
+      position: relative;
+      width: 850px;
+      height: 500px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    /* ===== FORM BOXES ===== */
+    .form-box {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.6s ease-in-out;
+    }
+
+    .form-box form {
+      width: 100%;
+      padding: 40px;
+    }
+
+    .form-box h2 {
+      font-size: 28px;
+      color: #333;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .form-box .subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    /* Login Box - Starts LEFT */
+    .login-box {
+      left: 0;
+      z-index: 2;
+    }
+
+    /* Register Box - Starts LEFT but hidden */
+    .register-box {
+      left: 0;
+      z-index: 1;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ===== INPUT STYLES ===== */
+    .input-field {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-field i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #11998e;
+      font-size: 18px;
+    }
+
+    .input-field input {
+      width: 100%;
+      padding: 15px 15px 15px 50px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: 0.3s;
+      background: #f9f9f9;
+    }
+
+    .input-field input:focus {
+      outline: none;
+      border-color: #11998e;
+      background: #fff;
+    }
+
+    /* ===== BUTTON ===== */
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(17, 153, 142, 0.3);
+    }
+
+    /* ===== TOGGLE PANEL (GREEN SIDE) ===== */
+    .toggle-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: #fff;
+      text-align: center;
+      padding: 40px;
+      transition: all 0.6s ease-in-out;
+      z-index: 10;
+    }
+
+    .toggle-panel .logo {
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 25px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+}
+
+.toggle-panel .logo i {
+  font-size: 45px;
+}
+
+.toggle-panel .logo img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+    .toggle-panel h2 {
+      font-size: 28px;
+      margin-bottom: 15px;
+    }
+
+    .toggle-panel p {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+
+    .toggle-btn {
+      padding: 12px 40px;
+      background: transparent;
+      border: 2px solid #fff;
+      border-radius: 25px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-btn:hover {
+      background: #fff;
+      color: #11998e;
+    }
+
+    /* ===== MESSAGES ===== */
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .message.error {
+      background: #ffe6e6;
+      color: #e74c3c;
+      border: 1px solid #e74c3c;
+    }
+
+    .message.success {
+      background: #e6ffe6;
+      color: #27ae60;
+      border: 1px solid #27ae60;
+    }
+
+    /* ===== MOBILE LINK ===== */
+    .mobile-link {
+      display: none;
+      text-align: center;
+      margin-top: 25px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .mobile-link a {
+      color: #11998e;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    /* ========================================= */
+    /* ANIMATION - REGISTER MODE ACTIVE */
+    /* ========================================= */
+
+    /* When register is active, move green panel to LEFT */
+    .wrapper.register-mode .toggle-panel {
+      right: 50%;
+    }
+
+    /* When register is active, hide login and show register */
+    .wrapper.register-mode .login-box {
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .wrapper.register-mode .register-box {
+      left: 50%;
+      opacity: 1;
+      pointer-events: all;
+      z-index: 2;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 800px) {
+      .wrapper {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+      }
+
+      .form-box {
+        position: relative;
+        width: 100%;
+        height: auto;
+      }
+
+      .login-box {
+        display: block;
+      }
+
+      .register-box {
+        display: none;
+        position: relative;
+        left: 0;
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .wrapper.register-mode .login-box {
+        display: none;
+      }
+
+      .wrapper.register-mode .register-box {
+        display: block;
+        left: 0;
+      }
+
+      .toggle-panel {
+        display: none;
+      }
+
+      .mobile-link {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper" id="wrapper">
+    
+    <!-- LOGIN FORM (Left Side) -->
+    <div class="form-box login-box">
+      <form action="/auth/login" method="POST">
+        <h2>Welcome Back!</h2>
+        <p class="subtitle">Login to view your exam schedule</p>
+        
+        <% if (typeof error !== 'undefined' && error.length > 0 && formType === 'login') { %>
+          <div class="message error">
+            <i class="fas fa-exclamation-circle"></i> <%= error %>
+          </div>
+        <% } %>
+        
+        <% if (typeof success !== 'undefined' && success.length > 0) { %>
+          <div class="message success">
+            <i class="fas fa-check-circle"></i> <%= success %>
+          </div>
+        <% } %>
+        
+        <div class="input-field">
+          <i class="fas fa-user"></i>
+          <input type="text" name="username" placeholder="Username" required>
+        </div>
+        
+        <div class="input-field">
+          <i class="fas fa-lock"></i>
+          <input type="password" name="password" placeholder="Password" required>
+        </div>
+        
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+        
+        <p class="mobile-link">
+          Don't have an account? <a href="#" onclick="toggleForm()">Register</a>
+        </p>
+      </form>
+    </div>
+    
+    <!-- REGISTER FORM (Will slide to Right) -->
+    <div class="form-box register-box">
+      <form action="/auth/register" method="POST">
+        <h2>Create Account</h2>
+        <p class="subtitle">Register to view your exam schedule</p>
+        
+        <% if (typeof error !== 'undefined' && error.length > 0 && formType === 'register') { %>
+          <div class="message error">
+            <i class="fas fa-exclamation-circle"></i> <%= error %>
+          </div>
+        <% } %>
+        
+        <div class="input-field">
+          <i class="fas fa-user"></i>
+          <input type="text" name="username" placeholder="Username" required>
+        </div>
+        
+        <div class="input-field">
+          <i class="fas fa-lock"></i>
+          <input type="password" name="password" placeholder="Password (min 6 chars)" required>
+        </div>
+        
+        <div class="input-field">
+          <i class="fas fa-lock"></i>
+          <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
+        </div>
+        
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-user-plus"></i> Register
+        </button>
+        
+        <p class="mobile-link">
+          Already have an account? <a href="#" onclick="toggleForm()">Login</a>
+        </p>
+      </form>
+    </div>
+    
+    <!-- GREEN TOGGLE PANEL (Right Side - Moves to Left on Register) -->
+    <div class="toggle-panel" id="togglePanel">
+      
+      <!-- Content for Login Mode (Shows Register button) -->
+      <div class="panel-content login-content" id="loginContent">
+        <div class="logo">
+            <img src="/images/logo.png" alt="School Logo">
+        </div>
+        <h2>Hello, Student!</h2>
+        <p>Don't have an account yet? Register now to view your exam schedule!</p>
+        <button type="button" class="toggle-btn" onclick="toggleForm()">
+          <i class="fas fa-user-plus"></i> Register
+        </button>
+      </div>
+      
+      <!-- Content for Register Mode (Shows Login button) -->
+      <div class="panel-content register-content" id="registerContent" style="display: none;">
+        <div class="logo">
+            <img src="/images/logo.png" alt="School Logo">
+        </div>
+        <h2>Welcome Back!</h2>
+        <p>Already have an account? Login to access your exam schedule!</p>
+        <button type="button" class="toggle-btn" onclick="toggleForm()">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  <script>
+    // Check if register mode from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const formType = '<%= typeof formType !== "undefined" ? formType : "login" %>';
+    
+    if (formType === 'register' || urlParams.get('register') === 'true') {
+      document.getElementById('wrapper').classList.add('register-mode');
+      document.getElementById('loginContent').style.display = 'none';
+      document.getElementById('registerContent').style.display = 'block';
+    }
+    
+    function toggleForm() {
+      const wrapper = document.getElementById('wrapper');
+      const loginContent = document.getElementById('loginContent');
+      const registerContent = document.getElementById('registerContent');
+      
+      wrapper.classList.toggle('register-mode');
+      
+      if (wrapper.classList.contains('register-mode')) {
+        loginContent.style.display = 'none';
+        registerContent.style.display = 'block';
+        window.history.pushState({}, '', '/auth/login?register=true');
+      } else {
+        loginContent.style.display = 'block';
+        registerContent.style.display = 'none';
+        window.history.pushState({}, '', '/auth/login');
+      }
+    }
+  </script>
+
+</body>
+</html>
