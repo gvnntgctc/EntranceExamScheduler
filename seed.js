@@ -1,22 +1,45 @@
 const mongoose = require('mongoose');
 const User = require('./models/User');
-const Schedule = require('./models/Schedule'); // This is missing!
 
+// Connect without deprecated options
+mongoose.connect('mongodb://localhost:27017/exam-scheduler');
 
-mongoose.connect('mongodb://localhost:27017/examScheduler');
-
-async function seed() {
-  // Clear existing users (optional: comment this out if you want to keep data)
-  await User.deleteMany({});
-
-  // Insert new users
-  await User.create([
-    { username: 'admin', password: 'admin123', role: 'admin' },
-    { username: 'student1', password: 'pass123', role: 'student' },
-    { username: 'student2', password: 'pass123', role: 'student' },
-  ]);
-  console.log('Sample users seeded successfully');
-  mongoose.disconnect();
+async function createAdmin() {
+  try {
+    console.log('Connecting to database...');
+    
+    // Wait for connection
+    await mongoose.connection.asPromise();
+    console.log('Connected to MongoDB!');
+    
+    // Delete old admin accounts
+    await User.deleteMany({ role: 'admin' });
+    console.log('Old admin accounts deleted.');
+    
+    // Create new admin
+    const admin = new User({
+      email: 'admin@admin.com',
+      fullName: 'Administrator',
+      password: 'admin123',
+      role: 'admin'
+    });
+    
+    await admin.save();
+    
+    console.log('========================================');
+    console.log('Admin account created successfully!');
+    console.log('========================================');
+    console.log('Email: admin@admin.com');
+    console.log('Password: admin123');
+    console.log('========================================');
+    
+    mongoose.connection.close();
+    process.exit(0);
+  } catch (err) {
+    console.error('Error:', err);
+    mongoose.connection.close();
+    process.exit(1);
+  }
 }
 
-seed().catch(console.error);
+createAdmin();

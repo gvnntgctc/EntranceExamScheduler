@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Student Dashboard</title>
+  <title>Student Dashboard - Exam Scheduler</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
@@ -9,12 +9,13 @@
 <body>
   <!-- Overlay -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
+  
+  <!-- Hamburger Button -->
   <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
   
-  <!-- Sidebar (Hidden by default) -->
+  <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
-    
+    <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
     
     <div class="sidebar-header">
       <h2><i class="fas fa-user-graduate"></i> Student Panel</h2>
@@ -28,59 +29,53 @@
   
   <!-- Main Content -->
   <div class="main-content">
-    
-    
     <div class="container">
-      <h1><i class="fas fa-calendar-alt"></i> Your Exam Schedule</h1>
+      <h1><i class="fas fa-tachometer-alt"></i> Welcome, <%= user.fullName %>!</h1>
       
-      <div id="schedule" class="section-card">
-        <% if (schedule) { %>
-          <div class="schedule-card">
-            <div class="schedule-card-header">
-              <i class="fas fa-clipboard-check"></i>
-              <h2>Your Upcoming Exam</h2>
-            </div>
-            <div class="schedule-card-body">
-              <div class="schedule-item">
-                <div class="schedule-icon">
-                  <i class="fas fa-calendar-day"></i>
-                </div>
-                <div class="schedule-text">
-                  <label>Date</label>
-                  <span><%= schedule.examDate.toDateString() %></span>
-                </div>
-              </div>
-              <div class="schedule-item">
-                <div class="schedule-icon">
-                  <i class="fas fa-clock"></i>
-                </div>
-                <div class="schedule-text">
-                  <label>Time</label>
-                  <span><%= schedule.examTime %></span>
-                </div>
-              </div>
-              <div class="schedule-item">
-                <div class="schedule-icon">
-                  <i class="fas fa-map-marker-alt"></i>
-                </div>
-                <div class="schedule-text">
-                  <label>Location</label>
-                  <span><%= schedule.location %></span>
-                </div>
-              </div>
-            </div>
-            <div class="schedule-card-footer">
-              <p><i class="fas fa-info-circle"></i> Please arrive 15 minutes before your scheduled time.</p>
-            </div>
+      <div class="section-card" id="schedule">
+        <h2><i class="fas fa-calendar-check"></i> My Exam Schedule</h2>
+        
+        <% if (!schedule) { %>
+          <div class="no-data">
+            <i class="fas fa-calendar-times"></i>
+            <p>No exam schedule assigned yet.</p>
+            <p class="sub-text">Please check back later or contact the admin.</p>
           </div>
         <% } else { %>
-          <div class="no-schedule">
-            <div class="no-schedule-icon">
-              <i class="fas fa-calendar-times"></i>
+          <div class="schedule-card">
+            <div class="schedule-card-header">
+              <i class="fas fa-calendar-alt"></i>
+              <span>Exam Details</span>
             </div>
-            <h2>No Schedule Yet</h2>
-            <p>Your exam schedule has not been set by the admin yet.</p>
-            <p>Please check back later or contact the administration.</p>
+            <div class="schedule-card-body">
+              <div class="schedule-detail">
+                <div class="detail-icon">
+                  <i class="fas fa-calendar"></i>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Date</span>
+                  <span class="detail-value"><%= new Date(schedule.examDate).toDateString() %></span>
+                </div>
+              </div>
+              <div class="schedule-detail">
+                <div class="detail-icon">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Time</span>
+                  <span class="detail-value"><%= schedule.examTime %></span>
+                </div>
+              </div>
+              <div class="schedule-detail">
+                <div class="detail-icon">
+                  <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Location</span>
+                  <span class="detail-value"><%= schedule.location %></span>
+                </div>
+              </div>
+            </div>
           </div>
         <% } %>
       </div>

@@ -2,28 +2,30 @@ const express = require('express');
 const User = require('../models/User');
 const router = express.Router();
 
-// Auth Page - renders "auth.ejs" NOT "login.ejs"
+// Auth Page (GET)
 router.get('/login', (req, res) => {
   const error = req.query.error || '';
   const success = req.query.success || '';
   const formType = req.query.register === 'true' ? 'register' : 'login';
-  res.render('auth', { error, success, formType });  // Changed from 'login' to 'auth'
+  res.render('auth', { error, success, formType });
 });
 
+// Redirect /register to /login?register=true
 router.get('/register', (req, res) => {
   res.redirect('/auth/login?register=true');
 });
 
-// Login POST
+// Login (POST)
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
+    
     const user = await User.findOne({ 
-      username: new RegExp(`^${username}$`, 'i') 
+      email: email.toLowerCase() 
     });
     
     if (!user || user.password !== password) {
-      return res.redirect('/auth/login?error=Invalid username or password.');
+      return res.redirect('/auth/login?error=Invalid email or password.');
     }
     
     req.session.userId = user._id;
@@ -35,16 +37,17 @@ router.post('/login', async (req, res) => {
     return res.redirect('/student');
   } catch (err) {
     console.error(err);
-    res.redirect('/auth/login?error=Login failed.');
+    res.redirect('/auth/login?error=Login failed. Please try again.');
   }
 });
 
-// Register POST
+// Register (POST)
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, confirmPassword } = req.body;
+    const { email, fullName, password, confirmPassword } = req.body;
     
-    if (!username || !password || !confirmPassword) {
+    // Validation
+    if (!email || !fullName || !password || !confirmPassword) {
       return res.redirect('/auth/login?register=true&error=All fields are required.');
     }
     
@@ -56,17 +59,20 @@ router.post('/register', async (req, res) => {
       return res.redirect('/auth/login?register=true&error=Passwords do not match.');
     }
     
+    // Check if email already exists
     const existingUser = await User.findOne({ 
-      username: new RegExp(`^${username}$`, 'i') 
+      email: email.toLowerCase() 
     });
     
     if (existingUser) {
-      return res.redirect('/auth/login?register=true&error=Username already taken.');
+      return res.redirect('/auth/login?register=true&error=Email already registered.');
     }
     
+    // Create new user
     const newUser = new User({
-      username: username.toLowerCase(),
-      password: password,
+      email: email.toLowerCase(),
+      fullName,
+      password,
       role: 'student'
     });
     
@@ -74,7 +80,7 @@ router.post('/register', async (req, res) => {
     res.redirect('/auth/login?success=Account created! Please login.');
   } catch (err) {
     console.error(err);
-    res.redirect('/auth/login?register=true&error=Registration failed.');
+    res.redirect('/auth/login?register=true&error=Registration failed. Please try again.');
   }
 });
 

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Students</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  
+  <!-- Hamburger Button -->
+  <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+  
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
+    
+    <div class="sidebar-header">
+      <h2><i class="fas fa-cogs"></i> Admin Panel</h2>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="/admin#add-schedule"><i class="fas fa-plus-circle"></i> Add Schedule</a></li>
+      <li><a href="/admin#schedules"><i class="fas fa-calendar-alt"></i> View Schedules</a></li>
+      <li><a href="/admin/students" class="active"><i class="fas fa-users"></i> Students</a></li>
+      <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container">
+      <h1><i class="fas fa-users"></i> Registered Students</h1>
+      
+      <% if (error && error.length > 0) { %>
+        <div class="message error">
+          <i class="fas fa-exclamation-triangle"></i> <%= error %>
+        </div>
+      <% } %>
+      
+      <% if (success && success.length > 0) { %>
+        <div class="message success">
+          <i class="fas fa-check-circle"></i> <%= success %>
+        </div>
+      <% } %>
+      
+      <div class="section-card">
+        <div class="section-header">
+          <h2><i class="fas fa-list"></i> All Students</h2>
+          <span class="student-count"><%= students.length %> students</span>
+        </div>
+        
+        <% if (students.length === 0) { %>
+          <div class="no-data">
+            <i class="fas fa-users"></i>
+            <p>No students registered yet.</p>
+          </div>
+        <% } else { %>
+          <div class="students-list">
+            <% students.forEach(student => { %>
+              <div class="student-item">
+                <div class="student-avatar">
+                  <%= student.fullName ? student.fullName.charAt(0).toUpperCase() : 'S' %>
+                </div>
+                <div class="student-details">
+                  <div class="student-name">
+                    <%= student.fullName %>
+                  </div>
+                  <div class="student-info-row">
+                    <div class="info-item">
+                      <i class="fas fa-envelope"></i>
+                      <span><%= student.email %></span>
+                    </div>
+                    <% if (student.createdAt) { %>
+                      <div class="info-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>Registered: <%= student.createdAt.toDateString() %></span>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  
+  <script src="/js/script.js"></script>
+</body>
+</html>
