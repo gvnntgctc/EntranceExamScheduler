@@ -449,6 +449,61 @@ h1 {
     padding: 10px 10px 10px 35px;
   }
 
+  /* Enhanced mobile form experience */
+  .input-group {
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .input-group input:focus {
+    outline: none;
+    border-color: #11998e;
+    box-shadow: 0 0 0 2px rgba(17, 153, 142, 0.2);
+  }
+
+  /* Better mobile button styling */
+  .btn-submit {
+    width: 100%;
+    min-height: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3);
+  }
+
+  /* Mobile-friendly error/success messages */
+  .error-message, .success-message {
+    font-size: 14px;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    word-wrap: break-word;
+  }
+
+  /* Better mobile spacing */
+  .form-title {
+    margin-bottom: 20px;
+  }
+
+  .form-subtitle {
+    margin-bottom: 25px;
+  }
+
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  .container {
+    margin: 10px;
+  }
+}
+
   h1 {
     font-size: 22px;
   }
