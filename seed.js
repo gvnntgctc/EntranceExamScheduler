@@ -22,6 +22,7 @@ async function createAdmin() {
       email: 'admin@admin.com',
       fullName: 'Administrator',
       password: 'admin123',
+      phoneNumber: '+00000000000',
       role: 'admin'
     });
     
