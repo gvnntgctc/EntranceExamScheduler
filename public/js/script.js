@@ -32,7 +32,7 @@ function closeSidebar() {
   document.body.style.overflow = '';
 }
 
-// Event Listeners
+// Sidebar Event Listeners
 if (hamburger) {
   hamburger.addEventListener('click', toggleSidebar);
 }
@@ -48,76 +48,70 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Close when clicking menu links
+// Close sidebar when clicking links
 const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
 sidebarLinks.forEach(link => {
   link.addEventListener('click', () => {
     setTimeout(closeSidebar, 150);
   });
+});
 
+// Time Input Elements
 const hourInput = document.getElementById('hourInput');
 const minuteInput = document.getElementById('minuteInput');
-const amBtn = document.getElementById('amBtn');
-const pmBtn = document.getElementById('pmBtn');
+const ampmSelect = document.getElementById('ampmSelect');
 const examTimeInput = document.getElementById('examTimeInput');
-const cancelBtn = document.getElementById('cancelBtn');
-const okBtn = document.getElementById('okBtn');
 
-let ampm = 'AM';
-
-// Validate and fix input values
-function sanitizeHour() {
-  let h = parseInt(hourInput.value);
-  if (isNaN(h) || h < 1) h = 1;
-  else if (h > 12) h = 12;
-  hourInput.value = h;
-  return h;
+// Helper to pad numbers
+function pad(num) {
+  return num.toString().padStart(2, '0');
 }
 
-function sanitizeMinute() {
-  let m = parseInt(minuteInput.value);
-  if (isNaN(m) || m < 0) m = 0;
-  else if (m > 59) m = 59;
-  minuteInput.value = m.toString().padStart(2, '0');
-  return m;
+function updateHiddenInput() {
+  if (!hourInput || !minuteInput || !ampmSelect || !examTimeInput) return;
+  let hour = parseInt(hourInput.value) || 12;
+  let minute = parseInt(minuteInput.value) || 0;
+  let ampm = ampmSelect.value;
+
+  if (hour < 1) hour = 1;
+  if (hour > 12) hour = 12;
+  if (minute < 0) minute = 0;
+  if (minute > 59) minute = 59;
+
+  examTimeInput.value = `${pad(hour)}:${pad(minute)} ${ampm}`;
 }
 
-function updateHidden() {
-  const h = sanitizeHour();
-  const m = sanitizeMinute();
-  examTimeInput.value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
+// Listen to time input changes and update hidden input
+if (hourInput) {
+  hourInput.addEventListener('input', updateHiddenInput);
+  hourInput.addEventListener('blur', () => {
+  let val = parseInt(hourInput.value) || 12;
+  if (val < 1) val = 1;
+  if (val > 12) val = 12;
+  hourInput.value = val;
+  updateHiddenInput();
+  });
 }
 
-hourInput.addEventListener('change', updateHidden);
-minuteInput.addEventListener('change', updateHidden);
+if (minuteInput) {
+  minuteInput.addEventListener('input', updateHiddenInput);
+  minuteInput.addEventListener('blur', () => {
+  let val = parseInt(minuteInput.value) || 0;
+  if (val < 0) val = 0;
+  if (val > 59) val = 59;
+  minuteInput.value = pad(val);
+  updateHiddenInput();
+  });
+}
 
-amBtn.addEventListener('click', () => {
-  ampm = 'AM';
-  amBtn.classList.add('active');
-  pmBtn.classList.remove('active');
-  updateHidden();
-});
+if (ampmSelect) ampmSelect.addEventListener('change', updateHiddenInput);
 
-pmBtn.addEventListener('click', () => {
-  ampm = 'PM';
-  pmBtn.classList.add('active');
-  amBtn.classList.remove('active');
-  updateHidden();
-});
+if (hourInput || minuteInput || ampmSelect || examTimeInput) updateHiddenInput(); // initialize hidden input on load
 
-cancelBtn.addEventListener('click', () => {
-  hourInput.value = '12';
-  minuteInput.value = '00';
-  ampm = 'AM';
-  amBtn.classList.add('active');
-  pmBtn.classList.remove('active');
-  updateHidden();
-});
-
-okBtn.addEventListener('click', () => {
-  // Optional: you can validate or close popup here
-  alert(`Selected time is: ${examTimeInput.value}`);
-});
-
-updateHidden();
+// Day Cards Click Event
+document.querySelectorAll('.day-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const day = card.getAttribute('data-day');
+    window.location.href = `/admin/schedules/day/${day}`;
+  });
 });

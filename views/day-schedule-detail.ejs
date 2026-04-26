@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= day %> Schedule Details</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <%- include('partials/sidebar') %>
+
+  <div class="main-content">
+    <div class="container">
+      <button onclick="history.back()" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Back</button>
+      <h1>Students Scheduled on <%= day %>, <%= monthName %> <%= year %></h1>
+
+      <input type="search" id="searchInput" placeholder="Search students..." oninput="filterStudents()" class="search-input"/>
+
+      <ul id="studentList" class="student-list">
+        <% if(schedules.length === 0) { %>
+          <li>No students scheduled on this day.</li>
+        <% } else { %>
+          <% schedules.forEach(({ studentId, examTime, location }) => { %>
+            <li class="student-item">
+              <strong><%= studentId ? studentId.username : 'Unknown' %></strong>
+              <span>Time: <%= examTime %></span>
+              <span>Location: <%= location %></span>
+              <a href="/admin/edit-schedule/<%= studentId._id %>" class="btn-icon edit" title="Edit Schedule">
+                <i class="fas fa-edit"></i>
+              </a>
+            </li>
+          <% }) %>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function filterStudents() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const students = document.querySelectorAll('.student-item');
+      students.forEach(student => {
+        const text = student.textContent.toLowerCase();
+        student.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+  </script>
+
+</body>
+</html>

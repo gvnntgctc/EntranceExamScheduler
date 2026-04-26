@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= monthName %> - Calendar View</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .page-header {
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-content h1 {
+      font-weight: 700;
+      font-size: 32px;
+      margin: 0;
+      color: #222;
+    }
+
+    .header-content p {
+      font-size: 14px;
+      color: #666;
+      margin: 8px 0 0 0;
+    }
+
+    .back-button {
+      background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-button:hover {
+      box-shadow: 0 8px 16px rgba(27, 94, 32, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .calendar-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgb(0 0 0 / 8%);
+      overflow: hidden;
+    }
+
+    .calendar-header {
+      background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+      color: white;
+      padding: 24px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .calendar-header h2 {
+      margin: 0;
+      font-size: 24px;
+      color: white;
+    }
+
+    .calendar-header p {
+      display: none;
+    }
+
+    .month-nav-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+    }
+
+    .month-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .month-nav-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .month-nav-btn#prevMonthBtn {
+      left: 24px;
+    }
+
+    .month-nav-btn#nextMonthBtn {
+      right: 24px;
+    }
+
+    .weekday-headers {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: #e0e0e0;
+      padding: 1px;
+    }
+
+    .weekday-header {
+      background: #f5f5f5;
+      padding: 12px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: #e0e0e0;
+      padding: 1px;
+    }
+
+    .calendar-day {
+      background: white;
+      min-height: 120px;
+      padding: 10px;
+      position: relative;
+      font-size: 12px;
+    }
+
+    .calendar-day.other-month {
+      background: #fafafa;
+      color: #999;
+    }
+
+    .calendar-day.today {
+      background: linear-gradient(135deg, rgba(27, 94, 32, 0.1) 0%, rgba(46, 125, 50, 0.1) 100%);
+      border: 2px solid #1B5E20;
+    }
+
+    .day-number {
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .calendar-day.other-month .day-number {
+      color: #bbb;
+    }
+
+    .scheduled-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .scheduled-applicant {
+      background: linear-gradient(135deg, rgba(27, 94, 32, 0.9) 0%, rgba(46, 125, 50, 0.9) 100%);
+      color: white;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all 0.2s ease;
+    }
+
+    .applicant-count {
+      background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      user-select: none;
+    }
+
+    .applicant-count:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
+    }
+
+    .no-schedule {
+      color: #bbb;
+      font-size: 11px;
+      font-style: italic;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+      color: white;
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .modal-close-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .filter-btn {
+      background: #f1f1f1;
+      border: 1px solid #d6d6d6;
+      color: #333;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: #1b5e20;
+      border-color: #19611d;
+      color: white;
+    }
+
+    .applicant-item {
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #f9f9f9;
+      border-left: 4px solid #1B5E20;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .applicant-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .applicant-time {
+      background: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #666;
+      border: 1px solid #e0e0e0;
+      white-space: nowrap;
+    }
+
+    .empty-applicants {
+      text-align: center;
+      padding: 30px 20px;
+      color: #999;
+    }
+
+    .empty-applicants i {
+      font-size: 40px;
+      color: #ddd;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .schedule-details {
+      margin-top: 30px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgb(0 0 0 / 8%);
+      overflow: hidden;
+    }
+
+    .schedule-details-header {
+      background: #f5f5f5;
+      padding: 20px 24px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .schedule-details-header h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .schedule-list {
+      padding: 20px 24px;
+    }
+
+    .schedule-item {
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #f9f9f9;
+      border-left: 4px solid #1B5E20;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+    }
+
+    .schedule-item-content {
+      flex-grow: 1;
+    }
+
+    .schedule-item-date {
+      font-weight: 700;
+      color: #1B5E20;
+      font-size: 14px;
+    }
+
+    .schedule-item-applicant {
+      font-size: 16px;
+      color: #333;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .schedule-item-time {
+      background: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #666;
+      white-space: nowrap;
+      border: 1px solid #e0e0e0;
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+
+    .empty-message i {
+      font-size: 48px;
+      color: #ddd;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .empty-message p {
+      font-size: 16px;
+      margin: 0;
+    }
+
+    @media(max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .calendar-day {
+        min-height: 100px;
+        font-size: 11px;
+      }
+
+      .day-number {
+        margin-bottom: 4px;
+      }
+
+      .scheduled-applicant {
+        font-size: 10px;
+        padding: 3px 5px;
+      }
+    }
+
+    @media(max-width: 600px) {
+      .container {
+        padding: 12px;
+      }
+
+      .header-content h1 {
+        font-size: 24px;
+      }
+
+      .calendar-day {
+        min-height: 80px;
+        padding: 6px;
+        font-size: 10px;
+      }
+
+      .day-number {
+        font-size: 12px;
+      }
+
+      .weekday-header {
+        padding: 8px;
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  
+  <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+
+  <%- include('./partials/sidebar', { page: 'weekly' }) %>
+
+  <div class="main-content">
+    <div class="container">
+      <div class="page-header">
+        <a href="/admin/weekly-schedule" class="back-button">
+          <i class="fas fa-arrow-left"></i> Back to Months
+        </a>
+      </div>
+
+      <!-- Calendar Grid -->
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <button class="month-nav-btn" id="prevMonthBtn" onclick="goToPreviousMonth()" title="Previous Month">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <h2><%= monthName %> <%= year %></h2>
+          <button class="month-nav-btn" id="nextMonthBtn" onclick="goToNextMonth()" title="Next Month">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <div class="weekday-headers">
+          <div class="weekday-header">Sun</div>
+          <div class="weekday-header">Mon</div>
+          <div class="weekday-header">Tue</div>
+          <div class="weekday-header">Wed</div>
+          <div class="weekday-header">Thu</div>
+          <div class="weekday-header">Fri</div>
+          <div class="weekday-header">Sat</div>
+        </div>
+
+        <div class="calendar-grid">
+          <% 
+            const firstDay = new Date(year, month - 1, 1).getDay();
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const daysInPrevMonth = new Date(year, month - 1, 0).getDate();
+
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+              const day = daysInPrevMonth - i;
+          %>
+            <div class="calendar-day other-month">
+              <span class="day-number"><%= day %></span>
+            </div>
+          <% } %>
+
+          <!-- Current month days -->
+          <% 
+            for (let day = 1; day <= daysInMonth; day++) {
+              const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              const schedules = schedulesMap[dateStr] || [];
+              const isToday = new Date().toISOString().split('T')[0] === dateStr;
+          %>
+            <div class="calendar-day <%= isToday ? 'today' : '' %>">
+              <span class="day-number"><%= day %></span>
+              <% if (schedules.length > 0) { %>
+                <button class="applicant-count" onclick="openApplicantModal('<%= dateStr %>')" title="Click to view applicants">
+                  <i class="fas fa-users"></i> <%= schedules.length %>
+                </button>
+              <% } else { %>
+                <div class="no-schedule">-</div>
+              <% } %>
+            </div>
+          <% } %>
+
+          <!-- Next month days -->
+          <% 
+            const totalCells = firstDay + daysInMonth;
+            const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+            for (let day = 1; day <= remainingCells; day++) {
+          %>
+            <div class="calendar-day other-month">
+              <span class="day-number"><%= day %></span>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Detailed Schedule List -->
+      <% if (schedulesList && schedulesList.length > 0) { %>
+        <div class="schedule-details">
+          <div class="schedule-details-header">
+            <h3><i class="fas fa-list"></i> Detailed Schedule for <%= monthName %></h3>
+          </div>
+          <div class="schedule-list">
+            <% schedulesList.forEach(schedule => { %>
+              <div class="schedule-item">
+                <div class="schedule-item-content">
+                  <div class="schedule-item-date">
+                    <i class="fas fa-calendar"></i> <%= new Date(schedule.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                  </div>
+                  <div class="schedule-item-applicant">
+                    <i class="fas fa-user"></i> <%= schedule.fullName %>
+                  </div>
+                </div>
+                <div class="schedule-item-time">
+                  <i class="fas fa-clock"></i> <%= schedule.examTime %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } else { %>
+        <div class="schedule-details">
+          <div class="empty-message">
+            <i class="fas fa-calendar-times"></i>
+            <p>No schedules found for <%= monthName %></p>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Applicants Modal -->
+  <div class="modal-overlay" id="applicantModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalDateTitle">Applicants for Date</h3>
+        <button class="modal-close-btn" onclick="closeApplicantModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-filters">
+          <button class="filter-btn active" id="filterAllBtn" onclick="setApplicantFilter('all')">All</button>
+          <button class="filter-btn" id="filterAmBtn" onclick="setApplicantFilter('am')">AM</button>
+          <button class="filter-btn" id="filterPmBtn" onclick="setApplicantFilter('pm')">PM</button>
+        </div>
+        <div id="modalBody">
+          <!-- Applicants will be inserted here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+  <script>
+    // Store applicants data for modal
+    const applicantsData = <%- JSON.stringify(schedulesMap) %>;
+    let currentApplicantDate = null;
+    let currentApplicantFilter = 'all';
+
+    function getTimePeriod(examTime) {
+      if (typeof examTime !== 'string') return 'all';
+      const normalized = examTime.toLowerCase();
+      if (normalized.includes('a.m') || normalized.includes('am')) return 'am';
+      if (normalized.includes('p.m') || normalized.includes('pm')) return 'pm';
+      return 'all';
+    }
+
+    function updateFilterButtons(filter) {
+      document.getElementById('filterAllBtn').classList.toggle('active', filter === 'all');
+      document.getElementById('filterAmBtn').classList.toggle('active', filter === 'am');
+      document.getElementById('filterPmBtn').classList.toggle('active', filter === 'pm');
+    }
+
+    function renderApplicantList() {
+      if (!currentApplicantDate) {
+        document.getElementById('modalBody').innerHTML = '';
+        return;
+      }
+
+      const applicants = applicantsData[currentApplicantDate] || [];
+      const filteredApplicants = applicants.filter(applicant => {
+        if (currentApplicantFilter === 'am') return getTimePeriod(applicant.examTime) === 'am';
+        if (currentApplicantFilter === 'pm') return getTimePeriod(applicant.examTime) === 'pm';
+        return true;
+      });
+
+      const filteredCount = filteredApplicants.length;
+      const dateObj = new Date(currentApplicantDate);
+      const formattedDate = dateObj.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+
+      const titlePrefix = currentApplicantFilter === 'all'
+        ? `${filteredCount} Applicant${filteredCount !== 1 ? 's' : ''}`
+        : `${filteredCount} ${currentApplicantFilter.toUpperCase()} Applicant${filteredCount !== 1 ? 's' : ''}`;
+
+      document.getElementById('modalDateTitle').textContent = `${titlePrefix} - ${formattedDate}`;
+
+      let modalBodyHTML = '';
+      if (filteredApplicants.length > 0) {
+        filteredApplicants.forEach(applicant => {
+          modalBodyHTML += `
+            <div class="applicant-item">
+              <span class="applicant-name"><i class="fas fa-user"></i> ${applicant.fullName}</span>
+              <span class="applicant-time"><i class="fas fa-clock"></i> ${applicant.examTime}</span>
+            </div>
+          `;
+        });
+      } else {
+        modalBodyHTML = `
+          <div class="empty-applicants">
+            <i class="fas fa-inbox"></i>
+            <p>No ${currentApplicantFilter === 'all' ? '' : currentApplicantFilter.toUpperCase() + ' '}applicants scheduled for this date</p>
+          </div>
+        `;
+      }
+
+      document.getElementById('modalBody').innerHTML = modalBodyHTML;
+    }
+
+    function setApplicantFilter(filter) {
+      currentApplicantFilter = filter;
+      updateFilterButtons(filter);
+      renderApplicantList();
+    }
+
+    function openApplicantModal(dateStr) {
+      currentApplicantDate = dateStr;
+      currentApplicantFilter = 'all';
+      updateFilterButtons('all');
+      renderApplicantList();
+
+      document.getElementById('applicantModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeApplicantModal() {
+      document.getElementById('applicantModal').classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Close modal when clicking on overlay
+    document.getElementById('applicantModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeApplicantModal();
+      }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeApplicantModal();
+      }
+    });
+
+    // Navigation between months (restricted to March-August)
+    function goToNextMonth() {
+      const currentMonth = <%= month %>;
+      const currentYear = <%= year %>;
+      let nextMonth = currentMonth + 1;
+      let nextYear = currentYear;
+      
+      // Restrict to August (month 8)
+      if (nextMonth > 8) {
+        return; // Don't navigate past August
+      }
+      
+      if (nextMonth > 12) {
+        nextMonth = 1;
+        nextYear++;
+      }
+      
+      window.location.href = `/admin/month/${nextMonth}`;
+    }
+
+    function goToPreviousMonth() {
+      const currentMonth = <%= month %>;
+      const currentYear = <%= year %>;
+      let prevMonth = currentMonth - 1;
+      let prevYear = currentYear;
+      
+      // Restrict to March (month 3)
+      if (prevMonth < 3) {
+        return; // Don't navigate above March
+      }
+      
+      if (prevMonth < 1) {
+        prevMonth = 12;
+        prevYear--;
+      }
+      
+      window.location.href = `/admin/month/${prevMonth}`;
+    }
+
+    // Disable navigation buttons at boundaries
+    window.addEventListener('DOMContentLoaded', function() {
+      const currentMonth = <%= month %>;
+      const prevBtn = document.getElementById('prevMonthBtn');
+      const nextBtn = document.getElementById('nextMonthBtn');
+      
+      // Disable previous button if at March
+      if (currentMonth <= 3) {
+        prevBtn.disabled = true;
+      }
+      
+      // Disable next button if at August
+      if (currentMonth >= 8) {
+        nextBtn.disabled = true;
+      }
+    });
+  </script>
+</body>
+</html>

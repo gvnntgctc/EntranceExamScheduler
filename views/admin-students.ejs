@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Students</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <style>
+    .search-bar { 
+      display: flex; 
+      gap: 10px; 
+      margin-bottom: 20px; 
+      align-items: center; 
+      flex-wrap: wrap;
+      background: #ffffff;
+      border: 1px solid #dce3eb;
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 8px 18px rgba(14, 30, 37, 0.08);
+    }
+    .search-input-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+      max-width: 520px;
+    }
+    .search-input-wrapper i {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      color: #7f8fa4;
+      font-size: 14px;
+      pointer-events: none;
+    }
+    .search-bar input { 
+      width: 100%; 
+      padding: 12px 14px 12px 38px; 
+      border: 1px solid #c8d5e0; 
+      border-radius: 8px; 
+      font-size: 14px; 
+      box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.06);
+      transition: all 0.2s ease;
+    }
+    .search-bar input:focus {
+      outline: none;
+      border-color: #11998e;
+      box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.2);
+    }
+    .search-bar select { 
+      padding: 12px 14px; 
+      border: 1px solid #c3cdd9; 
+      border-radius: 8px; 
+      font-size: 14px; 
+      background: white;
+      min-width: 140px;
+      color: #2f3b4a;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .search-bar select:focus {
+      outline: none;
+      border-color: #11998e;
+      box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.2);
+    }
+    .search-bar button, .search-bar a { 
+      padding: 10px 14px; 
+      white-space: nowrap;
+      min-width: 90px;
+    }
+    .search-bar button.btn-secondary {
+      background: #f1f5f9;
+      border: 1px solid #c3cdd9;
+      color: #334155;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    .search-bar button.btn-secondary:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+    .students-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .students-table thead {
+      background: #f5f6fa;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .students-table th {
+      padding: 16px 18px;
+      text-align: left;
+      font-weight: 600;
+      color: #555;
+      font-size: 15px;
+    }
+    .students-table td {
+      padding: 18px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 15px;
+    }
+    .students-table tbody tr:hover {
+      background: #f9f9f9;
+    }
+    .student-name {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 16px;
+    }
+    .student-email {
+      color: #666;
+      font-size: 15px;
+    }
+    .student-date {
+      color: #888;
+      font-size: 14px;
+    }
+    .actions-column {
+      text-align: center;
+      white-space: nowrap;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+    .status-passed {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .filter-indicator {
+      font-size: 12px;
+      color: #666;
+      font-weight: normal;
+      margin-left: 8px;
+    }
+    .edit-btn {
+      background: #4CAF50;
+      color: white;
+    }
+    .edit-btn:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+    }
+    .delete-btn {
+      background: #f44336;
+      color: white;
+    }
+    .delete-btn:hover {
+      background: #da190b;
+      transform: translateY(-2px);
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.3s ease;
+    }
+    .modal.show {
+      display: flex;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-content {
+      background-color: white;
+      margin: auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      text-align: center;
+    }
+    .modal-header {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f44336;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .modal-body {
+      color: #666;
+      margin-bottom: 20px;
+      font-size: 15px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .modal-actions button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .confirm-delete {
+      background: #f44336;
+      color: white;
+    }
+    .confirm-delete:hover {
+      background: #da190b;
+    }
+    .cancel-delete {
+      background: #e0e0e0;
+      color: #333;
+    }
+    .cancel-delete:hover {
+      background: #d0d0d0;
+    }
+  </style>
+
+  <!-- Responsive Styles for Table -->
+  <style>
+    @media (max-width: 768px) {
+      .students-table {
+        font-size: 14px;
+      }
+
+      .students-table th,
+      .students-table td {
+        padding: 12px 8px;
+      }
+
+      .student-name {
+        font-size: 14px;
+      }
+
+      .student-email {
+        font-size: 13px;
+      }
+
+      .action-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+        min-width: 60px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .students-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .students-table thead {
+        display: none;
+      }
+
+      .students-table tbody {
+        display: block;
+      }
+
+      .students-table tr {
+        display: block;
+        border: 1px solid #e0e0e0;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        padding: 10px;
+      }
+
+      .students-table td {
+        display: block;
+        text-align: left;
+        border: none;
+        padding: 5px 0;
+        position: relative;
+        padding-left: 50%;
+      }
+
+      .students-table td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 45%;
+        font-weight: bold;
+        color: #555;
+      }
+
+      .students-table td:last-child {
+        text-align: center;
+        padding-left: 0;
+      }
+
+      .students-table td:last-child:before {
+        display: none;
+      }
+
+      .action-btn {
+        display: inline-block;
+        margin: 2px;
+        min-width: 50px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .section-card {
+        padding: 15px;
+      }
+
+      .section-header h2 {
+        font-size: 18px;
+      }
+
+      .student-count-badge {
+        font-size: 12px;
+      }
+
+      .search-bar {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .search-bar input {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <%- include('partials/sidebar'); %>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container">
+      <h1><i class="fas fa-users"></i> Registered Applicants</h1>
+
+      <% if (error && error.length > 0) { %>
+        <div class="message error">
+          <i class="fas fa-exclamation-triangle"></i> <%= error %>
+        </div>
+      <% } %>
+
+      <% if (success && success.length > 0) { %>
+        <div class="message success">
+          <i class="fas fa-check-circle"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h2><i class="fas fa-list"></i> All Registered Applicants</h2>
+          <div class="student-count-badge">
+            <%= students.length %> Students
+            <% if (typeof status !== 'undefined' && status !== 'all') { %>
+              <span class="filter-indicator">(Filtered: <%= status %>)</span>
+            <% } %>
+          </div>
+        </div>
+
+        <% if (students.length > 0) { %>
+          <div class="search-bar">
+            <div class="search-input-wrapper">
+              <i class="fas fa-search"></i>
+              <input 
+                id="studentSearch" 
+                type="search" 
+                placeholder="Search by name or email..." 
+                aria-label="Search students"
+                value="<%= typeof search !== 'undefined' ? search : '' %>"
+              />
+            </div>
+            <select id="statusFilter" aria-label="Filter by status">
+              <option value="all" <%= typeof status === 'undefined' || status === 'all' ? 'selected' : '' %>>All Status</option>
+              <option value="pending" <%= typeof status !== 'undefined' && status === 'pending' ? 'selected' : '' %>>Pending</option>
+              <option value="passed" <%= typeof status !== 'undefined' && status === 'passed' ? 'selected' : '' %>>Passed</option>
+              <option value="failed" <%= typeof status !== 'undefined' && status === 'failed' ? 'selected' : '' %>>Failed</option>
+            </select>
+            <button id="clearSearch" class="btn btn-secondary"><i class="fas fa-times"></i> Clear</button>
+          </div>
+        <% } %>
+
+        <% if (students.length === 0) { %>
+          <div class="no-data">
+            <i class="fas fa-users"></i>
+            <p>No students registered yet.</p>
+          </div>
+        <% } else { %>
+
+          <table class="students-table" id="studentsGrid">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Registered</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% students.forEach((student, index) => { %>
+                <tr>
+                  <td data-label="#"><strong><%= index + 1 %></strong></td>
+                  <td data-label="Full Name" class="student-name"><%= student.fullName %></td>
+                  <td data-label="Email" class="student-email"><%= student.email %></td>
+                  <td data-label="Status">
+                    <span class="status-badge status-<%= student.status || 'pending' %>">
+                      <%= (student.status || 'pending').charAt(0).toUpperCase() + (student.status || 'pending').slice(1) %>
+                    </span>
+                  </td>
+                  <td data-label="Registered" class="student-date">
+                    <% if (student.createdAt) { %>
+                      <%= student.createdAt.toDateString() %>
+                    <% } %>
+                  </td>
+                  <td data-label="Actions" class="actions-column">
+                    <button class="action-btn edit-btn" onclick="viewStudent('<%= student._id %>')">
+                      <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="action-btn delete-btn" onclick="openDeleteModal('<%= student._id %>', '<%= student.fullName %>')">
+                      <i class="fas fa-trash"></i> Delete
+                    </button>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+
+        <% } %>
+      </div>
+
+      <!-- STUDENT DETAILS MODAL -->
+      <% if (selectedStudent) { %>
+        <div class="student-modal-bg" onclick="closeStudentModal()" style="display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9998;"></div>
+        <div id="studentModal" class="student-modal" style="display: flex; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 650px; max-height: 90vh; background: white; border-radius: 16px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1); overflow: hidden; flex-direction: column; z-index: 9999;">
+          <div class="student-modal-content" style="display: flex; flex-direction: column; height: 100%; background: white;">
+            <div class="student-modal-header" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 30px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(17, 153, 142, 0.2);">
+              <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="font-size: 32px; background: rgba(255, 255, 255, 0.2); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-user-circle"></i>
+                </div>
+                <div>
+                  <div style="font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Student Profile</div>
+                  <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: white;"><%= selectedStudent.fullName %></h2>
+                </div>
+              </div>
+              <button class="student-modal-close" onclick="closeStudentModal()" style="background: rgba(255, 255, 255, 0.25); border: none; color: white; font-size: 24px; cursor: pointer; padding: 10px 14px; border-radius: 8px; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            
+            <div class="student-modal-body" style="padding: 30px; overflow-y: auto; flex: 1; background: #f8f9fa; max-height: calc(90vh - 150px);">
+              <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e0e0e0;">
+                <h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; text-decoration: none; border: none;">
+                  <i class="fas fa-id-card"></i> Registration Information
+                </h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr style="">
+                    <td style="padding: 14px 0; font-weight: 600; color: #555; width: 35%;">Full Name</td>
+                    <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;"><%= selectedStudent.fullName %></td>
+                  </tr>
+                  <tr style="">
+                    <td style="padding: 14px 0; font-weight: 600; color: #555;">Email</td>
+                    <td style="padding: 14px 0; padding-left: 15px; color: #11998e;"><a href="mailto:<%= selectedStudent.email %>" style="color: #11998e; text-decoration: none; font-weight: 500;"><%= selectedStudent.email %></a></td>
+                  </tr>
+                  <tr style="">
+                    <td style="padding: 14px 0; font-weight: 600; color: #555;">Phone Number</td>
+                    <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;"><%= selectedStudent.phoneNumber || 'N/A' %></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 14px 0; font-weight: 600; color: #555;">Registered Date</td>
+                    <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;"><%= selectedStudent.createdAt ? selectedStudent.createdAt.toDateString() : 'N/A' %></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 14px 0; font-weight: 600; color: #555;">Application Status</td>
+                    <td style="padding: 14px 0; padding-left: 15px; font-weight: 700; color: #333;"><%= selectedStudent.status || 'pending' %></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 14px 0; font-weight: 600; color: #555;">Status Notes</td>
+                    <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;"><%= selectedStudent.resultMessage || 'No notes yet.' %></td>
+                  </tr>
+                </table>
+              </div>
+              <div style="background: white; padding: 20px 25px 25px 25px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 20px;">
+                <h3 style="color: #11998e; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Update Result Status</h3>
+                <form method="POST" action="/admin/students/status/<%= selectedStudent._id %>">
+                  <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                    <label style="display: flex; align-items: center; gap: 6px;"><input type="radio" name="status" value="passed" <%= selectedStudent.status === 'passed' ? 'checked' : '' %> /> Passed</label>
+                    <label style="display: flex; align-items: center; gap: 6px;"><input type="radio" name="status" value="failed" <%= selectedStudent.status === 'failed' ? 'checked' : '' %> /> Failed</label>
+                  </div>
+                  <button type="submit" class="action-btn edit-btn" style="margin-top: 0;">Apply Status</button>
+                </form>
+              </div>
+
+              <% if (studentSchedules && studentSchedules.length > 0) { %>
+                <div style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0;">
+                  <h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; text-decoration: none; border: none;">
+                    <i class="fas fa-calendar-check"></i> Exam Schedules (<%= studentSchedules.length %>)
+                  </h3>
+                  <ul style="list-style: none; padding: 0; margin: 0;">
+                    <% studentSchedules.forEach((s, idx) => { %>
+                      <li style="<%= idx > 0 ? 'padding-top: 15px; margin-top: 15px;' : '' %>">
+                        <div style="background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%); padding: 16px; border-radius: 10px; border-left: 4px solid #11998e;">
+                          <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #11998e; font-weight: 600;">
+                                <i class="fas fa-calendar"></i> <%= new Date(s.examDate).toDateString() %>
+                              </div>
+                              <div style="display: flex; align-items: center; gap: 8px; color: #555; margin-bottom: 6px; font-size: 14px;">
+                                <i class="fas fa-clock"></i> <strong>Time:</strong> <%= s.examTime %>
+                              </div>
+                              <div style="display: flex; align-items: center; gap: 8px; color: #555; font-size: 14px;">
+                                <i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> <%= s.location %>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    <% }) %>
+                  </ul>
+                </div>
+              <% } else { %>
+                <div style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 2px dashed #ddd;">
+                  <i class="fas fa-calendar-alt" style="font-size: 48px; color: #ccc; display: block; margin-bottom: 12px;"></i>
+                  <p style="color: #999; margin: 0; font-size: 16px; font-style: italic;">No exam schedules assigned yet</p>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="fas fa-exclamation-circle"></i>
+        Confirm Delete
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete <strong id="studentNameDisplay"></strong>? This action will also remove all their exam schedules and cannot be undone.
+      </div>
+      <div class="modal-actions">
+        <button class="confirm-delete" onclick="confirmDelete()">
+          <i class="fas fa-trash"></i> Yes, Delete
+        </button>
+        <button class="cancel-delete" onclick="closeDeleteModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+  <script>
+    let deleteStudentId = null;
+
+    function openDeleteModal(studentId, studentName) {
+      deleteStudentId = studentId;
+      document.getElementById('studentNameDisplay').textContent = studentName;
+      document.getElementById('deleteModal').classList.add('show');
+    }
+
+    function closeDeleteModal() {
+      deleteStudentId = null;
+      document.getElementById('deleteModal').classList.remove('show');
+    }
+
+    function confirmDelete() {
+      if (!deleteStudentId) return;
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/admin/students/delete/${deleteStudentId}`;
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    function viewStudent(studentId) {
+      console.log('Viewing student:', studentId);
+      window.location.href = `/admin/students?studentId=${studentId}`;
+    }
+
+    function closeStudentModal() {
+      window.location.href = '/admin/students';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeDeleteModal();
+      }
+    });
+
+    // Search and Filter functionality
+    (function() {
+      const searchInput = document.getElementById('studentSearch');
+      const statusFilter = document.getElementById('statusFilter');
+      const clearBtn = document.getElementById('clearSearch');
+      
+      if (!searchInput || !statusFilter) return;
+
+      function updateFilters() {
+        const searchValue = searchInput.value.trim();
+        const statusValue = statusFilter.value;
+        
+        // Build query string
+        const params = new URLSearchParams();
+        if (searchValue) params.set('search', searchValue);
+        if (statusValue !== 'all') params.set('status', statusValue);
+        
+        // Update URL without page reload
+        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.location.href = newUrl;
+      }
+
+      // Add event listeners
+      searchInput.addEventListener('input', debounce(updateFilters, 500));
+      statusFilter.addEventListener('change', updateFilters);
+      
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => { 
+          searchInput.value = ''; 
+          statusFilter.value = 'all';
+          window.location.href = window.location.pathname;
+        });
+      }
+
+      // Debounce function to limit API calls
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+    })();
+  </script>
+</body>
+</html>

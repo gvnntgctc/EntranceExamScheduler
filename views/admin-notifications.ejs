@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Notification History</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <link href="/css/style.css" rel="stylesheet" />
+  <style>
+    .section-card {
+      background: #fff;
+      border: 1px solid #e3e8ee;
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 10px 26px rgba(21, 34, 56, 0.06);
+      margin-bottom: 18px;
+    }
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .notifications-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    .notifications-table th,
+    .notifications-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #edf2f7;
+      text-align: left;
+      font-size: 14px;
+      color: #2a3f57;
+    }
+    .notifications-table th {
+      background: #f3f6fa;
+      font-weight: 700;
+      color: #4a5568;
+    }
+    .status-pill {
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 72px;
+    }
+    .status-sent { background: #d4edda; color: #155724; }
+    .status-failed { background: #f8d7da; color: #721c24; }
+    .message { margin: 12px 0; }
+    .message.error { background: #fff3f1; color: #a33d2b; border: 1px solid #f7c2b8; padding: 10px; border-radius: 8px; }
+    .message.success { background: #ecfdf5; color: #1f7a4b; border: 1px solid #a7f3d0; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar'); %>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+  <div class="main-content">
+    <div class="container">
+      <h1><i class="fas fa-bell"></i> Notification History</h1>
+      <% if (error && error.length > 0) { %>
+        <div class="message error"><i class="fas fa-exclamation-circle"></i> <%= error %></div>
+      <% } %>
+      <% if (success && success.length > 0) { %>
+        <div class="message success"><i class="fas fa-check-circle"></i> <%= success %></div>
+      <% } %>
+      <div class="section-card">
+        <div class="search-bar">
+          <input id="notificationSearch" type="search" placeholder="Search recipient, subject, body..." aria-label="Search notifications" value="<%= search %>" />
+          <button id="notificationSearchBtn" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+          <select id="notificationStatus" aria-label="Filter status">
+            <option value="all" <%= status==='all' ? 'selected' : '' %>>All Status</option>
+            <option value="sent" <%= status==='sent' ? 'selected' : '' %>>Sent</option>
+            <option value="failed" <%= status==='failed' ? 'selected' : '' %>>Failed</option>
+          </select>
+          <button id="clearNotificationFilter" class="btn btn-secondary"><i class="fas fa-times"></i> Clear</button>
+          <form id="clearAllForm" method="POST" action="/admin/notifications/clear" style="display:inline;margin-left: 6px;">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete all notification history? This cannot be undone.');">
+              <i class="fas fa-trash-alt"></i> Clear All
+            </button>
+          </form>
+        </div>
+
+        <div class="table-responsive">
+          <table class="notifications-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Recipient</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Sent At</th>
+                <th>Error</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (notifications.length === 0) { %>
+                <tr><td colspan="6" style="text-align:center; color:#66788a;">No notifications tracked yet.</td></tr>
+              <% } %>
+              <% notifications.forEach((notification, idx) => { %>
+                <tr>
+                  <td><%= idx + 1 %></td>
+                  <td><%= notification.recipientId ? notification.recipientId.fullName || notification.recipientEmail : notification.recipientEmail %></td>
+                  <td><%= notification.subject %></td>
+                  <td><span class="status-pill status-<%= notification.status %>"><%= notification.status %></span></td>
+                  <td><%= notification.createdAt.toLocaleString() %></td>
+                  <td><%= notification.errorMessage || '-' %></td>
+                  <td style="display:flex; gap:6px;">
+                    <a href="/admin/notifications/<%= notification._id %>" class="btn btn-secondary" style="font-size:12px;">View</a>
+                    <form method="POST" action="/admin/notifications/delete/<%= notification._id %>" onsubmit="return confirm('Delete this notification?');" style="margin:0;">
+                      <button type="submit" class="btn btn-danger" style="font-size:12px;">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+  <script>
+    const searchInput = document.getElementById('notificationSearch');
+    const statusSelect = document.getElementById('notificationStatus');
+    const clearBtn = document.getElementById('clearNotificationFilter');
+    let notificationSearchTimer = null;
+
+    function applyFilters() {
+      const params = new URLSearchParams();
+      if (searchInput.value.trim()) params.set('search', searchInput.value.trim());
+      if (statusSelect.value !== 'all') params.set('status', statusSelect.value);
+      window.location = '/admin/notifications' + (params.toString() ? '?' + params.toString() : '');
+    }
+
+    function debounceApplyFilters() {
+      if (notificationSearchTimer) {
+        clearTimeout(notificationSearchTimer);
+      }
+      notificationSearchTimer = setTimeout(applyFilters, 300);
+    }
+
+    searchInput.addEventListener('input', debounceApplyFilters);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyFilters();
+      }
+    });
+
+    statusSelect.addEventListener('change', applyFilters);
+    document.getElementById('notificationSearchBtn').addEventListener('click', applyFilters);
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      statusSelect.value = 'all';
+      window.location = '/admin/notifications';
+    });
+  </script>
+</body>
+</html>

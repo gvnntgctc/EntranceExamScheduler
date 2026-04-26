@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification Detail</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .detail-card {
+      max-width: 850px;
+      margin: 20px auto;
+      background: #fff;
+      border: 1px solid #e8eff6;
+      border-radius: 14px;
+      box-shadow: 0 10px 24px rgba(8, 20, 40, 0.08);
+      padding: 26px;
+    }
+    .detail-card h2 {
+      margin: 0 0 14px;
+      color: #1e3452;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .detail-row {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: start;
+    }
+    .detail-label {
+      font-weight: 700;
+      color: #3e5671;
+      letter-spacing: 0.4px;
+    }
+    .detail-value {
+      color: #243646;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      text-decoration: none;
+      color: #156597;
+      font-weight: 600;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar'); %>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+
+  <div class="main-content">
+    <div class="container">
+      <a href="/admin/notifications" class="back-link"><i class="fas fa-arrow-left"></i> Back to Notification History</a>
+      <div class="detail-card">
+        <h2>Notification Detail</h2>
+        <div class="detail-row"><div class="detail-label">Recipient</div><div class="detail-value"><%= notification.recipientId ? (notification.recipientId.fullName || notification.recipientEmail) : notification.recipientEmail %></div></div>
+        <div class="detail-row"><div class="detail-label">Email</div><div class="detail-value"><%= notification.recipientEmail %></div></div>
+        <div class="detail-row"><div class="detail-label">Subject</div><div class="detail-value"><%= notification.subject %></div></div>
+        <div class="detail-row"><div class="detail-label">Body</div><div class="detail-value"><%= notification.body %></div></div>
+        <div class="detail-row"><div class="detail-label">Status</div><div class="detail-value"><%= notification.status %></div></div>
+        <div class="detail-row"><div class="detail-label">Sent At</div><div class="detail-value"><%= notification.createdAt.toLocaleString() %></div></div>
+        <div class="detail-row"><div class="detail-label">Error</div><div class="detail-value"><%= notification.errorMessage || 'None' %></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify OTP - Exam Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/auth.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      background-image: url('/images/ptc.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="container" style="min-height: 650px;">
+    
+    <!-- VERIFY OTP FORM -->
+    <div class="form-container" style="position: relative; width: 100%; height: 100%; left: 0; opacity: 1; z-index: 2; display: flex; justify-content: center; align-items: center;">
+      <form action="/auth/verify-reset-otp" method="POST" style="width: 100%; max-width: 400px; padding: 40px; text-align: center; margin: 0 auto;">
+        <h1>Verify OTP</h1>
+        <p class="subtitle">Enter the OTP sent to your email</p>
+        
+        <% if (typeof error !== 'undefined' && error.length > 0) { %>
+          <div class="message error">
+            <i class="fas fa-exclamation-circle"></i> <%= error %>
+          </div>
+        <% } %>
+
+        <% if (typeof message !== 'undefined' && message.length > 0) { %>
+          <div class="message success">
+            <i class="fas fa-info-circle"></i> <%= message %>
+          </div>
+        <% } %>
+        
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" value="<%= email %>" disabled style="background: #f0f0f0; cursor: not-allowed;" />
+        </div>
+        
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="text" name="otp" placeholder="Enter 4-digit OTP" maxlength="4" inputmode="numeric" required />
+        </div>
+        
+        <button class="btn-submit" type="submit">
+          <i class="fas fa-check"></i> Verify OTP
+        </button>
+        
+        <div class="forgot-password">
+          <a href="/auth/login">
+            <i class="fas fa-arrow-left"></i> Back to Login
+          </a>
+        </div>
+      </form>
+    </div>
+    
+  </div>
+
+  <script>
+    // Restrict OTP input to only digits
+    const otpInput = document.querySelector('input[name="otp"]');
+    if (otpInput) {
+      otpInput.addEventListener('input', function(e) {
+        let value = this.value.replace(/\D/g, ''); // Remove all non-digits
+        if (value.length > 4) {
+          value = value.substring(0, 4);
+        }
+        this.value = value;
+      });
+    }
+  </script>
+
+</body>
+</html>

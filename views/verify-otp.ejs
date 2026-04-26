@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify OTP - Exam Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      max-width: 450px;
+      width: 100%;
+      padding: 40px;
+      text-align: center;
+      animation: slideUp 0.5s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header {
+      margin-bottom: 30px;
+    }
+
+    .header i {
+      font-size: 48px;
+      color: #11998e;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .phone-display {
+      font-size: 13px;
+      color: #999;
+      background: #f5f5f5;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 25px;
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .message.error {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ef5350;
+    }
+
+    .message.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #66bb6a;
+    }
+
+    .message i {
+      font-size: 16px;
+    }
+
+    .otp-form {
+      margin-bottom: 20px;
+    }
+
+    .otp-input-group {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .otp-digit {
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      background: #f9f9f9;
+    }
+
+    .otp-digit:focus {
+      border-color: #11998e;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.1);
+      outline: none;
+    }
+
+    .otp-digit:hover {
+      border-color: #11998e;
+    }
+
+    .single-otp-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Roboto Mono', monospace;
+      letter-spacing: 8px;
+      text-align: center;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    .single-otp-input:focus {
+      border-color: #11998e;
+      box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.1);
+      outline: none;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-verify {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+    }
+
+    .btn-verify:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(17, 153, 142, 0.3);
+    }
+
+    .btn-verify:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #666;
+      border: 1px solid #ddd;
+    }
+
+    .btn-secondary:hover {
+      background: #efefef;
+      color: #333;
+    }
+
+    .resend-section {
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      text-align: center;
+    }
+
+    .resend-text {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .btn-resend {
+      background: transparent;
+      color: #11998e;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 0;
+      text-decoration: underline;
+      transition: color 0.3s ease;
+    }
+
+    .btn-resend:hover {
+      color: #38ef7d;
+    }
+
+    .timer {
+      font-size: 13px;
+      color: #999;
+      margin-top: 10px;
+    }
+
+    .back-link {
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .back-link a {
+      color: #11998e;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .back-link a:hover {
+      color: #38ef7d;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 20px;
+      }
+
+      .otp-digit {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container single-panel">
+    <div class="header">
+      <i class="fas fa-lock"></i>
+      <h1>Verify OTP</h1>
+      <p class="subtitle">Enter the OTP sent to your email</p>
+      <% if (email) { %>
+        <div class="phone-display">
+          📧 <%= email %>
+        </div>
+      <% } %>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error.length > 0) { %>
+      <div class="message error">
+        <i class="fas fa-exclamation-circle"></i> <%= error %>
+      </div>
+    <% } %>
+
+    <% if (typeof success !== 'undefined' && success.length > 0) { %>
+      <div class="message success">
+        <i class="fas fa-check-circle"></i> <%= success %>
+      </div>
+    <% } %>
+
+    <form action="/auth/verify-otp" method="POST" class="otp-form">
+      <div class="otp-input-group">
+        <input 
+          type="text" 
+          name="otp" 
+          class="single-otp-input" 
+          placeholder="0000" 
+          maxlength="4" 
+          pattern="[0-9]{4}" 
+          required 
+          inputmode="numeric"
+          autocomplete="one-time-code"
+        />
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn-verify">
+          <i class="fas fa-check"></i> Verify OTP
+        </button>
+      </div>
+    </form>
+
+    <div class="resend-section">
+      <p class="resend-text">Didn't receive the OTP?</p>
+      <form action="/auth/resend-otp" method="POST" style="display: inline;">
+        <button type="submit" class="btn-resend">
+          <i class="fas fa-redo"></i> Resend OTP
+        </button>
+      </form>
+      <div class="timer">
+        ⏱️ Check your email for the verification code
+      </div>
+    </div>
+
+    <div class="back-link">
+      <a href="/auth/apply">
+        <i class="fas fa-arrow-left"></i> Back to Applicant Registration
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Auto-focus OTP input on page load
+    document.querySelector('.single-otp-input').focus();
+
+    // Allow only numbers in OTP input
+    document.querySelector('.single-otp-input').addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+      if (this.value.length > 4) {
+        this.value = this.value.slice(0, 4);
+      }
+    });
+
+    // Auto-submit when 4 digits are entered
+    document.querySelector('.single-otp-input').addEventListener('input', function(e) {
+      if (this.value.length === 4) {
+        // Optionally auto-submit
+        // this.form.submit();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Schedule - Exam Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('partials/sidebar') %>
+
+  <!-- Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  
+  <!-- Hamburger Button -->
+  <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container">
+      <h1><i class="fas fa-plus-circle"></i> Add New Schedule</h1>
+      
+      <% if (error && error.length > 0) { %>
+        <div class="message error">
+          <i class="fas fa-exclamation-triangle"></i> <%= error %>
+        </div>
+      <% } %>
+
+      <% if (success && success.length > 0) { %>
+        <div class="message success">
+          <i class="fas fa-check-circle"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <div class="section-card">
+        <h2><i class="fas fa-calendar-plus"></i> Create Schedule</h2>
+        <form action="/admin/add-schedule" method="POST" class="schedule-form" role="form" aria-label="Add schedule form">
+          <div class="form-group">
+            <label for="studentId"><i class="fas fa-user"></i> Applicant</label>
+            <% if (students && students.length > 0) { %>
+              <select id="studentId" name="studentId" required aria-required="true" aria-label="Select applicant">
+                <option value="">Select an applicant</option>
+                <% students.forEach(student => { %>
+                  <option value="<%= student._id %>"><%= student.fullName %></option>
+                <% }) %>
+              </select>
+            <% } else { %>
+              <input type="text" id="studentId" name="studentId" placeholder="Enter applicant username or email" required aria-required="true" aria-label="Applicant username or email" />
+            <% } %>
+          </div>
+          
+          <div class="form-group">
+            <label for="examDate"><i class="fas fa-calendar"></i> Exam Date</label>
+            <input type="date" id="examDate" name="examDate" min="<%= minDate %>" required aria-required="true" aria-label="Exam date" />
+            <p class="holiday-help">These dates are holidays and cannot be scheduled:</p>
+            <ul class="holiday-list">
+              <% const holidayList = typeof holidays !== 'undefined' ? holidays : []; %>
+              <% if (holidayList.length) { %>
+                <% holidayList.forEach(h => { %>
+                  <li><strong><%= h.month %>-<%= h.day %></strong> — <span><%= h.name %></span></li>
+                <% }) %>
+              <% } %>
+            </ul>
+            <p id="holidayWarning" class="holiday-warning" aria-live="polite"></p>
+          </div>
+          
+          <div class="form-group">
+            <label for="examTime"><i class="fas fa-clock"></i> Exam Time</label>
+            <select id="examTime" name="examTime" required aria-required="true" aria-label="Select exam time slot">
+              <option value="">Choose a time slot</option>
+              <option value="7:00-8:30 A.M">7:00-8:30 A.M</option>
+              <option value="9:00-10:30 A.M">9:00-10:30 A.M</option>
+              <option value="1:30-3:00 P.M">1:30-3:00 P.M</option>
+              <option value="3:30-5:00 P.M">3:30-5:00 P.M</option>
+            </select>
+            <small class="sub-text">Select a time slot for the applicant's exam.</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="location"><i class="fas fa-map-marker-alt"></i> Location</label>
+            <input type="text" id="location" name="location" placeholder="3rd Floor PTC Main Campus" value="3rd Floor PTC Main Campus" disabled />
+            <input type="hidden" name="location" value="3rd Floor PTC Main Campus" />
+            <small class="sub-text">Fixed location for all exams</small>
+          </div>
+          
+          <div class="form-buttons">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add Schedule</button>
+            <a href="/admin/weekly-schedule" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Cancel</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="section-card">
+        <h2><i class="fas fa-list"></i> Existing Schedules</h2>
+        <% if (schedules && schedules.length) { %>
+          <!-- Search Bar -->
+          <div class="search-bar-container">
+            <div class="search-container">
+              <i class="fas fa-search"></i>
+              <input 
+                type="text" 
+                id="scheduleSearch" 
+                class="search-input" 
+                placeholder="Search by applicant name, email, date, or location..."
+              />
+              <button type="button" id="clearBtn" class="clear-btn">
+                <i class="fas fa-times"></i> Clear
+              </button>
+            </div>
+          </div>
+          </div>
+
+          <ul class="schedule-list" id="schedulesList">
+            <% schedules.forEach(s => { %>
+              <li>
+                <div class="schedule-info">
+                  <i class="fas fa-user"></i>
+                  <div class="schedule-details">
+                    <strong><%= s.studentId ? s.studentId.fullName : 'Unknown' %></strong>
+                    <span><i class="fas fa-calendar"></i> <%= new Date(s.examDate).toDateString() %> - <%= s.examTime %></span>
+                    <span><i class="fas fa-map-marker-alt"></i> <%= s.location %></span>
+                  </div>
+                </div>
+                <div class="schedule-actions">
+                  <a href="/admin/edit-schedule/<%= s._id %>" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>
+                  <form method="POST" action="/admin/delete-schedule/<%= s._id %>" style="display:inline;">
+                    <button type="submit" class="delete-btn"><i class="fas fa-trash"></i> Delete</button>
+                  </form>
+                </div>
+              </li>
+            <% }) %>
+          </ul>
+          
+          <!-- Pagination Controls -->
+          <div class="pagination-controls">
+            <button class="pagination-btn" id="prevBtn" onclick="previousPage()">
+              <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <span class="page-info" id="pageInfo">Page 1</span>
+            <button class="pagination-btn" id="nextBtn" onclick="nextPage()">
+              Next <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        <% } else { %>
+          <div class="no-data">
+            <i class="fas fa-calendar-times"></i>
+            <p>No schedules yet. Use the form above to create your first schedule.</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+  <style>
+    .search-bar-container {
+      margin-bottom: 20px;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8f9fa;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      transition: all 0.3s ease;
+    }
+
+    .search-container:focus-within {
+      border-color: #11998e;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.1);
+    }
+
+    .search-container i {
+      color: #11998e;
+      font-size: 16px;
+    }
+
+    .search-input {
+      border: none;
+      background: transparent;
+      flex: 1;
+      font-size: 14px;
+      outline: none;
+      color: #333;
+    }
+
+    .search-input::placeholder {
+      color: #999;
+    }
+
+    .clear-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .clear-btn:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+
+    .clear-btn:active {
+      transform: translateY(0);
+    }
+
+    .holiday-help {
+      margin: 10px 0 6px;
+      color: #555;
+      font-size: 13px;
+    }
+
+    .holiday-list {
+      margin: 0 0 12px;
+      padding-left: 20px;
+      list-style: disc;
+    }
+
+    .holiday-list li {
+      color: #c0392b;
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .holiday-list li span {
+      color: #c0392b;
+      font-weight: 500;
+    }
+
+    .holiday-warning {
+      margin-top: 8px;
+      color: #c0392b;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .pagination-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .pagination-btn {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .page-info {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      min-width: 80px;
+      text-align: center;
+    }
+  </style>
+  <script>
+    // PAGINATION FOR EXISTING SCHEDULES
+    const ITEMS_PER_PAGE = 10;
+    let currentPage = 1;
+    const schedulesList = document.getElementById('schedulesList');
+    let allSchedules = [];
+
+    if (schedulesList) {
+      allSchedules = Array.from(schedulesList.querySelectorAll('li'));
+      
+      // Initialize all schedules with dataset.hidden = 'false'
+      allSchedules.forEach(item => {
+        item.dataset.hidden = 'false';
+        item.style.display = 'none'; // Hide all initially
+      });
+      
+      // Define displayPage function first
+      function displayPage(pageNumber) {
+        // Get all visible (non-filtered) schedules
+        const visibleSchedules = allSchedules.filter(item => item.dataset.hidden !== 'true');
+        
+        const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        
+        // Hide all schedules first
+        allSchedules.forEach(item => {
+          item.style.display = 'none';
+        });
+        
+        // Show only the schedules for this page
+        visibleSchedules.slice(startIndex, endIndex).forEach(item => {
+          item.style.display = 'flex';
+        });
+
+        const totalPages = Math.ceil(visibleSchedules.length / ITEMS_PER_PAGE);
+        document.getElementById('pageInfo').textContent = `Page ${pageNumber} of ${totalPages}`;
+        
+        // Disable Previous button on first page
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        if (prevBtn) prevBtn.disabled = pageNumber === 1;
+        if (nextBtn) nextBtn.disabled = pageNumber === totalPages;
+      }
+
+      // Make displayPage globally available
+      window.displayPage = displayPage;
+
+      // Display the first page
+      displayPage(currentPage);
+
+      window.nextPage = function() {
+        const visibleSchedules = allSchedules.filter(item => item.dataset.hidden !== 'true');
+        const totalPages = Math.ceil(visibleSchedules.length / ITEMS_PER_PAGE);
+        if (currentPage < totalPages) {
+          currentPage++;
+          displayPage(currentPage);
+        }
+      };
+
+      window.previousPage = function() {
+        if (currentPage > 1) {
+          currentPage--;
+          displayPage(currentPage);
+        }
+      };
+
+      // SEARCH FUNCTIONALITY
+      const searchInput = document.getElementById('scheduleSearch');
+      const clearBtn = document.getElementById('clearBtn');
+
+      function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        currentPage = 1;
+
+        if (searchTerm === '') {
+          // If search is empty, show all schedules in original order
+          allSchedules.forEach(item => {
+            item.dataset.hidden = 'false';
+          });
+        } else {
+          // Separate matching and non-matching items
+          const matchingItems = [];
+          const nonMatchingItems = [];
+          
+          allSchedules.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+              item.dataset.hidden = 'false';
+              matchingItems.push(item);
+            } else {
+              item.dataset.hidden = 'true';
+              nonMatchingItems.push(item);
+            }
+          });
+          
+          // Reorder: matching items first, then non-matching
+          const orderedItems = [...matchingItems, ...nonMatchingItems];
+          orderedItems.forEach((item, index) => {
+            allSchedules[index] = item;
+          });
+        }
+
+        displayPage(currentPage);
+      }
+
+      if (searchInput) {
+        // Search automatically as user types
+        searchInput.addEventListener('input', performSearch);
+      }
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+          searchInput.value = '';
+          currentPage = 1;
+          allSchedules.forEach(item => {
+            item.dataset.hidden = 'false';
+          });
+          displayPage(currentPage);
+        });
+      }
+    }
+
+    const examDateInput = document.getElementById('examDate');
+    const holidayWarning = document.getElementById('holidayWarning');
+    const holidays = {
+      '03-08': "International Women's Day",
+      '04-09': 'Day of Valor',
+      '05-01': 'Labor Day',
+      '06-12': 'Independence Day',
+      '08-21': 'Ninoy Aquino Day',
+      '08-31': 'National Heroes Day'
+    };
+
+    function formatHolidayKey(dateValue) {
+      const [year, month, day] = dateValue.split('-');
+      return `${month}-${day}`;
+    }
+
+    function validateHolidayDate(value) {
+      if (!value) return true;
+      const key = formatHolidayKey(value);
+      const name = holidays[key];
+      if (name) {
+        if (holidayWarning) {
+          holidayWarning.textContent = `Cannot schedule on holiday: ${name}`;
+        }
+        if (examDateInput) {
+          examDateInput.setCustomValidity('Holiday date selected');
+        }
+        return false;
+      }
+      if (holidayWarning) {
+        holidayWarning.textContent = '';
+      }
+      if (examDateInput) {
+        examDateInput.setCustomValidity('');
+      }
+      return true;
+    }
+
+    if (examDateInput) {
+      examDateInput.addEventListener('input', function() {
+        validateHolidayDate(this.value);
+      });
+      examDateInput.addEventListener('change', function() {
+        if (!validateHolidayDate(this.value)) {
+          this.value = '';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

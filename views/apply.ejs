@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Login - Exam Scheduler</title>
+  <title>Apply - Exam Scheduler</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/auth.css">
@@ -11,9 +11,9 @@
 <body>
   <div class="container single-panel" id="container">
     <div class="form-container sign-in-container" style="max-width: 420px; margin: auto;">
-      <form action="/auth/login" method="POST">
-        <h1>Admin Login</h1>
-        <p class="subtitle">Access the applicant management portal</p>
+      <form action="/auth/apply" method="POST">
+        <h1>Applicant Registration</h1>
+        <p class="subtitle">Register with your phone number and email for notifications</p>
 
         <% if (typeof error !== 'undefined' && error.length > 0) { %>
           <div class="message error">
@@ -28,20 +28,26 @@
         <% } %>
 
         <div class="input-group">
-          <i class="fas fa-envelope"></i>
-          <input type="email" name="email" placeholder="Admin email" required />
+          <i class="fas fa-user"></i>
+          <input type="text" name="fullName" placeholder="Full Name" required />
         </div>
+
         <div class="input-group">
-          <i class="fas fa-lock"></i>
-          <input type="password" name="password" placeholder="Password" required />
+          <i class="fas fa-phone"></i>
+          <input type="tel" name="phoneNumber" placeholder="Phone Number" required />
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" name="email" placeholder="Your email for notifications" required />
         </div>
 
         <button class="btn-submit" type="submit">
-          <i class="fas fa-sign-in-alt"></i> Login
+          <i class="fas fa-paper-plane"></i> Send Verification Code
         </button>
       </form>
       <div style="margin-top: 20px; text-align: center;">
-        <p>Applicant? <a href="/auth/apply">Register with your email</a></p>
+        <p>Have admin access? <a href="/auth/login">Admin login</a></p>
       </div>
     </div>
   </div>

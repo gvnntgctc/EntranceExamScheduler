@@ -1,139 +1,666 @@
 const express = require('express');
-const Schedule = require('../models/Schedule');
-const User = require('../models/User');
 const router = express.Router();
+let nodemailer;
+try {
+  nodemailer = require('nodemailer');
+} catch (err) {
+  console.warn('nodemailer not installed; email sending is disabled.');
+}
 
-// Middleware to check if admin
+const User = require('../models/User');
+const Schedule = require('../models/Schedule');
+const Notification = require('../models/Notification');
+
+function escapeRegExp(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+let transporter = null;
+if (nodemailer && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  const service = (process.env.EMAIL_SERVICE || 'outlook').toLowerCase();
+  const transportConfig = { auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } };
+  if (service === 'outlook') {
+    transportConfig.host = 'smtp.office365.com';
+    transportConfig.port = 587;
+    transportConfig.secure = false;
+  } else if (service === 'gmail') {
+    transportConfig.host = 'smtp.gmail.com';
+    transportConfig.port = 587;
+    transportConfig.secure = false;
+  } else {
+    transportConfig.service = service;
+  }
+
+  transporter = nodemailer.createTransport(transportConfig);
+  transporter.verify().then(() => {
+    console.log(`${service} transporter verified for:`, process.env.EMAIL_USER);
+  }).catch(err => {
+    console.error('Transporter verify failed:', err);
+  });
+  console.log('Email transporter initialized for:', process.env.EMAIL_USER, 'service:', service);
+} else {
+  console.log('Email transporter NOT initialized. nodemailer:', !!nodemailer, 'EMAIL_USER:', !!process.env.EMAIL_USER, 'EMAIL_PASS:', !!process.env.EMAIL_PASS);
+}
+
+async function sendEmail({ recipientId, to, subject, text }) {
+  if (!nodemailer) {
+    console.warn('sendEmail skipped: nodemailer not available');
+    await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'failed', errorMessage: 'nodemailer not available' });
+    return false;
+  }
+
+  if (!transporter) {
+    console.warn('sendEmail skipped: transporter not configured with Gmail credentials');
+    await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'failed', errorMessage: 'transporter not configured' });
+    return false;
+  }
+
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to,
+      subject,
+      text
+    });
+
+    await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'sent' });
+    return true;
+  } catch (error) {
+    console.error('Failed to send email:', error);
+    await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'failed', errorMessage: error.message || String(error) });
+    return false;
+  }
+}
+
+// Middleware: Admin check
 function isAdmin(req, res, next) {
   if (req.session.role === 'admin') return next();
   res.redirect('/auth/login');
 }
 
-// Admin dashboard (GET)
-router.get('/', isAdmin, async (req, res) => {
+// Admin Dashboard redirects to Weekly Schedule page
+router.get('/', isAdmin, (req, res) => {
+  return res.redirect('/admin/weekly-schedule');
+});
+
+// Monthly Schedule Grid Page (12 months view)
+router.get('/weekly-schedule', isAdmin, async (req, res) => {
   try {
-    const schedules = await Schedule.find().populate({
-      path: 'studentId',
-      match: { role: 'student' },
-      select: 'username'
+    const schedules = await Schedule.find().populate('studentId');
+    const currentYear = new Date().getFullYear();
+
+    // Count schedules for each month
+    const monthCounts = {};
+    for (let i = 1; i <= 12; i++) {
+      monthCounts[i] = 0;
+    }
+    
+    schedules.forEach(schedule => {
+      const d = new Date(schedule.examDate);
+      if (d.getFullYear() === currentYear) {
+        const month = d.getMonth() + 1;
+        monthCounts[month]++;
+      }
     });
-    const validSchedules = schedules.filter(schedule => schedule.studentId !== null);
-    const students = await User.find({ role: 'student' });
-    const error = req.query.error || '';
-    const success = req.query.success || '';
-    res.render('admin-dashboard', { schedules: validSchedules, students, error, success });
-  } catch (err) {
-    console.error(err);
-    res.send('Error loading dashboard');
+
+    res.render('weekly-schedule', { 
+      monthCounts, 
+      currentYear, 
+      page: 'weekly', 
+      error: req.query.error || '', 
+      success: req.query.success || '' 
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.render('weekly-schedule', {
+      monthCounts: {},
+      currentYear: new Date().getFullYear(),
+      page: 'weekly',
+      error: 'Failed to load schedules',
+      success: ''
+    });
   }
 });
 
-// Add schedule (POST)
+// Month Detail Calendar Page
+router.get('/month/:month', isAdmin, async (req, res) => {
+  try {
+    const month = parseInt(req.params.month);
+    
+    if (month < 1 || month > 12) {
+      return res.redirect('/admin/weekly-schedule?error=Invalid month');
+    }
+
+    const year = new Date().getFullYear();
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const monthName = monthNames[month - 1];
+
+    // Get all schedules for this month
+    const schedules = await Schedule.find().populate('studentId');
+    const schedulesList = [];
+    const schedulesMap = {};
+
+    schedules.forEach(schedule => {
+      const d = new Date(schedule.examDate);
+      if (d.getMonth() === month - 1 && d.getFullYear() === year) {
+        const dateStr = d.toISOString().split('T')[0];
+        const studentName = schedule.studentId ? schedule.studentId.fullName : 'Unknown Applicant';
+
+        if (!schedulesMap[dateStr]) {
+          schedulesMap[dateStr] = [];
+        }
+        
+        schedulesMap[dateStr].push({
+          fullName: studentName,
+          examTime: schedule.examTime
+        });
+
+        schedulesList.push({
+          examDate: schedule.examDate,
+          fullName: studentName,
+          examTime: schedule.examTime
+        });
+      }
+    });
+
+    // Sort detailed list by date
+    schedulesList.sort((a, b) => new Date(a.examDate) - new Date(b.examDate));
+
+    res.render('month-detail', { 
+      month,
+      year,
+      monthName,
+      schedulesMap,
+      schedulesList,
+      totalSchedules: schedulesList.length,
+      page: 'weekly',
+      error: req.query.error || '', 
+      success: req.query.success || '' 
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.redirect('/admin/weekly-schedule?error=Failed to load month view');
+  }
+});
+
+// Add Schedule Page
+router.get('/add-schedule', isAdmin, async (req, res) => {
+  try {
+    const schedules = await Schedule.find().populate('studentId');
+    const allStudents = await User.find({ role: 'student' }).sort({ fullName: 1 });
+    
+    // Get IDs of students who already have a schedule
+    const scheduledStudentIds = new Set(schedules.map(s => s.studentId._id.toString()));
+    
+    // Filter out students who already have a schedule
+    const students = allStudents.filter(student => !scheduledStudentIds.has(student._id.toString()));
+    
+    const minDate = new Date().toISOString().split('T')[0];
+
+    res.render('add-schedule', { 
+      schedules,
+      students,
+      minDate,
+      page: 'addSchedule',
+      error: req.query.error || '',
+      success: req.query.success || ''
+    });
+
+  } catch (error) {
+    console.error(error);
+    const students = [];
+    const minDate = new Date().toISOString().split('T')[0];
+    res.render('add-schedule', { 
+      schedules: [], 
+      students,
+      minDate,
+      page: 'addSchedule',
+      error: 'Failed to load schedules',
+      success: ''
+    });
+  }
+});
+
+// Create Schedule
 router.post('/add-schedule', isAdmin, async (req, res) => {
   try {
-    const { studentUsername, examDate, examHour, examMinute, examPeriod, location } = req.body;
-    
-    // Combine time parts into one string
-    const examTime = `${examHour}:${examMinute} ${examPeriod}`;
-    
-    // Find the student by username (case-insensitive)
-    const student = await User.findOne({ 
-      username: new RegExp(`^${studentUsername}$`, 'i'), 
-      role: 'student' 
-    });
-    
+    const { studentId, examDate, examTime, location } = req.body;
+
+    // Basic validation
+    if (!studentId || !examDate || !examTime || !location) {
+      return res.redirect('/admin/add-schedule?error=All fields are required');
+    }
+
+    // Try to find student by id first, otherwise allow using email or full name text
+    let student = null;
+    try {
+      student = await User.findById(studentId);
+    } catch (e) {
+      student = null;
+    }
     if (!student) {
-      return res.redirect('/admin?error=Student not found. Please check the username.');
+      student = await User.findOne({ email: studentId }) || await User.findOne({ fullName: studentId });
     }
-    
-    // Check if the student already has a schedule
-    const existingSchedule = await Schedule.findOne({ studentId: student._id });
-    if (existingSchedule) {
-      return res.redirect('/admin?error=This student already has a schedule.');
+    if (!student) {
+      return res.redirect('/admin/add-schedule?error=Student not found');
     }
-    
-    // Create the schedule
-    const schedule = new Schedule({ 
-      studentId: student._id, 
-      examDate, 
-      examTime, 
-      location 
+
+    // Prevent duplicate schedules for the same student on the same day
+    const dateStart = new Date(examDate);
+    dateStart.setHours(0, 0, 0, 0);
+    const dateEnd = new Date(dateStart);
+    dateEnd.setHours(23, 59, 59, 999);
+    const existing = await Schedule.findOne({ studentId: student._id, examDate: { $gte: dateStart, $lte: dateEnd } });
+    if (existing) {
+      return res.redirect('/admin/add-schedule?error=This student already has a scheduled exam on that day');
+    }
+
+    const newSchedule = new Schedule({
+      studentId: student._id,
+      examDate: new Date(examDate),
+      examTime: examTime.trim(),
+      location: location.trim()
     });
-    await schedule.save();
-    res.redirect('/admin?success=Schedule added successfully.');
-  } catch (err) {
-    console.error(err);
-    res.redirect('/admin?error=Error adding schedule.');
+
+    await newSchedule.save();
+
+    // Notify applicant with schedule details
+    const scheduleEmail = `Hello ${student.fullName || student.email},\n\nYour exam schedule has been set:\nDate: ${examDate}\nTime: ${examTime}\nLocation: ${location}\n\nPlease be ready and arrive 15 minutes early.\n\nGood luck!`;
+    const notificationSent = await sendEmail({
+      recipientId: student._id,
+      to: student.email,
+      subject: 'Your exam schedule is confirmed',
+      text: scheduleEmail
+    });
+
+    if (notificationSent) {
+      return res.redirect('/admin/add-schedule?success=Schedule created successfully and applicant notified');
+    }
+
+    return res.redirect('/admin/add-schedule?success=Schedule created successfully; applicant notification failed');
+  } catch (error) {
+    console.error('Failed to create schedule:', error);
+    return res.redirect('/admin/add-schedule?error=Failed to create schedule');
   }
 });
 
-// Delete schedule (POST)
-router.post('/delete-schedule', isAdmin, async (req, res) => {
+// Students List Page
+router.get('/students', isAdmin, async (req, res) => {
   try {
-    const { scheduleId } = req.body;
+    console.log('=== STUDENTS PAGE ===');
+    console.log('Query params:', req.query);
     
-    if (!scheduleId) {
-      return res.redirect('/admin?error=Invalid schedule ID.');
+    // Build query for filtering
+    let query = { role: 'student', isVerified: true };
+    
+    // Status filter
+    if (req.query.status && req.query.status !== 'all') {
+      query.status = req.query.status;
     }
     
-    const schedule = await Schedule.findById(scheduleId);
-    if (!schedule) {
-      return res.redirect('/admin?error=Schedule not found.');
+    // Search filter
+    if (req.query.search) {
+      const searchRegex = new RegExp(req.query.search, 'i');
+      query.$or = [
+        { fullName: searchRegex },
+        { email: searchRegex }
+      ];
     }
     
-    await Schedule.findByIdAndDelete(scheduleId);
-    res.redirect('/admin?success=Schedule deleted successfully.');
-  } catch (err) {
-    console.error(err);
-    res.redirect('/admin?error=Error deleting schedule.');
+    const students = await User.find(query).sort({ createdAt: -1 });
+    console.log('Found students:', students.length);
+    
+    let studentSchedules = [];
+    let selectedStudent = null;
+    let selectedStudentId = null;
+    
+    if (req.query.studentId) {
+      selectedStudentId = req.query.studentId;
+      console.log('Looking for student ID:', selectedStudentId);
+      
+      try {
+        selectedStudent = await User.findById(selectedStudentId);
+        console.log('Found selectedStudent:', selectedStudent ? `${selectedStudent.fullName} (${selectedStudent.email})` : 'NULL');
+      } catch (err) {
+        console.log('Error finding student by ID:', err.message);
+      }
+      
+      if (selectedStudent) {
+        studentSchedules = await Schedule.find({ studentId: selectedStudentId }).sort({ examDate: -1 }).populate('studentId');
+        console.log('Found schedules:', studentSchedules.length);
+      }
+    }
+
+    console.log('Rendering with selectedStudent:', selectedStudent ? 'YES' : 'NO');
+    
+    res.render('admin-students', { 
+      students,
+      studentSchedules,
+      selectedStudent,
+      selectedStudentId,
+      search: req.query.search || '',
+      status: req.query.status || 'all',
+      page: 'students',
+      error: req.query.error || '',
+      success: req.query.success || ''
+    });
+
+  } catch (error) {
+    console.error('Error in /students route:', error);
+    res.render('admin-students', { 
+      students: [],
+      studentSchedules: [],
+      selectedStudent: null,
+      selectedStudentId: null,
+      page: 'students',
+      error: 'Failed to load students',
+      success: ''
+    });
   }
 });
 
-// Edit schedule page (GET)
+// Notification history page
+router.get('/notifications', isAdmin, async (req, res) => {
+  try {
+    const query = {};
+
+    if (req.query.status && req.query.status !== 'all') {
+      query.status = req.query.status;
+    }
+
+    const searchText = (req.query.search || '').trim();
+    if (searchText) {
+      const safeSearch = escapeRegExp(searchText);
+      const searchRegex = new RegExp(safeSearch, 'i');
+
+      query.$or = [
+        { recipientEmail: searchRegex },
+        { subject: searchRegex },
+        { body: searchRegex }
+      ];
+
+      const matchedUsers = await User.find({ fullName: searchRegex }, '_id');
+      if (matchedUsers.length > 0) {
+        query.$or.push({ recipientId: { $in: matchedUsers.map(user => user._id) } });
+      }
+    }
+
+    const notifications = await Notification.find(query)
+      .sort({ createdAt: -1 })
+      .populate('recipientId');
+
+    res.render('admin-notifications', {
+      notifications,
+      search: req.query.search || '',
+      status: req.query.status || 'all',
+      page: 'notifications',
+      error: req.query.error || '',
+      success: req.query.success || ''
+    });
+  } catch (err) {
+    console.error('Failed to load notifications:', err);
+    res.render('admin-notifications', {
+      notifications: [],
+      search: req.query.search || '',
+      status: req.query.status || 'all',
+      page: 'notifications',
+      error: 'Failed to load notification history',
+      success: ''
+    });
+  }
+});
+
+// Notification detail page
+router.get('/notifications/:id', isAdmin, async (req, res) => {
+  try {
+    const notification = await Notification.findById(req.params.id).populate('recipientId');
+    if (!notification) {
+      return res.redirect('/admin/notifications?error=Notification not found');
+    }
+
+    res.render('admin-notification-detail', {
+      notification,
+      page: 'notifications',
+      error: '',
+      success: ''
+    });
+  } catch (err) {
+    console.error('Failed to load notification detail:', err);
+    res.redirect('/admin/notifications?error=Failed to load notification detail');
+  }
+});
+
+// Clear all notifications
+router.post('/notifications/clear', isAdmin, async (req, res) => {
+  try {
+    await Notification.deleteMany({});
+    return res.redirect('/admin/notifications?success=All notification history cleared');
+  } catch (error) {
+    console.error('Failed to clear notifications:', error);
+    return res.redirect('/admin/notifications?error=Failed to clear notification history');
+  }
+});
+
+// Delete a single notification
+router.post('/notifications/delete/:id', isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Notification.findByIdAndDelete(id);
+    return res.redirect('/admin/notifications?success=Notification deleted successfully');
+  } catch (error) {
+    console.error('Failed to delete notification:', error);
+    return res.redirect('/admin/notifications?error=Failed to delete notification');
+  }
+});
+
+// Delete student and their schedules
+router.post('/students/delete/:id', isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const student = await User.findById(id);
+    if (!student) return res.redirect('/admin/students?error=Student not found');
+
+    if (student.role !== 'student') return res.redirect('/admin/students?error=Cannot delete this user');
+
+    await Schedule.deleteMany({ studentId: student._id });
+    await User.findByIdAndDelete(student._id);
+
+    return res.redirect('/admin/students?success=Student and schedules deleted');
+  } catch (err) {
+    console.error('Failed to delete student:', err);
+    return res.redirect('/admin/students?error=Failed to delete student');
+  }
+});
+
+// Update student status (pass/fail)
+router.post('/students/status/:id', isAdmin, async (req, res) => {
+  try {
+    const studentId = req.params.id;
+    const { status } = req.body;
+
+    if (!['passed', 'failed', 'pending'].includes(status)) {
+      return res.redirect('/admin/students?error=Invalid status value');
+    }
+
+    const student = await User.findById(studentId);
+    if (!student) {
+      return res.redirect('/admin/students?error=Student not found');
+    }
+
+    student.status = status;
+    student.notificationSent = false;
+
+    let statusMessage = '';
+    let emailSubject = '';
+    let emailBody = '';
+
+    if (status === 'passed') {
+      statusMessage = 'Your application is approved. Check your exam schedule.';
+      emailSubject = 'Admission Decision: Bachelor of Science in Information Technology (BSIT)';
+      emailBody = `Dear Applicant,\n\nWe are pleased to inform you that you have successfully passed the entrance examination for the Bachelor of Science in Information Technology (BSIT) program.\n\nYour performance on the assessment demonstrated the technical aptitude and academic potential we look for in our incoming IT cohort. We are excited to welcome you to our academic community as you begin your journey toward a career in technology.`;
+    } else if (status === 'failed') {
+      statusMessage = 'Your application is not approved. Please try again next session.';
+      emailSubject = 'Admission Notice: Computer Systems Servicing (CSS) Program';
+      emailBody = `Dear Applicant,\n\nWe are pleased to inform you that you have successfully passed the entrance examination for the Computer Systems Servicing (CSS) program.\n\nBased on your examination results, you have demonstrated the foundational skills and technical interest required for this qualification. This program will provide you with hands-on training in computer assembly, software configuration, networking, and systems maintenance, leading toward a National Certificate (NC II).`;
+    } else {
+      statusMessage = 'Application is pending review.';
+      emailSubject = 'Exam result: pending evaluation';
+      emailBody = `Hello ${student.fullName},\n\n${statusMessage}\n\nBest regards.`;
+    }
+
+    student.resultMessage = statusMessage;
+
+    await student.save();
+
+    console.log('[ADMIN STATUS] Sending to:', student.email, 'status:', status, 'message:', student.resultMessage);
+
+    const sent = await sendEmail({
+      recipientId: student._id,
+      to: student.email,
+      subject: emailSubject,
+      text: emailBody
+    });
+
+    if (sent) {
+      student.notificationSent = true;
+      await student.save();
+    }
+
+    return res.redirect(`/admin/students?studentId=${studentId}&success=Status updated successfully`);
+  } catch (error) {
+    console.error('Failed to update status:', error);
+    return res.redirect('/admin/students?error=Failed to update status');
+  }
+});
+
+
+// Detailed Schedule for a specific day
+router.get('/schedules/day/:day', isAdmin, async (req, res) => {
+  const { day } = req.params;
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+
+  try {
+    const schedules = await Schedule.find().populate('studentId');
+    
+    const filteredSchedules = schedules.filter(s => {
+      const d = new Date(s.examDate);
+      const weekday = d.toLocaleString('default', { weekday: 'long' });
+      return weekday === day && d.getMonth() === month && d.getFullYear() === year;
+    });
+
+    res.render('day-schedule-detail', {
+      schedules: filteredSchedules,
+      day,
+      monthName: month.toLocaleString
+        ? month.toLocaleString('default', { month: 'long' }) 
+        : now.toLocaleString('default', { month: 'long' }), // fallback
+      year,
+      page: 'daily',
+      error: '',
+      success: ''
+    });
+  } catch (error) {
+    console.error(error);
+    res.redirect('/admin/weekly-schedule?error=Failed to load day schedule');
+  }
+});
+
+router.get('/weekly-schedule', isAdmin, async (req, res) => {
+  const schedules = await Schedule.find().populate('studentId');
+  const now = new Date();
+  const monthName = now.toLocaleString('default', { month: 'long' });
+  const currentYear = now.getFullYear();
+  const dayCounts = { Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0 };
+  schedules.forEach(schedule => {
+    const d = new Date(schedule.examDate);
+    if (d.getMonth() === now.getMonth() && d.getFullYear() === currentYear) {
+      const dayName = d.toLocaleString('default', { weekday: 'long' });
+      if (dayCounts.hasOwnProperty(dayName)) dayCounts[dayName]++;
+    }
+  });
+  res.render('weekly-schedule', { 
+    dayCounts, monthName, currentYear, 
+    page: 'weekly', 
+    error: req.query.error || '', 
+    success: req.query.success || '' 
+  });
+});
+
+// Get Edit Schedule Page
 router.get('/edit-schedule/:id', isAdmin, async (req, res) => {
   try {
-    const schedule = await Schedule.findById(req.params.id).populate('studentId', 'username');
+    const { id } = req.params;
+    const schedule = await Schedule.findById(id).populate('studentId');
+    
     if (!schedule) {
-      return res.redirect('/admin?error=Schedule not found.');
+      return res.redirect('/admin/add-schedule?error=Schedule not found');
     }
-    const error = req.query.error || '';
-    res.render('edit-schedule', { schedule, error });
-  } catch (err) {
-    console.error(err);
-    res.redirect('/admin?error=Error loading schedule.');
+
+    res.render('edit-schedule', { 
+      schedule,
+      page: 'editSchedule',
+      error: req.query.error || '',
+      success: req.query.success || ''
+    });
+
+  } catch (error) {
+    console.error('Failed to load edit schedule page:', error);
+    return res.redirect('/admin/add-schedule?error=Failed to load schedule');
   }
 });
 
-// Update schedule (POST)
+// Update Schedule
 router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
   try {
-    const { studentUsername, examDate, examHour, examMinute, examPeriod, location } = req.body;
-    
-    // Combine time parts into one string
-    const examTime = `${examHour}:${examMinute} ${examPeriod}`;
-    
-    // Find the student by username (case-insensitive)
-    const student = await User.findOne({ 
-      username: new RegExp(`^${studentUsername}$`, 'i'), 
-      role: 'student' 
-    });
-    
-    if (!student) {
-      return res.redirect(`/admin/edit-schedule/${req.params.id}?error=Student not found.`);
+    const { id } = req.params;
+    const { examDate, examTime, location } = req.body;
+
+    // Basic validation
+    if (!examDate || !examTime || !location) {
+      return res.redirect(`/admin/edit-schedule/${id}?error=All fields are required`);
     }
-    
+
+    const schedule = await Schedule.findById(id);
+    if (!schedule) {
+      return res.redirect('/admin/add-schedule?error=Schedule not found');
+    }
+
     // Update the schedule
-    await Schedule.findByIdAndUpdate(req.params.id, {
-      studentId: student._id,
-      examDate,
-      examTime,
-      location
-    });
+    schedule.examDate = new Date(examDate);
+    schedule.examTime = examTime.trim();
+    schedule.location = location.trim();
+
+    await schedule.save();
+
+    return res.redirect('/admin/add-schedule?success=Schedule updated successfully');
+  } catch (error) {
+    console.error('Failed to update schedule:', error);
+    return res.redirect('/admin/add-schedule?error=Failed to update schedule');
+  }
+});
+
+// Delete Schedule
+router.post('/delete-schedule/:id', isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const schedule = await Schedule.findById(id);
     
-    res.redirect('/admin?success=Schedule updated successfully.');
-  } catch (err) {
-    console.error(err);
-    res.redirect('/admin?error=Error updating schedule.');
+    if (!schedule) {
+      return res.redirect('/admin/add-schedule?error=Schedule not found');
+    }
+
+    await Schedule.findByIdAndDelete(id);
+    return res.redirect('/admin/add-schedule?success=Schedule deleted successfully');
+  } catch (error) {
+    console.error('Failed to delete schedule:', error);
+    return res.redirect('/admin/add-schedule?error=Failed to delete schedule');
   }
 });
 
