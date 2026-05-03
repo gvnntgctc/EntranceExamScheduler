@@ -2039,6 +2039,74 @@ form.schedule-form {
   border-top: 1px solid #e6e6e6;
 }
 
+.toast-message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 380px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.14);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast-message.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-message.toast-success {
+  border-color: #2e7d32;
+}
+
+.toast-message.toast-error {
+  border-color: #c62828;
+}
+
+.toast-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(17, 153, 142, 0.12);
+  color: #11998e;
+}
+
+.toast-message.toast-error .toast-icon {
+  background: rgba(198, 40, 40, 0.12);
+  color: #c62828;
+}
+
+.toast-content {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+}
+
+.toast-close {
+  font-size: 18px;
+  line-height: 1;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+}
+
+.toast-close:hover {
+  color: #333;
+}
+
 .schedule-form .suggestions-container {
   position: relative;
 }

@@ -288,12 +288,14 @@ router.get('/add-schedule', isAdmin, async (req, res) => {
     }, {});
     
     const minDate = new Date().toISOString().split('T')[0];
+    const maxDate = new Date(new Date().getFullYear() + 2, 11, 31).toISOString().split('T')[0];
 
     res.render('add-schedule', { 
       schedules,
       students,
       scheduleCounts,
       minDate,
+      maxDate,
       page: 'addSchedule',
       error: req.query.error || '',
       success: req.query.success || ''
@@ -303,11 +305,13 @@ router.get('/add-schedule', isAdmin, async (req, res) => {
     console.error(error);
     const students = [];
     const minDate = new Date().toISOString().split('T')[0];
+    const maxDate = new Date(new Date().getFullYear() + 2, 11, 31).toISOString().split('T')[0];
     res.render('add-schedule', { 
       schedules: [], 
       students,
       scheduleCounts: {},
       minDate,
+      maxDate,
       page: 'addSchedule',
       error: 'Failed to load schedules',
       success: ''
@@ -323,6 +327,23 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
     // Basic validation
     if (!studentId || !examDate || !examTime || !location) {
       return res.redirect('/admin/add-schedule?error=All fields are required');
+    }
+
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(examDate)) {
+      return res.redirect('/admin/add-schedule?error=Invalid exam date');
+    }
+
+    const parsedExamDate = new Date(examDate);
+    if (Number.isNaN(parsedExamDate.getTime()) || parsedExamDate.toISOString().slice(0, 10) !== examDate) {
+      return res.redirect('/admin/add-schedule?error=Invalid exam date');
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const maxExamDate = new Date(today.getFullYear() + 2, 11, 31);
+    if (parsedExamDate < today || parsedExamDate > maxExamDate) {
+      return res.redirect('/admin/add-schedule?error=Exam date must be between today and the end of the next 2 years');
     }
 
     // Try to find student by id first, otherwise allow using email or full name text

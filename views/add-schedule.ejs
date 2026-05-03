@@ -38,6 +38,14 @@
         </div>
       <% } %>
 
+      <% if (success || (error && error.length > 0)) { %>
+        <div id="toastMessage" class="toast-message <%= success ? 'toast-success' : 'toast-error' %>" role="status" aria-live="polite">
+          <span class="toast-icon"><i class="fas <%= success ? 'fa-check-circle' : 'fa-exclamation-circle' %>"></i></span>
+          <div class="toast-content"><%= success || error %></div>
+          <button type="button" class="toast-close" aria-label="Close notification">&times;</button>
+        </div>
+      <% } %>
+
       <div class="section-card">
         <div class="stats-grid">
           <div class="stat-card">
@@ -71,7 +79,7 @@
 
             <div class="form-group">
               <label for="examDate"><i class="fas fa-calendar"></i> Exam Date</label>
-              <input type="date" id="examDate" name="examDate" min="<%= minDate %>" required aria-required="true" aria-label="Exam date" aria-describedby="holidayHelp" />
+              <input type="date" id="examDate" name="examDate" min="<%= minDate %>" max="<%= maxDate %>" required aria-required="true" aria-label="Exam date" aria-describedby="holidayHelp" />
             </div>
 
             <div class="form-group">
@@ -180,6 +188,14 @@
 
   <script>
     const scheduleCounts = <%- JSON.stringify(scheduleCounts || {}) %>;
+    const toastMessage = document.getElementById('toastMessage');
+    if (toastMessage) {
+      toastMessage.classList.add('show');
+      const toastClose = toastMessage.querySelector('.toast-close');
+      toastClose?.addEventListener('click', () => toastMessage.classList.remove('show'));
+      setTimeout(() => toastMessage.classList.remove('show'), 4500);
+    }
+
       // Live applicant search with hidden ID selection
     const studentOptions = <%- JSON.stringify(students || []) %>;
     const studentSearchInput = document.getElementById('studentSearch');
@@ -445,12 +461,46 @@
       return true;
     }
 
+    function validateExamDateValue(value) {
+      const allowedDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      const maxDateValue = '<%= maxDate %>';
+      if (!allowedDateRegex.test(value)) {
+        return false;
+      }
+
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) {
+        return false;
+      }
+
+      if (value < '<%= minDate %>' || value > maxDateValue) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function setExamDateInvalid(message) {
+      if (holidayWarning) {
+        holidayWarning.textContent = message;
+      }
+      if (examDateInput) {
+        examDateInput.setCustomValidity(message);
+      }
+    }
+
     if (examDateInput) {
       examDateInput.addEventListener('input', function() {
         validateHolidayDate(this.value);
         validateCapacityDate(this.value);
       });
       examDateInput.addEventListener('change', function() {
+        if (!validateExamDateValue(this.value)) {
+          setExamDateInvalid('Please enter a valid exam date between today and the next 2 years.');
+          this.value = '';
+          return;
+        }
+
         const holidayValid = validateHolidayDate(this.value);
         const capacityValid = validateCapacityDate(this.value);
         if (!holidayValid || !capacityValid) {
