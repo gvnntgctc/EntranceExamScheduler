@@ -1821,50 +1821,7 @@ h2 i {
   }
   
   .schedule-list li {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 14px;
-  }
-
-  .schedule-card-header {
-    width: 100%;
-    flex-wrap: wrap;
-  }
-
-  .schedule-actions {
-    width: 100%;
-    justify-content: flex-start;
-    margin-top: 8px;
-  }
-
-  .schedule-card-row {
-    width: 100%;
-    flex-direction: column;
-    gap: 12px;
-    flex-direction: column;
-  }
-
-  .section-card .schedule-list .schedule-card-header {
-    width: 100%;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .section-card .schedule-list .schedule-actions {
-    width: 100%;
-    justify-content: flex-start;
-    margin-top: 8px;
-  }
-
-  .section-card .schedule-list .schedule-card-row {
-    width: 100%;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .button-group .btn {
-    width: 100%;
-    justify-content: center;
+    padding: 16px;
   }
   
   .schedule-item {
