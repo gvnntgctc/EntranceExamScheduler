@@ -57,6 +57,30 @@
     .message { margin: 12px 0; }
     .message.error { background: #fff3f1; color: #a33d2b; border: 1px solid #f7c2b8; padding: 10px; border-radius: 8px; }
     .message.success { background: #ecfdf5; color: #1f7a4b; border: 1px solid #a7f3d0; padding: 10px; border-radius: 8px; }
+    
+    /* View Details Button Styling */
+    .view-details-btn {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      border: none;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(17, 153, 142, 0.2);
+    }
+    
+    .view-details-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3);
+      background: linear-gradient(135deg, #0e7a70 0%, #2dd66f 100%);
+    }
   </style>
 </head>
 <body>
@@ -109,10 +133,7 @@
                   <td><%= notification.createdAt.toLocaleString() %></td>
                   <td><%= notification.errorMessage || '-' %></td>
                   <td style="display:flex; gap:6px;">
-                    <a href="/admin/notifications/<%= notification._id %>" class="btn btn-secondary" style="font-size:12px;">View</a>
-                    <form method="POST" action="/admin/notifications/delete/<%= notification._id %>" onsubmit="return confirm('Delete this notification?');" style="margin:0;">
-                      <button type="submit" class="btn btn-danger" style="font-size:12px;">Delete</button>
-                    </form>
+                    <a href="/admin/notifications/<%= notification._id %>" class="view-details-btn"><i class="fas fa-eye"></i> View Details</a>
                   </td>
                 </tr>
               <% }) %>
