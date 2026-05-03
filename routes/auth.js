@@ -197,6 +197,9 @@ router.post('/apply-review', async (req, res) => {
     const phoneNumber = (req.body.phoneNumber || '').trim();
     const rawEmail = (req.body.email || '').trim().toLowerCase();
 
+    console.log('=== APPLY-REVIEW ATTEMPT ===');
+    console.log('Input data:', { fullName, phoneNumber, rawEmail });
+
     const phoneRegex = /^(\+63|0)9\d{9}$/;
     const emailRegex = /^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$/;
 
@@ -223,14 +226,23 @@ router.post('/apply-review', async (req, res) => {
       ]
     });
 
-    if (existingUser) {
+    console.log('Existing user found in apply-review:', existingUser ? {
+      id: existingUser._id,
+      name: existingUser.fullName,
+      email: existingUser.email,
+      phone: existingUser.phoneNumber,
+      verified: existingUser.isVerified,
+      status: existingUser.status
+    } : 'None');
+
+    if (existingUser && existingUser.isVerified) {
       let errorMessage = 'This information is already registered.';
       if (existingUser.phoneNumber === phoneNumber) {
-        errorMessage = 'Phone number is already registered.';
+        errorMessage = `Phone number ${phoneNumber} is already registered and verified.`;
       } else if (existingUser.email === rawEmail) {
-        errorMessage = 'Email is already registered.';
+        errorMessage = `Email ${rawEmail} is already registered and verified.`;
       } else if (existingUser.fullName && existingUser.fullName.toLowerCase() === fullName.toLowerCase()) {
-        errorMessage = 'Full name is already registered.';
+        errorMessage = `Name "${fullName}" is already registered and verified.`;
       }
       const params = new URLSearchParams({ error: errorMessage, fullName, phoneNumber, email: rawEmail });
       return res.redirect(`/auth/apply?${params.toString()}`);
