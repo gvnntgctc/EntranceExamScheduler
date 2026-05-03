@@ -296,13 +296,13 @@ router.post('/apply-confirm', async (req, res) => {
     if (existingUser && existingUser.isVerified) {
       let errorMessage = 'This information is already registered.';
       if (existingUser.phoneNumber === phoneNumber) {
-        errorMessage = 'Phone number is already registered.';
+        errorMessage = `Phone number ${phoneNumber} is already registered and verified.`;
       } else if (existingUser.email === rawEmail) {
-        errorMessage = 'Email is already registered.';
+        errorMessage = `Email ${rawEmail} is already registered and verified.`;
       } else if (existingUser.fullName && existingUser.fullName.toLowerCase() === fullName.toLowerCase()) {
-        errorMessage = 'Full name is already registered.';
+        errorMessage = `Name "${fullName}" is already registered and verified.`;
       }
-      console.log('Blocking registration due to verified user:', errorMessage);
+      console.log('❌ BLOCKING: Found verified user -', errorMessage);
       const params = new URLSearchParams({ error: errorMessage, fullName, phoneNumber, email: rawEmail });
       return res.redirect(`/auth/apply?${params.toString()}`);
     }
@@ -359,7 +359,13 @@ router.post('/apply-confirm', async (req, res) => {
     }
 
     req.session.registrationEmail = rawEmail;
-    return res.redirect('/auth/verify-otp?success=Registration received and pending review. Verification code sent to your email.');
+
+    const wasUpdate = existingUser && !existingUser.isVerified;
+    const successMessage = wasUpdate
+      ? 'Registration updated. New verification code sent to your email.'
+      : 'Registration received and pending review. Verification code sent to your email.';
+
+    return res.redirect(`/auth/verify-otp?success=${encodeURIComponent(successMessage)}`);
   } catch (err) {
     console.error('[APPLY-CONFIRM] ERROR:', err);
     return res.redirect('/auth/apply?error=Application failed. Please try again.');

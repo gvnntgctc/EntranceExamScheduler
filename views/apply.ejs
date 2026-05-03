@@ -52,5 +52,17 @@
     </div>
   </div>
   <script src="/js/disable-once.js"></script>
+  <script>
+    // Debug form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const formData = new FormData(this);
+      const data = {
+        fullName: formData.get('fullName'),
+        phoneNumber: formData.get('phoneNumber'),
+        email: formData.get('email')
+      };
+      console.log('Submitting registration data:', data);
+    });
+  </script>
 </body>
 </html>
