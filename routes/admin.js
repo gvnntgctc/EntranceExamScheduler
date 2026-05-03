@@ -333,48 +333,60 @@ router.get('/students/api/:id', isAdmin, async (req, res) => {
 });
 
 // Student detail view route
-router.get('/students/view/:id', async (req, res) => {
-  console.log('=== STUDENTS VIEW ROUTE HIT ===');
-  console.log('Params ID:', req.params.id);
-  console.log('Session role:', req.session ? req.session.role : 'no session');
-  
+router.get('/students/view/:id', isAdmin, async (req, res) => {
   try {
+    const search = req.query.search || '';
+    const status = req.query.status || 'all';
+
+    // Build query for filtering student list
+    let query = { role: 'student', isVerified: true };
+    if (status !== 'all') {
+      query.status = status;
+    }
+    if (search) {
+      const searchRegex = new RegExp(escapeRegExp(search), 'i');
+      query.$or = [
+        { fullName: searchRegex },
+        { email: searchRegex }
+      ];
+    }
+
+    const students = await User.find(query).sort({ createdAt: -1 });
     const studentId = req.params.id;
-    console.log('Looking for student ID:', studentId);
-    
-    // Check if it's a valid ObjectId
-    if (!mongoose.Types.ObjectId.isValid(studentId)) {
-      console.log('Invalid ObjectId');
-      return res.json({ error: 'Invalid student ID', studentId });
-    }
-    
-    const selectedStudent = await User.findById(studentId);
-    console.log('Student found:', selectedStudent ? 'YES' : 'NO');
-    
-    if (!selectedStudent) {
-      console.log('Student not found in database');
-      return res.json({ error: 'Student not found', studentId });
-    }
-    
-    console.log('Student data:', { id: selectedStudent._id, name: selectedStudent.fullName, email: selectedStudent.email });
-    
-    // For now, just return JSON to test if route is working
-    return res.json({
-      success: true,
-      studentId,
-      student: {
-        id: selectedStudent._id,
-        name: selectedStudent.fullName,
-        email: selectedStudent.email,
-        status: selectedStudent.status
+    let selectedStudent = null;
+    let studentSchedules = [];
+
+    if (mongoose.Types.ObjectId.isValid(studentId)) {
+      selectedStudent = await User.findById(studentId);
+      if (selectedStudent) {
+        studentSchedules = await Schedule.find({ studentId }).sort({ examDate: -1 });
       }
+    }
+
+    res.render('admin-students', {
+      students,
+      studentSchedules,
+      selectedStudent,
+      selectedStudentId: studentId,
+      search,
+      status,
+      page: 'students',
+      error: req.query.error || (selectedStudent ? '' : 'Unable to load applicant details'),
+      success: req.query.success || ''
     });
-    
-    // Continue with normal rendering...
-    // ... rest of the code ...
   } catch (error) {
     console.error('Error in /students/view/:id route:', error);
-    return res.json({ error: 'Internal server error', message: error.message });
+    res.render('admin-students', {
+      students: [],
+      studentSchedules: [],
+      selectedStudent: null,
+      selectedStudentId: null,
+      search: req.query.search || '',
+      status: req.query.status || 'all',
+      page: 'students',
+      error: `Failed to load students: ${error.message}`,
+      success: ''
+    });
   }
 });
 
