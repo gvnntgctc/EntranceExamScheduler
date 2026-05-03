@@ -333,7 +333,7 @@ router.get('/students/api/:id', isAdmin, async (req, res) => {
 });
 
 // Student detail view route
-router.get('/students/view/:id', isAdmin, async (req, res) => {
+router.get('/students/view/:id', async (req, res) => {
   console.log('=== STUDENTS VIEW ROUTE HIT ===');
   console.log('Params ID:', req.params.id);
   console.log('Session role:', req.session.role);
