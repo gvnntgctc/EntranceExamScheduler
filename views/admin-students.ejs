@@ -905,48 +905,48 @@
         }
       });
 
-      function submitBulkStatus(studentIds, status) {
+      async function submitBulkStatus(studentIds, status) {
         console.log('Submitting bulk status update:', studentIds, status);
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/admin/students/bulk-status';
-        
-        studentIds.forEach(id => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = 'studentIds[]';
-          input.value = id;
-          form.appendChild(input);
+        const response = await fetch('/admin/students/bulk-status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({ studentIds, status })
         });
-        
-        const statusInput = document.createElement('input');
-        statusInput.type = 'hidden';
-        statusInput.name = 'status';
-        statusInput.value = status;
-        form.appendChild(statusInput);
-        
-        document.body.appendChild(form);
-        console.log('Submitting form with studentIds:', studentIds, 'status:', status);
-        form.submit();
+
+        console.log('Bulk status response status:', response.status);
+        if (response.redirected) {
+          window.location.href = response.url;
+          return;
+        }
+
+        const text = await response.text();
+        console.log('Bulk status response body:', text);
+        window.location.reload();
       }
 
-      function submitBulkDelete(studentIds) {
+      async function submitBulkDelete(studentIds) {
         console.log('Submitting bulk delete:', studentIds);
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/admin/students/bulk-delete';
-
-        studentIds.forEach(id => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = 'studentIds[]';
-          input.value = id;
-          form.appendChild(input);
+        const response = await fetch('/admin/students/bulk-delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({ studentIds })
         });
 
-        document.body.appendChild(form);
-        console.log('Submitting form with studentIds:', studentIds);
-        form.submit();
+        console.log('Bulk delete response status:', response.status);
+        if (response.redirected) {
+          window.location.href = response.url;
+          return;
+        }
+
+        const text = await response.text();
+        console.log('Bulk delete response body:', text);
+        window.location.reload();
       }
 
       // Initial state

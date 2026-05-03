@@ -793,12 +793,14 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
 
     console.log('Raw studentIds:', studentIds, 'status:', status, 'type:', typeof studentIds);
 
-    if (!Array.isArray(studentIds)) {
-      if (typeof studentIds === 'string') {
-        studentIds = studentIds.split(',').map(id => id.trim()).filter(id => id);
-      } else {
-        studentIds = [];
-      }
+    if (Array.isArray(studentIds)) {
+      studentIds = studentIds.map(id => String(id).trim()).filter(id => id);
+    } else if (typeof studentIds === 'string') {
+      studentIds = studentIds.split(',').map(id => id.trim()).filter(id => id);
+    } else if (studentIds && typeof studentIds === 'object') {
+      studentIds = Object.values(studentIds).map(id => String(id).trim()).filter(id => id);
+    } else {
+      studentIds = [];
     }
 
     console.log('Parsed studentIds:', studentIds, 'Length:', studentIds.length);
@@ -886,12 +888,14 @@ router.post('/students/bulk-delete', isAdmin, async (req, res) => {
 
     console.log('Raw studentIds:', studentIds, 'type:', typeof studentIds);
 
-    if (!Array.isArray(studentIds)) {
-      if (typeof studentIds === 'string') {
-        studentIds = studentIds.split(',').map(id => id.trim()).filter(id => id);
-      } else {
-        studentIds = [];
-      }
+    if (Array.isArray(studentIds)) {
+      studentIds = studentIds.map(id => String(id).trim()).filter(id => id);
+    } else if (typeof studentIds === 'string') {
+      studentIds = studentIds.split(',').map(id => id.trim()).filter(id => id);
+    } else if (studentIds && typeof studentIds === 'object') {
+      studentIds = Object.values(studentIds).map(id => String(id).trim()).filter(id => id);
+    } else {
+      studentIds = [];
     }
 
     console.log('Parsed studentIds:', studentIds, 'Length:', studentIds.length);
