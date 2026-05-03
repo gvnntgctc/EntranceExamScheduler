@@ -886,14 +886,17 @@ h2 i {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.schedule-card-header {
+.schedule-list .schedule-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  background: transparent;
+  color: inherit;
+  padding: 0;
 }
 
-.schedule-applicant {
+.schedule-list .schedule-applicant {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -901,13 +904,13 @@ h2 i {
   min-width: 0;
 }
 
-.schedule-applicant i {
+.schedule-list .schedule-applicant i {
   font-size: 18px;
   color: #11998e;
   flex-shrink: 0;
 }
 
-.schedule-applicant strong {
+.schedule-list .schedule-applicant strong {
   font-size: 15px;
   color: #2c3e50;
   overflow: hidden;
@@ -915,15 +918,15 @@ h2 i {
   white-space: nowrap;
 }
 
-.schedule-card-row {
+.schedule-list .schedule-card-row {
   display: flex;
   gap: 24px;
   flex-wrap: wrap;
 }
 
-.schedule-time,
-.schedule-date,
-.schedule-location {
+.schedule-list .schedule-time,
+.schedule-list .schedule-date,
+.schedule-list .schedule-location {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -931,7 +934,7 @@ h2 i {
   min-width: 140px;
 }
 
-.detail-label {
+.schedule-list .detail-label {
   font-size: 12px;
   color: #999;
   text-transform: uppercase;
@@ -942,22 +945,22 @@ h2 i {
   gap: 6px;
 }
 
-.detail-label i {
+.schedule-list .detail-label i {
   color: #11998e;
   font-size: 13px;
 }
 
-.detail-value {
+.schedule-list .detail-value {
   font-size: 14px;
   color: #2c3e50;
   font-weight: 500;
 }
 
-.schedule-info {
+.schedule-list .schedule-info {
   display: none;
 }
 
-.schedule-details {
+.schedule-list .schedule-details {
   display: none;
 }
 

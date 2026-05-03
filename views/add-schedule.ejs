@@ -110,16 +110,7 @@
             </div>
           </div>
 
-          <div class="holiday-panel">
-            <p class="holiday-help" id="holidayHelp">These dates are holidays and cannot be scheduled:</p>
-            <ul class="holiday-list">
-              <% const holidayList = typeof holidays !== 'undefined' ? holidays : []; %>
-              <% if (holidayList.length) { %>
-                <% holidayList.forEach(h => { %>
-                  <li><strong><%= h.month %>-<%= h.day %></strong> — <span><%= h.name %></span></li>
-                <% }) %>
-              <% } %>
-            </ul>
+          
             <p id="holidayWarning" class="holiday-warning" aria-live="polite"></p>
             <p id="capacityWarning" class="holiday-warning" aria-live="polite"></p>
           </div>
@@ -349,7 +340,8 @@
           }
         }, 150);
       });
-    }</script>
+    }
+  </script>
   <script src="/js/script.js"></script>
   <script>
     // PAGINATION FOR EXISTING SCHEDULES
