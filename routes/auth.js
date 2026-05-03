@@ -206,7 +206,7 @@ router.post('/apply-review', async (req, res) => {
     }
 
     if (!phoneRegex.test(phoneNumber)) {
-      const params = new URLSearchParams({ error: 'Invalid phone number format. Use 09123456789 or +639123456789.', fullName, phoneNumber, email: rawEmail });
+      const params = new URLSearchParams({ error: 'Invalid phone number format.', fullName, phoneNumber, email: rawEmail });
       return res.redirect(`/auth/apply?${params.toString()}`);
     }
 
@@ -263,7 +263,7 @@ router.post('/apply-confirm', async (req, res) => {
     }
 
     if (!phoneRegex.test(phoneNumber)) {
-      const params = new URLSearchParams({ error: 'Invalid phone number format. Use 09123456789 or +639123456789.', fullName, phoneNumber, email: rawEmail });
+      const params = new URLSearchParams({ error: 'Invalid phone number format.', fullName, phoneNumber, email: rawEmail });
       return res.redirect(`/auth/apply?${params.toString()}`);
     }
 

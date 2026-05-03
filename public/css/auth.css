@@ -183,6 +183,17 @@ h1 {
   box-shadow: 0 10px 25px rgba(17, 153, 142, 0.3);
 }
 
+.btn-submit:disabled,
+.btn-submit.disabled,
+.btn-verify:disabled,
+.btn-resend:disabled,
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .btn-ghost {
   padding: 12px 40px;
   background: transparent;
