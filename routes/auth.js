@@ -294,7 +294,7 @@ router.post('/apply-confirm', async (req, res) => {
     }
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
-    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
+    const otpExpiry = new Date(Date.now() + 3 * 60 * 1000);
 
     console.log('Creating new user with:', { phoneNumber, email: rawEmail, fullName });
     const user = new User({
@@ -319,7 +319,7 @@ router.post('/apply-confirm', async (req, res) => {
     req.session.registrationUserId = user._id;
 
     const pendingSubject = 'Entrance Exam - Registration Pending';
-    const pendingText = `Hello ${fullName || rawEmail},\n\nYour registration has been received and your account is currently pending review.\n\nYour verification code is ${otp}. It expires in 15 minutes.\n\nWe will notify you by email once your account is approved and when your exam schedule is available.\n\nThank you for applying.`;
+    const pendingText = `Hello ${fullName || rawEmail},\n\nYour registration has been received and your account is currently pending review.\n\nYour verification code is ${otp}. It expires in 3 minutes.\n\nWe will notify you by email once your account is approved and when your exam schedule is available.\n\nThank you for applying.`;
 
     const emailSent = await sendEmail({
       to: rawEmail,
@@ -406,7 +406,7 @@ router.post('/resend-otp', async (req, res) => {
     }
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
-    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
+    const otpExpiry = new Date(Date.now() + 3 * 60 * 1000);
     user.otp = otp;
     user.otpExpiry = otpExpiry;
     await user.save();
@@ -414,7 +414,7 @@ router.post('/resend-otp', async (req, res) => {
     const emailSent = await sendEmail({
       to: user.email,
       subject: 'Entrance Exam - New Verification Code',
-      text: `Your new verification code is ${otp}. It expires in 15 minutes.`
+      text: `Your new verification code is ${otp}. It expires in 3 minutes.`
     });
 
     if (!emailSent) {
