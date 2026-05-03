@@ -551,11 +551,11 @@
     </div>
   </div>
 
-  <form id="bulkStatusForm" method="POST" action="/admin/students/bulk-status" style="display:none;" enctype="application/json">
+  <form id="bulkStatusForm" method="POST" action="/admin/students/bulk-status" style="display:none;">
     <input type="hidden" name="data" id="bulkStatusData" />
   </form>
 
-  <form id="bulkDeleteForm" method="POST" action="/admin/students/bulk-delete" style="display:none;" enctype="application/json">
+  <form id="bulkDeleteForm" method="POST" action="/admin/students/bulk-delete" style="display:none;">
     <input type="hidden" name="data" id="bulkDeleteData" />
   </form>
 
@@ -986,7 +986,6 @@
 
         console.log('Form action:', form.action);
         console.log('Form method:', form.method);
-        console.log('Form enctype:', form.enctype);
 
         // Add visual feedback
         const submitBtn = document.querySelector('#bulkConfirmBtn');
@@ -1028,10 +1027,10 @@
 
         dataField.value = data;
         console.log('Set data field value to:', dataField.value);
+        console.log('Field value after setting:', document.getElementById('bulkDeleteData').value);
 
         console.log('Form action:', form.action);
         console.log('Form method:', form.method);
-        console.log('Form enctype:', form.enctype);
 
         // Add visual feedback
         const submitBtn = document.querySelector('#bulkConfirmBtn');
