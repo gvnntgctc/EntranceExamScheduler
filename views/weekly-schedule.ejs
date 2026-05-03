@@ -207,13 +207,18 @@
     }
 
     .month-header::after {
-      content: '📅';
+      content: '';
       position: absolute;
       right: 16px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 40px;
-      opacity: 0.2;
+      width: 44px;
+      height: 44px;
+      background-image: url('/images/logo.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.8;
     }
 
     .month-header h3 {
@@ -277,6 +282,17 @@
       font-size: 14px;
       margin-top: 12px;
       width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .month-logo-icon {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      display: inline-block;
     }
 
     .view-calendar-btn:hover {
@@ -428,7 +444,7 @@
                 <span><%= count %> applicant<%= count !== 1 ? 's' : '' %></span>
               </div>
               <button class="view-calendar-btn" onclick="window.location.href='/admin/month/<%= monthNum %>'">
-                <i class="fas fa-calendar"></i> View Calendar
+                <img src="/images/logo.png" alt="School logo" class="month-logo-icon" /> View Calendar
               </button>
             </div>
           </div>
