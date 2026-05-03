@@ -552,7 +552,7 @@
             
             const count = monthCounts[monthNum] || 0;
         %>
-          <div class="month-card" data-month="<%= monthNum %>" data-month-name="<%= month %>" tabindex="0" role="button" aria-label="<%= month %> - <%= count %> scheduled">
+          <div class="month-card" data-month="<%= monthNum %>" data-month-name="<%= month %>" tabindex="0" role="button" aria-label="<%= month %> - <%= count %> scheduled" onclick="window.location.href='/admin/month/<%= monthNum %>';" style="cursor: pointer;">
             <div class="month-header">
               <h3><%= month %></h3>
               <div class="year"><%= currentYear %></div>
