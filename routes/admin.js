@@ -786,34 +786,32 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
 router.post('/students/bulk-status', isAdmin, async (req, res) => {
   try {
     console.log('Bulk status update request body:', req.body);
-    console.log('Content-Type:', req.headers['content-type']);
+    console.log('Session role:', req.session.role);
 
-    let studentIdsRaw, status;
-
-    if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
-      // JSON request
-      studentIdsRaw = req.body.studentIds;
-      status = req.body.status;
-    } else {
-      // Form data
-      studentIdsRaw = req.body.studentIds;
-      status = req.body.status;
+    let data;
+    try {
+      data = JSON.parse(req.body.data);
+    } catch (e) {
+      console.log('Failed to parse data:', req.body.data);
+      return res.redirect('/admin/students?error=Invalid request data');
     }
 
-    console.log('Raw studentIds:', studentIdsRaw, 'Type:', typeof studentIdsRaw);
+    const { studentIds, status } = data;
+
+    console.log('Parsed studentIds:', studentIds, 'Type:', typeof studentIds);
     console.log('Status:', status);
 
     // Ensure studentIds is always an array
-    let studentIds = [];
-    if (Array.isArray(studentIdsRaw)) {
-      studentIds = studentIdsRaw;
-    } else if (studentIdsRaw) {
-      studentIds = [studentIdsRaw];
+    let studentIdsArray = [];
+    if (Array.isArray(studentIds)) {
+      studentIdsArray = studentIds;
+    } else if (studentIds) {
+      studentIdsArray = [studentIds];
     }
 
-    console.log('Processed studentIds:', studentIds, 'Length:', studentIds.length);
+    console.log('Processed studentIds:', studentIdsArray, 'Length:', studentIdsArray.length);
 
-    if (studentIds.length === 0) {
+    if (studentIdsArray.length === 0) {
       console.log('No students selected');
       return res.redirect('/admin/students?error=No students selected');
     }
@@ -823,7 +821,7 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
       return res.redirect('/admin/students?error=Invalid status value');
     }
 
-    const students = await User.find({ _id: { $in: studentIds } });
+    const students = await User.find({ _id: { $in: studentIdsArray } });
     if (students.length === 0) {
       return res.redirect('/admin/students?error=No valid students found');
     }
@@ -890,36 +888,36 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
 router.post('/students/bulk-delete', isAdmin, async (req, res) => {
   try {
     console.log('Bulk delete request body:', req.body);
-    console.log('Content-Type:', req.headers['content-type']);
+    console.log('Session role:', req.session.role);
 
-    let studentIdsRaw;
-
-    if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
-      // JSON request
-      studentIdsRaw = req.body.studentIds;
-    } else {
-      // Form data
-      studentIdsRaw = req.body.studentIds;
+    let data;
+    try {
+      data = JSON.parse(req.body.data);
+    } catch (e) {
+      console.log('Failed to parse data:', req.body.data);
+      return res.redirect('/admin/students?error=Invalid request data');
     }
 
-    console.log('Raw studentIds:', studentIdsRaw, 'Type:', typeof studentIdsRaw);
+    const { studentIds } = data;
+
+    console.log('Parsed studentIds:', studentIds, 'Type:', typeof studentIds);
 
     // Ensure studentIds is always an array
-    let studentIds = [];
-    if (Array.isArray(studentIdsRaw)) {
-      studentIds = studentIdsRaw;
-    } else if (studentIdsRaw) {
-      studentIds = [studentIdsRaw];
+    let studentIdsArray = [];
+    if (Array.isArray(studentIds)) {
+      studentIdsArray = studentIds;
+    } else if (studentIds) {
+      studentIdsArray = [studentIds];
     }
 
-    console.log('Processed studentIds:', studentIds, 'Length:', studentIds.length);
+    console.log('Processed studentIds:', studentIdsArray, 'Length:', studentIdsArray.length);
 
-    if (studentIds.length === 0) {
+    if (studentIdsArray.length === 0) {
       console.log('No students selected');
       return res.redirect('/admin/students?error=No students selected');
     }
 
-    const students = await User.find({ _id: { $in: studentIds }, role: 'student' });
+    const students = await User.find({ _id: { $in: studentIdsArray }, role: 'student' });
     if (students.length === 0) {
       return res.redirect('/admin/students?error=No valid students found');
     }
