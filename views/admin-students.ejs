@@ -545,9 +545,13 @@
     </div>
   </div>
 
-  <form id="bulkActionForm" method="POST" style="display:none;">
-    <div id="bulkStudentIdsContainer"></div>
-    <input type="hidden" name="status" id="bulkStatus" />
+  <form id="bulkStatusForm" method="POST" action="/admin/students/bulk-status" style="display:none;">
+    <div id="bulkStatusStudentIdsContainer"></div>
+    <input type="hidden" name="status" id="bulkStatusStatus" />
+  </form>
+
+  <form id="bulkDeleteForm" method="POST" action="/admin/students/bulk-delete" style="display:none;">
+    <div id="bulkDeleteStudentIdsContainer"></div>
   </form>
 
   <!-- Bulk Status / Delete Confirmation Modal -->
@@ -877,22 +881,37 @@
       // Bulk action handlers
       bulkPassBtn.addEventListener('click', function() {
         const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
-        console.log('Selected IDs:', selectedIds, 'Length:', selectedIds.length);
-        if (selectedIds.length === 0) return;
+        console.log('Bulk Pass clicked - Selected IDs:', selectedIds, 'Length:', selectedIds.length);
+        console.log('Checkboxes found:', document.querySelectorAll('.student-checkbox').length);
+        console.log('Checked checkboxes:', document.querySelectorAll('.student-checkbox:checked').length);
+        if (selectedIds.length === 0) {
+          console.log('No students selected, returning early');
+          return;
+        }
         openBulkConfirm('passed', selectedIds);
       });
 
       bulkFailBtn.addEventListener('click', function() {
         const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
-        console.log('Selected IDs:', selectedIds, 'Length:', selectedIds.length);
-        if (selectedIds.length === 0) return;
+        console.log('Bulk Fail clicked - Selected IDs:', selectedIds, 'Length:', selectedIds.length);
+        console.log('Checkboxes found:', document.querySelectorAll('.student-checkbox').length);
+        console.log('Checked checkboxes:', document.querySelectorAll('.student-checkbox:checked').length);
+        if (selectedIds.length === 0) {
+          console.log('No students selected, returning early');
+          return;
+        }
         openBulkConfirm('failed', selectedIds);
       });
 
       bulkDeleteBtn.addEventListener('click', function() {
         const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
-        console.log('Selected IDs:', selectedIds, 'Length:', selectedIds.length);
-        if (selectedIds.length === 0) return;
+        console.log('Bulk Delete clicked - Selected IDs:', selectedIds, 'Length:', selectedIds.length);
+        console.log('Checkboxes found:', document.querySelectorAll('.student-checkbox').length);
+        console.log('Checked checkboxes:', document.querySelectorAll('.student-checkbox:checked').length);
+        if (selectedIds.length === 0) {
+          console.log('No students selected, returning early');
+          return;
+        }
         openBulkConfirm('deleted', selectedIds);
       });
 
@@ -901,17 +920,23 @@
       });
 
       bulkConfirmBtn.addEventListener('click', function() {
-        if (!pendingBulkIds.length || !pendingBulkStatus) return;
+        console.log('Confirm button clicked, pendingBulkIds:', pendingBulkIds, 'pendingBulkStatus:', pendingBulkStatus);
+        if (!pendingBulkIds.length || !pendingBulkStatus) {
+          console.log('No pending bulk action, returning');
+          return;
+        }
         closeBulkConfirm();
         if (pendingBulkStatus === 'deleted') {
+          console.log('Calling submitBulkDelete with:', pendingBulkIds);
           submitBulkDelete(pendingBulkIds);
         } else {
+          console.log('Calling submitBulkStatus with:', pendingBulkIds, pendingBulkStatus);
           submitBulkStatus(pendingBulkIds, pendingBulkStatus);
         }
       });
 
-      function setBulkStudentInputs(studentIds) {
-        const container = document.getElementById('bulkStudentIdsContainer');
+      function setBulkStudentInputs(formId, studentIds) {
+        const container = document.getElementById(formId);
         container.innerHTML = '';
 
         studentIds.forEach(id => {
@@ -925,23 +950,27 @@
 
       function submitBulkStatus(studentIds, status) {
         console.log('Submitting bulk status update:', studentIds, status);
-        const form = document.getElementById('bulkActionForm');
-        const statusField = document.getElementById('bulkStatus');
+        const form = document.getElementById('bulkStatusForm');
+        const statusField = document.getElementById('bulkStatusStatus');
 
-        setBulkStudentInputs(studentIds);
-        form.action = '/admin/students/bulk-status';
+        setBulkStudentInputs('bulkStatusStudentIdsContainer', studentIds);
         statusField.value = status;
+
+        console.log('Form action:', form.action);
+        console.log('Form data:', new FormData(form));
+
         form.submit();
       }
 
       function submitBulkDelete(studentIds) {
         console.log('Submitting bulk delete:', studentIds);
-        const form = document.getElementById('bulkActionForm');
-        const statusField = document.getElementById('bulkStatus');
+        const form = document.getElementById('bulkDeleteForm');
 
-        setBulkStudentInputs(studentIds);
-        form.action = '/admin/students/bulk-delete';
-        statusField.value = '';
+        setBulkStudentInputs('bulkDeleteStudentIdsContainer', studentIds);
+
+        console.log('Form action:', form.action);
+        console.log('Form data:', new FormData(form));
+
         form.submit();
       }
 

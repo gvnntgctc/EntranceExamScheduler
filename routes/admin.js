@@ -785,13 +785,15 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
 // Bulk status update route
 router.post('/students/bulk-status', isAdmin, async (req, res) => {
   try {
-    console.log('Bulk status update request body:', req.body);
+    console.log('Bulk status update request body:', JSON.stringify(req.body, null, 2));
     console.log('Session role:', req.session.role);
+    console.log('Headers:', req.headers);
 
     let studentIds = req.body.studentIds || req.body['studentIds[]'];
     const status = req.body.status;
 
     console.log('Raw studentIds:', studentIds, 'status:', status, 'type:', typeof studentIds);
+    console.log('studentIds[] specifically:', req.body['studentIds[]']);
 
     if (Array.isArray(studentIds)) {
       studentIds = studentIds.map(id => String(id).trim()).filter(id => id);
@@ -881,12 +883,14 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
 // Bulk delete students and their schedules
 router.post('/students/bulk-delete', isAdmin, async (req, res) => {
   try {
-    console.log('Bulk delete request body:', req.body);
+    console.log('Bulk delete request body:', JSON.stringify(req.body, null, 2));
     console.log('Session role:', req.session.role);
+    console.log('Headers:', req.headers);
 
     let studentIds = req.body.studentIds || req.body['studentIds[]'];
 
     console.log('Raw studentIds:', studentIds, 'type:', typeof studentIds);
+    console.log('studentIds[] specifically:', req.body['studentIds[]']);
 
     if (Array.isArray(studentIds)) {
       studentIds = studentIds.map(id => String(id).trim()).filter(id => id);
