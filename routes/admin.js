@@ -317,24 +317,18 @@ router.get('/students', isAdmin, async (req, res) => {
     console.log('Query params:', req.query);
     
     // Build query for filtering
-    let query = { role: 'student', isVerified: true };
+    let query = {}; // Find all users to debug
     
-    // Status filter
-    if (req.query.status && req.query.status !== 'all') {
-      query.status = req.query.status;
+    console.log('Final query:', JSON.stringify(query, null, 2));
+    
+    let students = [];
+    try {
+      students = await User.find(query).sort({ createdAt: -1 });
+      console.log('Found students:', students.length);
+    } catch (findError) {
+      console.error('Error finding students:', findError);
+      throw findError;
     }
-    
-    // Search filter
-    if (req.query.search) {
-      const searchRegex = new RegExp(req.query.search, 'i');
-      query.$or = [
-        { fullName: searchRegex },
-        { email: searchRegex }
-      ];
-    }
-    
-    const students = await User.find(query).sort({ createdAt: -1 });
-    console.log('Found students:', students.length);
     
     let studentSchedules = [];
     let selectedStudent = null;
@@ -358,7 +352,7 @@ router.get('/students', isAdmin, async (req, res) => {
       }
       
       if (selectedStudent) {
-        studentSchedules = await Schedule.find({ studentId: selectedStudentId }).sort({ examDate: -1 }).populate('studentId');
+        studentSchedules = await Schedule.find({ studentId: selectedStudentId }).sort({ examDate: -1 });
         console.log('Found schedules:', studentSchedules.length);
       }
     }
@@ -385,7 +379,7 @@ router.get('/students', isAdmin, async (req, res) => {
       selectedStudent: null,
       selectedStudentId: null,
       page: 'students',
-      error: 'Failed to load students',
+      error: `Failed to load students: ${error.message}`,
       success: ''
     });
   }
