@@ -407,7 +407,7 @@ router.post('/verify-otp', async (req, res) => {
     });
 
     const verifiedText = `Dear ${user.fullName || user.email},\n\n` +
-      `Congratulations. Your email address has been successfully verified for the Philippine Technological College entrance examination registration.\n\n` +
+      `Congratulations. Your email address has been successfully verified for the Pateros Technological College entrance examination registration.\n\n` +
       `══════════════════════════════════════════════════════════════════════\n` +
       `APPLICATION CONFIRMATION\n` +
       `══════════════════════════════════════════════════════════════════════\n\n` +
@@ -425,7 +425,7 @@ router.post('/verify-otp', async (req, res) => {
       `If you have questions, please contact the Admissions Office.\n\n` +
       `Best regards,\n\n` +
       `Admissions Office\n` +
-      `Philippine Technological College\n` +
+      `Pateros Technological College\n` +
       `Entrance Exam Administration`;
 
     await sendEmail({
@@ -474,7 +474,7 @@ router.post('/resend-otp', async (req, res) => {
       `If you did not request this code, please disregard this email.\n\n` +
       `Best regards,\n\n` +
       `Admissions Office\n` +
-      `Philippine Technological College\n` +
+      `Pateros Technological College\n` +
       `Entrance Exam Administration`;
 
     const emailSent = await sendEmail({
