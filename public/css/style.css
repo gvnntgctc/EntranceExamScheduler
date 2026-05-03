@@ -2242,7 +2242,9 @@ form.schedule-form {
 .modal-body .date-grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-auto-rows: 52px;
     gap: 10px;
+    min-height: 362px;
   }
 
   .modal-body .calendar-banner {
@@ -2324,9 +2326,11 @@ form.schedule-form {
     background: #f3f4f6;
   }
 
-  .modal-body .date-grid .date-cell button.disabled-holiday {
+  .modal-body .date-grid .date-cell button.disabled-holiday,
+  .modal-body .date-grid .date-cell button.disabled-weekend {
     border-color: #ef4444;
     color: #b91c1c;
+    background: #fef2f2;
   }
 
   .modal-body .date-grid .date-cell button.disabled-full {
@@ -2753,13 +2757,18 @@ button.btn-primary:hover {
 .modal-content {
   background: white;
   border-radius: 20px;
-  width: 100%;
-  max-width: 600px;
+  width: min(100%, 520px);
+  max-width: 520px;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   animation: modalSlideIn 0.3s ease;
+}
+
+#examDateModal .modal-content {
+  width: min(100%, 520px);
+  max-width: 520px;
 }
 
 @keyframes modalSlideIn {

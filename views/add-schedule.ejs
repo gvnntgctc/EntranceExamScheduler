@@ -630,12 +630,17 @@
 
         const holiday = holidays[formatHolidayKey(dateValue)];
         const count = scheduleCounts[dateValue] || 0;
-        const disabled = holiday || count >= 50 || isDatePast(dateValue);
+        const dayOfWeek = new Date(dateValue).getDay();
+        const weekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const disabled = holiday || weekend || count >= 50 || isDatePast(dateValue);
         if (disabled) {
           button.disabled = true;
           if (holiday) {
             button.classList.add('disabled-holiday');
             button.title = `${holiday} - unavailable`;
+          } else if (weekend) {
+            button.classList.add('disabled-weekend');
+            button.title = 'Weekend - unavailable';
           } else if (count >= 50) {
             button.classList.add('disabled-full');
             button.title = 'Fully booked';
@@ -654,6 +659,13 @@
 
         cell.appendChild(button);
         dateGrid.appendChild(cell);
+      }
+
+      const totalCells = firstDay + dayCount;
+      for (let i = totalCells; i < 42; i += 1) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'date-cell empty-cell';
+        dateGrid.appendChild(emptyCell);
       }
     }
 
