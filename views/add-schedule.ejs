@@ -77,13 +77,15 @@
               <% } %>
             </div>
 
-            <div class="form-group">
+            <div class="form-group exam-date-container">
               <label for="examDateDisplay"><i class="fas fa-calendar"></i> Exam Date</label>
-              <input type="hidden" id="examDate" name="examDate" />
-              <input type="text" id="examDateDisplay" placeholder="Select a date from March to August 2026" readonly required aria-label="Selected exam date" aria-describedby="holidayHelp" />
-              <div class="date-selection" id="examDateSelection">
-                <div class="month-tabs" id="monthTabs" role="tablist" aria-label="Exam month selection"></div>
-                <div class="date-grid" id="dateGrid" aria-live="polite"></div>
+              <div class="exam-date-card">
+                <input type="hidden" id="examDate" name="examDate" />
+                <input type="text" id="examDateDisplay" placeholder="Select a date from March to August 2026" readonly required aria-label="Selected exam date" aria-describedby="holidayHelp" />
+                <div class="date-selection" id="examDateSelection">
+                  <div class="month-tabs" id="monthTabs" role="tablist" aria-label="Exam month selection"></div>
+                  <div class="date-grid" id="dateGrid" aria-live="polite"></div>
+                </div>
               </div>
               <small class="sub-text">Choose a date by clicking a day button instead of typing.</small>
             </div>
