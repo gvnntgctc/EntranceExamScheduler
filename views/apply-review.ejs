@@ -14,18 +14,26 @@
       <h1>Confirm Your Information</h1>
       <p class="subtitle">Please verify your details before submitting your application.</p>
 
-      <div class="review-card" style="background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 10px; margin-bottom: 24px;">
-        <div class="review-row" style="display: flex; justify-content: space-between; margin-bottom: 14px;">
-          <span>Full Name</span>
-          <strong><%= fullName %></strong>
+      <div class="review-card">
+        <div class="review-card-header">
+          <i class="fas fa-user-check"></i>
+          <div>
+            <h2>Check your details</h2>
+            <p class="review-note">Make sure everything is correct before we send the verification code. You can go back and edit if needed.</p>
+          </div>
         </div>
-        <div class="review-row" style="display: flex; justify-content: space-between; margin-bottom: 14px;">
-          <span>Phone Number</span>
-          <strong><%= phoneNumber %></strong>
+
+        <div class="review-item">
+          <label>Full Name</label>
+          <span><%= fullName %></span>
         </div>
-        <div class="review-row" style="display: flex; justify-content: space-between;">
-          <span>Email</span>
-          <strong><%= email %></strong>
+        <div class="review-item">
+          <label>Phone Number</label>
+          <span><%= phoneNumber %></span>
+        </div>
+        <div class="review-item">
+          <label>Email</label>
+          <span><%= email %></span>
         </div>
       </div>
 
@@ -34,13 +42,15 @@
         <input type="hidden" name="phoneNumber" value="<%= phoneNumber %>" />
         <input type="hidden" name="email" value="<%= email %>" />
 
-        <button class="btn-submit" type="submit" style="width: 100%;">
+        <button class="btn-submit" type="submit">
           <i class="fas fa-check-circle"></i> Confirm and Send Code
         </button>
       </form>
 
-      <div style="margin-top: 18px; text-align: center;">
-        <a href="/auth/apply?fullName=<%= encodeURIComponent(fullName) %>&phoneNumber=<%= encodeURIComponent(phoneNumber) %>&email=<%= encodeURIComponent(email) %>">Edit information</a>
+      <div class="review-actions">
+        <a class="btn-ghost" href="/auth/apply?fullName=<%= encodeURIComponent(fullName) %>&phoneNumber=<%= encodeURIComponent(phoneNumber) %>&email=<%= encodeURIComponent(email) %>">
+          <i class="fas fa-edit"></i> Edit information
+        </a>
       </div>
     </div>
   </div>

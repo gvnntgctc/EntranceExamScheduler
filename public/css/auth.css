@@ -203,6 +203,94 @@ h1 {
   color: #11998e;
 }
 
+.review-card {
+  background: #f8fffb;
+  border: 1px solid rgba(17, 153, 142, 0.18);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 18px 40px rgba(17, 153, 142, 0.08);
+  margin-bottom: 24px;
+}
+
+.review-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.review-card-header i {
+  color: #11998e;
+  font-size: 28px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(17, 153, 142, 0.12);
+}
+
+.review-card-header h2 {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.review-note {
+  color: #5d6b65;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-top: 4px;
+}
+
+.review-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid #e6f4ef;
+}
+
+.review-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.review-item label {
+  color: #51605a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.review-item span {
+  color: #1d2e28;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+.review-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.review-actions .btn-ghost {
+  width: 100%;
+  justify-content: center;
+  border-color: #11998e;
+  color: #11998e;
+  background: #fff;
+}
+
+.review-actions .btn-ghost:hover {
+  background: rgba(17, 153, 142, 0.08);
+  color: #11998e;
+}
+
 /* ==================== */
 /* Toggle Text */
 /* ==================== */
