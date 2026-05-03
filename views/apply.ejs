@@ -11,7 +11,7 @@
 <body>
   <div class="container single-panel" id="container">
     <div class="form-container sign-in-container" style="max-width: 420px; margin: auto;">
-      <form action="/auth/apply" method="POST">
+      <form action="/auth/apply-review" method="POST">
         <h1>Applicant Registration</h1>
         <p class="subtitle">Register with your phone number and email for notifications</p>
 
@@ -29,21 +29,21 @@
 
         <div class="input-group">
           <i class="fas fa-user"></i>
-          <input type="text" name="fullName" placeholder="Full Name" required />
+          <input type="text" name="fullName" placeholder="Full Name" value="<%= fullName || '' %>" required />
         </div>
 
         <div class="input-group">
           <i class="fas fa-phone"></i>
-          <input type="tel" name="phoneNumber" placeholder="Phone Number" required />
+          <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber || '' %>" required />
         </div>
 
         <div class="input-group">
           <i class="fas fa-envelope"></i>
-          <input type="email" name="email" placeholder="Your email for notifications" required />
+          <input type="email" name="email" placeholder="Your email for notifications" value="<%= email || '' %>" required />
         </div>
 
         <button class="btn-submit" type="submit">
-          <i class="fas fa-paper-plane"></i> Send Verification Code
+          <i class="fas fa-paper-plane"></i> Continue to Review
         </button>
       </form>
       <div style="margin-top: 20px; text-align: center;">

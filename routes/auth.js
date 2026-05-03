@@ -180,43 +180,79 @@ router.post('/login', async (req, res) => {
 router.get('/apply', (req, res) => {
   const error = req.query.error || '';
   const success = req.query.success || '';
-  res.render('apply', { error, success });
+  const fullName = req.query.fullName || '';
+  const phoneNumber = req.query.phoneNumber || '';
+  const email = req.query.email || '';
+  res.render('apply', { error, success, fullName, phoneNumber, email });
 });
 
-// POST /apply - student enters full personal info + phone and email
-router.post('/apply', async (req, res) => {
+// POST /apply-review - validate submitted data and show confirmation
+router.post('/apply-review', async (req, res) => {
   try {
-    console.log('Request body:', req.body);
     const fullName = (req.body.fullName || '').trim();
     const phoneNumber = (req.body.phoneNumber || '').trim();
     const rawEmail = (req.body.email || '').trim().toLowerCase();
 
-    console.log('Received form data:', { fullName, phoneNumber, rawEmail });
+    const phoneRegex = /^(\+63|0)9\d{9}$/;
+    const emailRegex = /^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$/;
 
     if (!fullName || !phoneNumber || !rawEmail) {
-      return res.redirect('/auth/apply?error=All fields are required.');
+      const params = new URLSearchParams({ error: 'All fields are required.', fullName, phoneNumber, email: rawEmail });
+      return res.redirect(`/auth/apply?${params.toString()}`);
     }
 
-    // Validate phone number format (Philippines: 09xxxxxxxxx or +63xxxxxxxxx)
-    const phoneRegex = /^(\+63|0)9\d{9}$/;
     if (!phoneRegex.test(phoneNumber)) {
-      return res.redirect('/auth/apply?error=Invalid phone number format. Use 09123456789 or +639123456789.');
+      const params = new URLSearchParams({ error: 'Invalid phone number format. Use 09123456789 or +639123456789.', fullName, phoneNumber, email: rawEmail });
+      return res.redirect(`/auth/apply?${params.toString()}`);
     }
 
-    // Basic email validation
-    const emailRegex = /^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(rawEmail)) {
-      return res.redirect('/auth/apply?error=Invalid email format.');
+      const params = new URLSearchParams({ error: 'Invalid email format.', fullName, phoneNumber, email: rawEmail });
+      return res.redirect(`/auth/apply?${params.toString()}`);
+    }
+
+    return res.render('apply-review', {
+      fullName,
+      phoneNumber,
+      email: rawEmail
+    });
+  } catch (err) {
+    console.error('[APPLY-REVIEW] ERROR:', err);
+    return res.redirect('/auth/apply?error=Application failed. Please try again.');
+  }
+});
+
+// POST /apply-confirm - create/update user after review
+router.post('/apply-confirm', async (req, res) => {
+  try {
+    const fullName = (req.body.fullName || '').trim();
+    const phoneNumber = (req.body.phoneNumber || '').trim();
+    const rawEmail = (req.body.email || '').trim().toLowerCase();
+
+    const phoneRegex = /^(\+63|0)9\d{9}$/;
+    const emailRegex = /^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$/;
+
+    if (!fullName || !phoneNumber || !rawEmail) {
+      const params = new URLSearchParams({ error: 'All fields are required.', fullName, phoneNumber, email: rawEmail });
+      return res.redirect(`/auth/apply?${params.toString()}`);
+    }
+
+    if (!phoneRegex.test(phoneNumber)) {
+      const params = new URLSearchParams({ error: 'Invalid phone number format. Use 09123456789 or +639123456789.', fullName, phoneNumber, email: rawEmail });
+      return res.redirect(`/auth/apply?${params.toString()}`);
+    }
+
+    if (!emailRegex.test(rawEmail)) {
+      const params = new URLSearchParams({ error: 'Invalid email format.', fullName, phoneNumber, email: rawEmail });
+      return res.redirect(`/auth/apply?${params.toString()}`);
     }
 
     let user = await User.findOne({ phoneNumber });
-
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
     if (user) {
       if (user.isVerified) {
-        // Allow updating personal info and email even if already verified
         user.fullName = fullName;
         user.email = rawEmail;
         try {
@@ -280,7 +316,7 @@ router.post('/apply', async (req, res) => {
     req.session.registrationEmail = rawEmail;
     return res.redirect('/auth/verify-otp?success=Registration received and pending review. Verification code sent to your email.');
   } catch (err) {
-    console.error('[APPLY] ERROR:', err);
+    console.error('[APPLY-CONFIRM] ERROR:', err);
     return res.redirect('/auth/apply?error=Application failed. Please try again.');
   }
 });

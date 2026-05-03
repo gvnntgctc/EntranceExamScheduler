@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Registration - Exam Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <div class="container single-panel" id="container">
+    <div class="form-container sign-in-container" style="max-width: 420px; margin: auto;">
+      <h1>Confirm Your Information</h1>
+      <p class="subtitle">Please verify your details before submitting your application.</p>
+
+      <div class="review-card" style="background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 10px; margin-bottom: 24px;">
+        <div class="review-row" style="display: flex; justify-content: space-between; margin-bottom: 14px;">
+          <span>Full Name</span>
+          <strong><%= fullName %></strong>
+        </div>
+        <div class="review-row" style="display: flex; justify-content: space-between; margin-bottom: 14px;">
+          <span>Phone Number</span>
+          <strong><%= phoneNumber %></strong>
+        </div>
+        <div class="review-row" style="display: flex; justify-content: space-between;">
+          <span>Email</span>
+          <strong><%= email %></strong>
+        </div>
+      </div>
+
+      <form action="/auth/apply-confirm" method="POST">
+        <input type="hidden" name="fullName" value="<%= fullName %>" />
+        <input type="hidden" name="phoneNumber" value="<%= phoneNumber %>" />
+        <input type="hidden" name="email" value="<%= email %>" />
+
+        <button class="btn-submit" type="submit" style="width: 100%;">
+          <i class="fas fa-check-circle"></i> Confirm and Send Code
+        </button>
+      </form>
+
+      <div style="margin-top: 18px; text-align: center;">
+        <a href="/auth/apply?fullName=<%= encodeURIComponent(fullName) %>&phoneNumber=<%= encodeURIComponent(phoneNumber) %>&email=<%= encodeURIComponent(email) %>">Edit information</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
