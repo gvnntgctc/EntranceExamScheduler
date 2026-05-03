@@ -404,7 +404,7 @@
               <option value="passed" <%= typeof status !== 'undefined' && status === 'passed' ? 'selected' : '' %>>Passed</option>
               <option value="failed" <%= typeof status !== 'undefined' && status === 'failed' ? 'selected' : '' %>>Failed</option>
             </select>
-            <button id="clearSearch" class="btn btn-secondary"><i class="fas fa-times"></i> Clear</button>
+           
           </div>
 
           <!-- Bulk Actions Bar -->
@@ -571,7 +571,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <i class="fas fa-check-circle"></i>
-        Confirm Bulk Action
+        Confirm Action
       </div>
       <div class="modal-body">
         <p id="bulkConfirmMessage" style="margin: 0; color: #334155; line-height: 1.6;"></p>
