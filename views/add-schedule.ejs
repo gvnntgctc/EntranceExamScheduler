@@ -156,19 +156,33 @@
           <ul class="schedule-list" id="schedulesList">
             <% schedules.forEach(s => { %>
               <li>
-                <div class="schedule-info">
-                  <i class="fas fa-user"></i>
-                  <div class="schedule-details">
+                <div class="schedule-card-header">
+                  <div class="schedule-applicant">
+                    <i class="fas fa-user"></i>
                     <strong><%= s.studentId ? s.studentId.fullName : 'Unknown' %></strong>
-                    <span><i class="fas fa-calendar"></i> <%= new Date(s.examDate).toDateString() %> - <%= s.examTime %></span>
-                    <span><i class="fas fa-map-marker-alt"></i> <%= s.location %></span>
+                  </div>
+                  <div class="schedule-actions">
+                    <a href="/admin/edit-schedule/<%= s._id %>" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>
+                    <form method="POST" action="/admin/delete-schedule/<%= s._id %>" class="delete-form" data-schedule-title="<%= s.studentId ? s.studentId.fullName : 'Unknown' %>" data-schedule-date="<%= new Date(s.examDate).toDateString() %>" style="display:inline;">
+                      <button type="submit" class="delete-btn"><i class="fas fa-trash"></i> Delete</button>
+                    </form>
                   </div>
                 </div>
-                <div class="schedule-actions">
-                  <a href="/admin/edit-schedule/<%= s._id %>" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>
-                  <form method="POST" action="/admin/delete-schedule/<%= s._id %>" class="delete-form" data-schedule-title="<%= s.studentId ? s.studentId.fullName : 'Unknown' %>" data-schedule-date="<%= new Date(s.examDate).toDateString() %>" style="display:inline;">
-                    <button type="submit" class="delete-btn"><i class="fas fa-trash"></i> Delete</button>
-                  </form>
+                <div class="schedule-card-row">
+                  <div class="schedule-time">
+                    <span class="detail-label"><i class="fas fa-clock"></i> Time</span>
+                    <span class="detail-value"><%= s.examTime %></span>
+                  </div>
+                  <div class="schedule-date">
+                    <span class="detail-label"><i class="fas fa-calendar"></i> Date</span>
+                    <span class="detail-value"><%= new Date(s.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                  </div>
+                </div>
+                <div class="schedule-card-row">
+                  <div class="schedule-location">
+                    <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Location</span>
+                    <span class="detail-value"><%= s.location %></span>
+                  </div>
                 </div>
               </li>
             <% }) %>

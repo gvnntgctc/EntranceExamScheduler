@@ -871,57 +871,94 @@ h2 i {
 
 .schedule-list li {
   background: #f8f9fa;
-  padding: 20px;
-  margin-bottom: 15px;
+  padding: 16px;
+  margin-bottom: 12px;
   border-radius: 12px;
   border-left: 4px solid #11998e;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
+  flex-direction: column;
+  gap: 12px;
   transition: all 0.3s ease;
-  min-height: 106px;
 }
 
 .schedule-list li:hover {
-  transform: translateX(5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transform: translateX(3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.schedule-info {
+.schedule-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.schedule-applicant {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
   flex: 1;
   min-width: 0;
 }
 
-.schedule-info > i {
-  font-size: 24px;
+.schedule-applicant i {
+  font-size: 18px;
   color: #11998e;
+  flex-shrink: 0;
+}
+
+.schedule-applicant strong {
+  font-size: 15px;
+  color: #2c3e50;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-card-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.schedule-time,
+.schedule-date,
+.schedule-location {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-label i {
+  color: #11998e;
+  font-size: 13px;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.schedule-info {
+  display: none;
 }
 
 .schedule-details {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  min-width: 0;
-}
-
-.schedule-details strong {
-  font-size: 16px;
-  color: #2c3e50;
-}
-
-.schedule-details span {
-  font-size: 14px;
-  color: #666;
-}
-
-.schedule-details span i {
-  margin-right: 5px;
-  color: #11998e;
+  display: none;
 }
 
 .schedule-actions {
@@ -930,8 +967,6 @@ h2 i {
   align-items: center;
   justify-content: flex-end;
   flex-wrap: nowrap;
-  min-width: 0;
-  margin-left: auto;
 }
 
 .schedule-actions form {
@@ -1662,15 +1697,24 @@ h2 i {
   .schedule-list li {
     flex-direction: column;
     align-items: flex-start;
+    padding: 14px;
   }
-  
+
+  .schedule-card-header {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
   .schedule-actions {
     width: 100%;
     justify-content: flex-start;
-    margin-top: 10px;
+    margin-top: 8px;
   }
-  
-  .button-group {
+
+  .schedule-card-row {
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
     flex-direction: column;
   }
   
