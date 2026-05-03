@@ -230,6 +230,16 @@
     .cancel-delete:hover {
       background: #d0d0d0;
     }
+    
+    /* Loading Spinner Animation */
+    @keyframes lds-ring {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 
   <!-- Responsive Styles for Table -->
@@ -465,6 +475,17 @@
           </div>
           
           <div class="student-modal-body" style="padding: 30px; overflow-y: auto; flex: 1; background: #f8f9fa; max-height: calc(90vh - 150px);">
+            <!-- Loading Spinner -->
+            <div id="studentModalLoader" style="display: none; text-align: center; padding: 60px 30px;">
+              <div style="display: inline-block; position: relative; width: 60px; height: 60px;">
+                <div style="box-sizing: border-box; display: block; position: absolute; width: 48px; height: 48px; margin: 6px; border: 5px solid #11998e; border-radius: 50%; animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite; border-color: #11998e transparent transparent transparent;"></div>
+                <div style="box-sizing: border-box; display: block; position: absolute; width: 48px; height: 48px; margin: 6px; border: 5px solid #11998e; border-radius: 50%; animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite; border-color: transparent transparent #38ef7d transparent; animation-delay: -0.45s;"></div>
+                <div style="box-sizing: border-box; display: block; position: absolute; width: 48px; height: 48px; margin: 6px; border: 5px solid #11998e; border-radius: 50%; animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite; border-color: transparent transparent transparent #11998e; animation-delay: -0.9s;"></div>
+              </div>
+              <p style="color: #11998e; margin-top: 15px; font-weight: 500;">Loading student details...</p>
+            </div>
+            <!-- Content Container -->
+            <div id="studentModalContent" style="display: none;">
             <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e0e0e0;">
               <h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; text-decoration: none; border: none;">
                 <i class="fas fa-id-card"></i> Registration Information
@@ -509,6 +530,7 @@
 
             <div id="studentSchedulesContainer" style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0;">
               <!-- Schedules will be populated by JavaScript -->
+            </div>
             </div>
           </div>
         </div>
@@ -561,94 +583,129 @@
       form.submit();
     }
 
-    // View student details in modal
+    // Student data cache
+    const studentDataCache = {};
+
     async function viewStudent(studentId) {
       console.log('viewStudent called with ID:', studentId);
+      
+      // Show modal with loader immediately
+      document.getElementById('studentModal').style.display = 'flex';
+      document.getElementById('studentModalBg').style.display = 'block';
+      document.getElementById('studentModalLoader').style.display = 'block';
+      document.getElementById('studentModalContent').style.display = 'none';
+      
       try {
-        console.log('Fetching from:', `/admin/students/api/${studentId}`);
+        // Check cache first
+        if (studentDataCache[studentId]) {
+          console.log('Loading from cache:', studentId);
+          const cachedData = studentDataCache[studentId];
+          displayStudentData(cachedData.student, cachedData.studentSchedules);
+          return;
+        }
+        
+        // Fetch from API
+        console.log('Fetching from API:', `/admin/students/api/${studentId}`);
         const response = await fetch(`/admin/students/api/${studentId}`);
         console.log('Response status:', response.status);
+        
         if (!response.ok) {
           console.error('Response not ok:', response.status, response.statusText);
           alert('Failed to load student details: ' + response.status);
+          document.getElementById('studentModal').style.display = 'none';
+          document.getElementById('studentModalBg').style.display = 'none';
           return;
         }
         
         const data = await response.json();
         console.log('Received data:', data);
-        const student = data.student;
-        const schedules = data.studentSchedules || [];
         
-        if (!student) {
+        if (!data.student) {
           console.error('No student data in response');
           alert('No student data received');
+          document.getElementById('studentModal').style.display = 'none';
+          document.getElementById('studentModalBg').style.display = 'none';
           return;
         }
         
-        console.log('Updating modal content...');
-        // Update modal content
-        document.getElementById('studentModalName').textContent = student.fullName;
-        document.getElementById('studentModalFullName').textContent = student.fullName;
-        document.getElementById('studentModalEmail').textContent = student.email;
-        document.getElementById('studentModalEmail').href = `mailto:${student.email}`;
-        document.getElementById('studentModalPhone').textContent = student.phoneNumber || 'N/A';
-        document.getElementById('studentModalDate').textContent = student.createdAt ? new Date(student.createdAt).toDateString() : 'N/A';
-        document.getElementById('studentModalStatus').textContent = student.status || 'pending';
-        document.getElementById('studentModalNotes').textContent = student.resultMessage || 'No notes yet.';
+        // Cache the data
+        studentDataCache[studentId] = data;
+        console.log('Cached student data:', studentId);
         
-        // Update status form
-        document.getElementById('studentStatusForm').action = `/admin/students/status/${student._id}`;
-        const passedRadio = document.querySelector('input[name="status"][value="passed"]');
-        const failedRadio = document.querySelector('input[name="status"][value="failed"]');
-        if (passedRadio) passedRadio.checked = student.status === 'passed';
-        if (failedRadio) failedRadio.checked = student.status === 'failed';
-        
-        // Update schedules
-        const schedulesContainer = document.getElementById('studentSchedulesContainer');
-        if (schedules.length > 0) {
-          let schedulesHtml = `<h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-calendar-check"></i> Exam Schedules (${schedules.length})
-          </h3>
-          <ul style="list-style: none; padding: 0; margin: 0;">`;
-          
-          schedules.forEach((s, idx) => {
-            schedulesHtml += `<li ${idx > 0 ? 'style="padding-top: 15px; margin-top: 15px;"' : ''}>
-              <div style="background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%); padding: 16px; border-radius: 10px; border-left: 4px solid #11998e;">
-                <div style="display: flex; justify-content: space-between; align-items: start;">
-                  <div style="flex: 1;">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #11998e; font-weight: 600;">
-                      <i class="fas fa-calendar"></i> ${new Date(s.examDate).toDateString()}
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px; color: #555; margin-bottom: 6px; font-size: 14px;">
-                      <i class="fas fa-clock"></i> <strong>Time:</strong> ${s.examTime}
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px; color: #555; font-size: 14px;">
-                      <i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> ${s.location}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </li>`;
-          });
-          
-          schedulesHtml += '</ul>';
-          schedulesContainer.innerHTML = schedulesHtml;
-        } else {
-          schedulesContainer.innerHTML = `<div style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 2px dashed #ddd;">
-            <i class="fas fa-calendar-alt" style="font-size: 48px; color: #ccc; display: block; margin-bottom: 12px;"></i>
-            <p style="color: #999; margin: 0; font-size: 16px; font-style: italic;">No exam schedules assigned yet</p>
-          </div>`;
-        }
-        
-        console.log('Showing modal...');
-        // Show modal
-        document.getElementById('studentModal').style.display = 'flex';
-        document.getElementById('studentModalBg').style.display = 'block';
+        // Display the data
+        displayStudentData(data.student, data.studentSchedules || []);
         
       } catch (error) {
         console.error('Error loading student details:', error);
         alert('Failed to load student details: ' + error.message);
+        document.getElementById('studentModal').style.display = 'none';
+        document.getElementById('studentModalBg').style.display = 'none';
       }
+    }
+
+    function displayStudentData(student, schedules) {
+      console.log('Displaying student data...');
+      
+      // Update modal header
+      document.getElementById('studentModalName').textContent = student.fullName;
+      
+      // Update modal content
+      document.getElementById('studentModalFullName').textContent = student.fullName;
+      document.getElementById('studentModalEmail').textContent = student.email;
+      document.getElementById('studentModalEmail').href = `mailto:${student.email}`;
+      document.getElementById('studentModalPhone').textContent = student.phoneNumber || 'N/A';
+      document.getElementById('studentModalDate').textContent = student.createdAt ? new Date(student.createdAt).toDateString() : 'N/A';
+      document.getElementById('studentModalStatus').textContent = student.status || 'pending';
+      document.getElementById('studentModalNotes').textContent = student.resultMessage || 'No notes yet.';
+      
+      // Update status form
+      document.getElementById('studentStatusForm').action = `/admin/students/status/${student._id}`;
+      const passedRadio = document.querySelector('input[name="status"][value="passed"]');
+      const failedRadio = document.querySelector('input[name="status"][value="failed"]');
+      if (passedRadio) passedRadio.checked = student.status === 'passed';
+      if (failedRadio) failedRadio.checked = student.status === 'failed';
+      
+      // Update schedules
+      const schedulesContainer = document.getElementById('studentSchedulesContainer');
+      if (schedules.length > 0) {
+        let schedulesHtml = `<h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-calendar-check"></i> Exam Schedules (${schedules.length})
+        </h3>
+        <ul style="list-style: none; padding: 0; margin: 0;">`;
+        
+        schedules.forEach((s, idx) => {
+          schedulesHtml += `<li ${idx > 0 ? 'style="padding-top: 15px; margin-top: 15px;"' : ''}>
+            <div style="background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%); padding: 16px; border-radius: 10px; border-left: 4px solid #11998e;">
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #11998e; font-weight: 600;">
+                    <i class="fas fa-calendar"></i> ${new Date(s.examDate).toDateString()}
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; color: #555; margin-bottom: 6px; font-size: 14px;">
+                    <i class="fas fa-clock"></i> <strong>Time:</strong> ${s.examTime}
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; color: #555; font-size: 14px;">
+                    <i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> ${s.location}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>`;
+        });
+        
+        schedulesHtml += '</ul>';
+        schedulesContainer.innerHTML = schedulesHtml;
+      } else {
+        schedulesContainer.innerHTML = `<div style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 2px dashed #ddd;">
+          <i class="fas fa-calendar-alt" style="font-size: 48px; color: #ccc; display: block; margin-bottom: 12px;"></i>
+          <p style="color: #999; margin: 0; font-size: 16px; font-style: italic;">No exam schedules assigned yet</p>
+        </div>`;
+      }
+      
+      // Hide loader and show content
+      console.log('Showing content, hiding loader');
+      document.getElementById('studentModalLoader').style.display = 'none';
+      document.getElementById('studentModalContent').style.display = 'block';
     }
 
     // Handle status form submission
