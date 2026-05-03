@@ -446,7 +446,7 @@
             <tbody>
               <% students.forEach((student, index) => { %>
                 <tr>
-                  <td><input type="checkbox" class="student-checkbox" value="<%= student._id %>" style="width: 18px; height: 18px;"></td>
+                  <td><input type="checkbox" class="student-checkbox" value="<%= student._id.toString() %>" style="width: 18px; height: 18px;"></td>
                   <td data-label="#"><strong><%= index + 1 %></strong></td>
                   <td data-label="Full Name" class="student-name"><%= student.fullName %></td>
                   <td data-label="Email" class="student-email"><%= student.email %></td>
@@ -872,18 +872,21 @@
       // Bulk action handlers
       bulkPassBtn.addEventListener('click', function() {
         const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+        console.log('Selected IDs:', selectedIds, 'Length:', selectedIds.length);
         if (selectedIds.length === 0) return;
         openBulkConfirm('passed', selectedIds);
       });
 
       bulkFailBtn.addEventListener('click', function() {
         const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+        console.log('Selected IDs:', selectedIds, 'Length:', selectedIds.length);
         if (selectedIds.length === 0) return;
         openBulkConfirm('failed', selectedIds);
       });
 
       bulkDeleteBtn.addEventListener('click', function() {
         const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+        console.log('Selected IDs:', selectedIds, 'Length:', selectedIds.length);
         if (selectedIds.length === 0) return;
         openBulkConfirm('deleted', selectedIds);
       });
