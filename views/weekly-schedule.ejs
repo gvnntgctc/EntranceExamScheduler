@@ -505,27 +505,27 @@
             <p class="summary-note"><%= busiestMonth.count %> applicant<%= busiestMonth.count !== 1 ? 's' : '' %> scheduled for this month.</p>
           </div>
         </div>
-      </div>
 
-      <div class="upcoming-card">
-        <h3>Upcoming Entrance Exams</h3>
-        <p>Next scheduled exam dates are listed below in chronological order so you can see the nearest sessions at a glance.</p>
-        <% if (upcomingSchedules && upcomingSchedules.length > 0) { %>
-          <ul class="exam-list">
-            <% upcomingSchedules.forEach((schedule, index) => { %>
-              <li class="exam-item">
-                <span class="exam-rank"><%= index + 1 %></span>
-                <div class="exam-details">
-                  <strong><%= schedule.studentId?.fullName || 'Applicant' %></strong>
-                  <span><%= new Date(schedule.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %> at <%= schedule.examTime %></span>
-                </div>
-                <span class="exam-location"><%= schedule.location %></span>
-              </li>
-            <% }) %>
-          </ul>
-        <% } else { %>
-          <p class="empty-note">No upcoming entrance exams are scheduled yet.</p>
-        <% } %>
+        <div class="upcoming-card">
+          <h3>Upcoming Entrance Exams</h3>
+          <p>Next scheduled exam dates are listed below in chronological order so you can see the nearest sessions at a glance.</p>
+          <% if (upcomingSchedules && upcomingSchedules.length > 0) { %>
+            <ul class="exam-list">
+              <% upcomingSchedules.forEach((schedule, index) => { %>
+                <li class="exam-item">
+                  <span class="exam-rank"><%= index + 1 %></span>
+                  <div class="exam-details">
+                    <strong><%= schedule.studentId?.fullName || 'Applicant' %></strong>
+                    <span><%= new Date(schedule.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %> at <%= schedule.examTime %></span>
+                  </div>
+                  <span class="exam-location"><%= schedule.location %></span>
+                </li>
+              <% }) %>
+            </ul>
+          <% } else { %>
+            <p class="empty-note">No upcoming entrance exams are scheduled yet.</p>
+          <% } %>
+        </div>
       </div>
 
       <div class="monthly-grid">
