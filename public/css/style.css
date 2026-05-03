@@ -1027,30 +1027,31 @@ h2 i {
 
   /* Override schedule list styles to keep the list compact and neat */
   .section-card .schedule-list li {
-    padding: 12px 14px;
+    padding: 0;
     margin-bottom: 10px;
-    border-radius: 12px;
+    border-radius: 10px;
     background: #ffffff;
-    border-left: 4px solid #11998e;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-left: 5px solid #11998e;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0;
+    overflow: hidden;
   }
 
   .section-card .schedule-list li:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 
   .section-card .schedule-list .schedule-card-header {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 12px;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 0;
-    padding: 0;
-    background: transparent !important;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #e8e8e8;
     color: inherit !important;
     font-size: inherit !important;
     font-weight: inherit !important;
@@ -1061,6 +1062,7 @@ h2 i {
     align-items: center;
     gap: 8px;
     min-width: 0;
+    flex: 1;
   }
 
   .section-card .schedule-list .schedule-applicant i {
@@ -1073,11 +1075,10 @@ h2 i {
     font-size: 14px;
     font-weight: 600;
     color: #1f2937;
-    line-height: 1.2;
+    line-height: 1.3;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    min-width: 0;
   }
 
   .section-card .schedule-list .schedule-actions {
@@ -1085,7 +1086,7 @@ h2 i {
     gap: 6px;
     align-items: center;
     justify-content: flex-end;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .section-card .schedule-list .schedule-actions form {
@@ -1095,22 +1096,24 @@ h2 i {
 
   .section-card .schedule-list .schedule-actions a,
   .section-card .schedule-list .schedule-actions button {
-    min-width: 0;
-    white-space: nowrap;
-    padding: 6px 10px;
+    padding: 5px 8px;
+    font-size: 11px;
     line-height: 1;
-    font-size: 12px;
-  }
-
-  .section-card .schedule-list .schedule-actions button {
-    height: auto;
+    white-space: nowrap;
+    border-radius: 4px;
   }
 
   .section-card .schedule-list .schedule-card-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px 16px;
-    align-items: flex-start;
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+    gap: 0;
+    padding: 12px 14px;
+    align-items: center;
+    border-top: 1px solid #e8e8e8;
+  }
+
+  .section-card .schedule-list .schedule-card-row:first-of-type {
+    border-top: none;
   }
 
   .section-card .schedule-list .schedule-time,
@@ -1118,36 +1121,36 @@ h2 i {
   .section-card .schedule-list .schedule-location {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     min-width: 0;
-  }
-
-  .section-card .schedule-list .detail-label {
-    font-size: 10px;
-    color: #999;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .section-card .schedule-list .detail-value {
-    font-size: 13px;
-    color: #333;
-    font-weight: 500;
-    overflow-wrap: break-word;
+    padding-right: 12px;
   }
 
   .section-card .schedule-list .schedule-location {
-    min-width: auto;
+    padding-right: 0;
+  }
+
+  .section-card .schedule-list .detail-label {
+    font-size: 9px;
+    color: #999;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .section-card .schedule-list .detail-value {
+    font-size: 12px;
+    color: #333;
+    font-weight: 500;
   }
 
   .section-card .schedule-list .schedule-card-row + .schedule-card-row {
-    padding-top: 6px;
-    border-top: 1px solid rgba(17, 25, 39, 0.06);
-    margin-top: 6px;
+    padding-top: 12px;
+    border-top: 1px solid #e8e8e8;
+    margin-top: 0;
   }
 
   .section-card .schedule-list .schedule-info,
@@ -1158,17 +1161,24 @@ h2 i {
   @media (max-width: 900px) {
     .section-card .schedule-list .schedule-card-row {
       grid-template-columns: 1fr;
-      gap: 16px;
+      gap: 8px;
+      border-top: none;
+      padding: 12px 14px;
+    }
+
+    .section-card .schedule-list .schedule-time,
+    .section-card .schedule-list .schedule-date,
+    .section-card .schedule-list .schedule-location {
+      padding-right: 0;
     }
 
     .section-card .schedule-list .schedule-actions {
       justify-content: flex-start;
-      width: 100%;
     }
 
     .section-card .schedule-list .schedule-card-header {
-      grid-template-columns: 1fr;
-      align-items: stretch;
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 
