@@ -317,15 +317,15 @@ body.review-screen .review-form {
 .review-summary {
   display: grid;
   gap: 14px;
-  background: #f7fffb;
-  border: 1px solid rgba(17, 153, 142, 0.14);
-  border-radius: 22px;
+  background: #f9fdfb;
+  border: 1px solid rgba(17, 153, 142, 0.16);
+  border-radius: 24px;
   padding: 24px;
 }
 
 .review-item {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: max-content 1fr;
   gap: 16px;
   align-items: center;
   padding: 18px 0;
@@ -334,8 +334,8 @@ body.review-screen .review-form {
 
 .review-item:nth-child(odd) {
   background: rgba(17, 153, 142, 0.04);
-  padding: 18px 20px;
   border-radius: 16px;
+  padding: 18px 20px;
 }
 
 .review-item:last-child {
@@ -349,6 +349,7 @@ body.review-screen .review-form {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .review-value {
@@ -357,7 +358,7 @@ body.review-screen .review-form {
   font-weight: 700;
   text-align: right;
   word-break: break-word;
-  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 .review-actions {
