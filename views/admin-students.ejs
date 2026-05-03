@@ -435,7 +435,7 @@
           <table class="students-table" id="studentsGrid">
             <thead>
               <tr>
-                <th style="width: 50px;"><input type="checkbox" id="selectAll" style="width: 18px; height: 18px;"></th>
+                <th style="width: 50px;"><input type="checkbox" id="headerCheckbox" style="width: 18px; height: 18px;"></th>
                 <th>#</th>
                 <th>Full Name</th>
                 <th>Email</th>
@@ -447,7 +447,7 @@
             <tbody>
               <% students.forEach((student, index) => { %>
                 <tr>
-                  <td data-label="Select"><input type="checkbox" class="student-checkbox" value="<%= student._id %>" style="width: 18px; height: 18px;"></td>
+                  <td><input type="checkbox" class="student-checkbox" value="<%= student._id %>" style="width: 18px; height: 18px;"></td>
                   <td data-label="#"><strong><%= index + 1 %></strong></td>
                   <td data-label="Full Name" class="student-name"><%= student.fullName %></td>
                   <td data-label="Email" class="student-email"><%= student.email %></td>
@@ -575,6 +575,27 @@
           <i class="fas fa-trash"></i> Yes, Delete
         </button>
         <button class="cancel-delete" onclick="closeDeleteModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Status Confirmation Modal -->
+  <div id="bulkConfirmModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="fas fa-check-circle"></i>
+        Confirm Bulk Action
+      </div>
+      <div class="modal-body">
+        <p id="bulkConfirmMessage" style="margin: 0; color: #334155; line-height: 1.6;"></p>
+      </div>
+      <div class="modal-actions">
+        <button id="bulkConfirmBtn" class="confirm-delete" style="background: #28a745; border-color: #28a745;">
+          <i class="fas fa-check"></i> Confirm
+        </button>
+        <button id="bulkCancelBtn" class="cancel-delete" style="background: #f3f4f6; color: #111;">
           <i class="fas fa-times"></i> Cancel
         </button>
       </div>
@@ -799,7 +820,10 @@
             student.row.style.display = '';
             visibleCount++;
             // Update index for visible rows
-            student.row.querySelector('td:first-child strong').textContent = visibleCount;
+            const indexCell = student.row.querySelector('td:nth-child(2) strong');
+            if (indexCell) {
+              indexCell.textContent = visibleCount;
+            }
           } else {
             student.row.style.display = 'none';
           }
@@ -830,10 +854,18 @@
     
     (function() {
       const selectAllCheckbox = document.getElementById('selectAll');
+      const headerCheckbox = document.getElementById('headerCheckbox');
       const studentCheckboxes = document.querySelectorAll('.student-checkbox');
       const bulkPassBtn = document.getElementById('bulkPassBtn');
       const bulkFailBtn = document.getElementById('bulkFailBtn');
       const bulkActionsBar = document.querySelector('.bulk-actions-bar');
+      const bulkConfirmModal = document.getElementById('bulkConfirmModal');
+      const bulkConfirmMessage = document.getElementById('bulkConfirmMessage');
+      const bulkConfirmBtn = document.getElementById('bulkConfirmBtn');
+      const bulkCancelBtn = document.getElementById('bulkCancelBtn');
+
+      let pendingBulkIds = [];
+      let pendingBulkStatus = null;
 
       if (!bulkActionsBar) return; // No bulk actions bar if no students
 
@@ -858,24 +890,63 @@
         const allVisibleChecked = visibleCheckboxes.length > 0 && checkedVisibleBoxes.length === visibleCheckboxes.length;
         const someVisibleChecked = checkedVisibleBoxes.length > 0;
         
-        selectAllCheckbox.checked = allVisibleChecked;
-        selectAllCheckbox.indeterminate = someVisibleChecked && !allVisibleChecked;
+        if (selectAllCheckbox) {
+          selectAllCheckbox.checked = allVisibleChecked;
+          selectAllCheckbox.indeterminate = someVisibleChecked && !allVisibleChecked;
+        }
+        if (headerCheckbox) {
+          headerCheckbox.checked = allVisibleChecked;
+          headerCheckbox.indeterminate = someVisibleChecked && !allVisibleChecked;
+        }
       };
 
+      function openBulkConfirm(action, selectedIds) {
+        pendingBulkIds = selectedIds;
+        pendingBulkStatus = action;
+        bulkConfirmMessage.textContent = `You are about to mark ${selectedIds.length} applicant(s) as ${action.toUpperCase()}. This will send notification emails to each selected applicant.`;
+        bulkConfirmBtn.textContent = action === 'passed' ? 'Confirm Pass' : 'Confirm Fail';
+        bulkConfirmBtn.style.background = action === 'passed' ? '#28a745' : '#dc3545';
+        bulkConfirmModal.classList.add('show');
+      }
+
+      function closeBulkConfirm() {
+        pendingBulkIds = [];
+        pendingBulkStatus = null;
+        bulkConfirmModal.classList.remove('show');
+      }
+
       // Select All functionality
-      selectAllCheckbox.addEventListener('change', function() {
-        const isChecked = this.checked;
-        const visibleCheckboxes = Array.from(studentCheckboxes).filter(cb => {
-          const row = cb.closest('tr');
-          return row.style.display !== 'none';
+      if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+          const isChecked = this.checked;
+          const visibleCheckboxes = Array.from(studentCheckboxes).filter(cb => {
+            const row = cb.closest('tr');
+            return row.style.display !== 'none';
+          });
+          
+          visibleCheckboxes.forEach(cb => {
+            cb.checked = isChecked;
+          });
+          
+          updateBulkButtons();
         });
-        
-        visibleCheckboxes.forEach(cb => {
-          cb.checked = isChecked;
+      }
+
+      if (headerCheckbox) {
+        headerCheckbox.addEventListener('change', function() {
+          const isChecked = this.checked;
+          const visibleCheckboxes = Array.from(studentCheckboxes).filter(cb => {
+            const row = cb.closest('tr');
+            return row.style.display !== 'none';
+          });
+          
+          visibleCheckboxes.forEach(cb => {
+            cb.checked = isChecked;
+          });
+          
+          updateBulkButtons();
         });
-        
-        updateBulkButtons();
-      });
+      }
 
       // Individual checkbox changes
       studentCheckboxes.forEach(cb => {
@@ -889,19 +960,23 @@
       bulkPassBtn.addEventListener('click', function() {
         const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
         if (selectedIds.length === 0) return;
-        
-        if (confirm(`Are you sure you want to mark ${selectedIds.length} student(s) as PASSED? This will send notification emails.`)) {
-          submitBulkStatus(selectedIds, 'passed');
-        }
+        openBulkConfirm('passed', selectedIds);
       });
 
       bulkFailBtn.addEventListener('click', function() {
         const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
         if (selectedIds.length === 0) return;
-        
-        if (confirm(`Are you sure you want to mark ${selectedIds.length} student(s) as FAILED? This will send notification emails.`)) {
-          submitBulkStatus(selectedIds, 'failed');
-        }
+        openBulkConfirm('failed', selectedIds);
+      });
+
+      bulkCancelBtn.addEventListener('click', function() {
+        closeBulkConfirm();
+      });
+
+      bulkConfirmBtn.addEventListener('click', function() {
+        if (!pendingBulkIds.length || !pendingBulkStatus) return;
+        closeBulkConfirm();
+        submitBulkStatus(pendingBulkIds, pendingBulkStatus);
       });
 
       function submitBulkStatus(studentIds, status) {
