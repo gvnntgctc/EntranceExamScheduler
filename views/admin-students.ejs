@@ -430,9 +430,9 @@
                     <% } %>
                   </td>
                   <td data-label="Actions" class="actions-column">
-                    <button type="button" class="action-btn edit-btn" onclick="viewStudent(this.getAttribute('data-student-id'))" data-student-id="<%= student._id.toString() %>">
+                    <a href="/admin/students?studentId=<%= student._id.toString() %><%= search ? '&search=' + encodeURIComponent(search) : '' %><%= status && status !== 'all' ? '&status=' + status : '' %>" class="action-btn edit-btn" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
                       <i class="fas fa-eye"></i> View
-                    </button>
+                    </a>
                     <button type="button" class="action-btn delete-btn" onclick="openDeleteModal('<%= student._id %>', '<%= student.fullName %>')">
                       <i class="fas fa-trash"></i> Delete
                     </button>
@@ -591,15 +591,6 @@
       form.action = `/admin/students/delete/${deleteStudentId}`;
       document.body.appendChild(form);
       form.submit();
-    }
-
-    function viewStudent(studentId) {
-      console.log('Viewing student:', studentId);
-      console.log('Type of studentId:', typeof studentId);
-      console.log('Encoded:', encodeURIComponent(studentId));
-      const url = '/admin/students?studentId=' + encodeURIComponent(studentId);
-      console.log('Navigating to:', url);
-      window.location.href = url;
     }
 
     function closeStudentModal() {

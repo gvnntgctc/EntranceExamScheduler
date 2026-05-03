@@ -318,7 +318,7 @@ router.get('/students', isAdmin, async (req, res) => {
     console.log('Query params:', req.query);
     
     // Build query for filtering
-    let query = {}; // Find all users to debug
+    let query = { role: 'student', isVerified: true };
     
     console.log('Final query:', JSON.stringify(query, null, 2));
     
@@ -533,8 +533,8 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
       emailBody = `Dear Applicant,\n\nWe are pleased to inform you that you have successfully passed the entrance examination for the Bachelor of Science in Information Technology (BSIT) program.\n\nYour performance on the assessment demonstrated the technical aptitude and academic potential we look for in our incoming IT cohort. We are excited to welcome you to our academic community as you begin your journey toward a career in technology.`;
     } else if (status === 'failed') {
       statusMessage = 'Your application is not approved. Please try again next session.';
-      emailSubject = 'Admission Notice: Computer Systems Servicing (CSS) Program';
-      emailBody = `Dear Applicant,\n\nWe are pleased to inform you that you have successfully passed the entrance examination for the Computer Systems Servicing (CSS) program.\n\nBased on your examination results, you have demonstrated the foundational skills and technical interest required for this qualification. This program will provide you with hands-on training in computer assembly, software configuration, networking, and systems maintenance, leading toward a National Certificate (NC II).`;
+      emailSubject = 'Admission Notice: Application Not Approved';
+      emailBody = `Dear Applicant,\n\nWe regret to inform you that you did not pass the entrance examination at this time. Please review your application and consider applying again in the next session.\n\nThank you for your interest and effort.`;
     } else {
       statusMessage = 'Application is pending review.';
       emailSubject = 'Exam result: pending evaluation';
