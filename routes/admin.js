@@ -785,9 +785,14 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
 // Bulk status update route
 router.post('/students/bulk-status', isAdmin, async (req, res) => {
   try {
-    const { studentIds, status } = req.body;
+    let { studentIds, status } = req.body;
 
-    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+    // Ensure studentIds is always an array
+    if (!Array.isArray(studentIds)) {
+      studentIds = studentIds ? [studentIds] : [];
+    }
+
+    if (studentIds.length === 0) {
       return res.redirect('/admin/students?error=No students selected');
     }
 
@@ -861,9 +866,14 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
 // Bulk delete students and their schedules
 router.post('/students/bulk-delete', isAdmin, async (req, res) => {
   try {
-    const { studentIds } = req.body;
+    let { studentIds } = req.body;
 
-    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+    // Ensure studentIds is always an array
+    if (!Array.isArray(studentIds)) {
+      studentIds = studentIds ? [studentIds] : [];
+    }
+
+    if (studentIds.length === 0) {
       return res.redirect('/admin/students?error=No students selected');
     }
 

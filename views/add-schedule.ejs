@@ -141,28 +141,33 @@
           </div>
 
           <ul class="schedule-list" id="schedulesList">
-            <% schedules.forEach(s => { %>
-              <li>
-                <div class="schedule-card-header">
-                  <div class="schedule-applicant">
-                    <i class="fas fa-user"></i>
-                    <strong><%= s.studentId ? s.studentId.fullName : 'Unknown' %></strong>
+            <% schedules.forEach((s, index) => { %>
+              <li class="schedule-item-card">
+                <div class="schedule-item-top">
+                  <div>
+                    <div class="schedule-item-applicant">
+                      <div class="schedule-item-avatar"><%= s.studentId && s.studentId.fullName ? s.studentId.fullName.charAt(0).toUpperCase() : '?' %></div>
+                      <div>
+                        <strong><%= s.studentId ? s.studentId.fullName : 'Unknown Applicant' %></strong>
+                        <span class="schedule-item-subtitle"><%= s.studentId ? s.studentId.email : 'No email available' %></span>
+                      </div>
+                    </div>
+                    <div class="schedule-item-meta">
+                      <div class="schedule-detail-box">
+                        <span class="detail-label"><i class="fas fa-calendar"></i> Date</span>
+                        <span class="detail-value"><%= new Date(s.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                      </div>
+                      <div class="schedule-detail-box">
+                        <span class="detail-label"><i class="fas fa-clock"></i> Time</span>
+                        <span class="detail-value"><%= s.examTime %></span>
+                      </div>
+                      <div class="schedule-detail-box">
+                        <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Location</span>
+                        <span class="detail-value"><%= s.location %></span>
+                      </div>
+                    </div>
                   </div>
-                  <div class="schedule-summary">
-                    <div class="schedule-time">
-                      <span class="detail-label"><i class="fas fa-clock"></i> Time</span>
-                      <span class="detail-value"><%= s.examTime %></span>
-                    </div>
-                    <div class="schedule-date">
-                      <span class="detail-label"><i class="fas fa-calendar"></i> Date</span>
-                      <span class="detail-value"><%= new Date(s.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
-                    </div>
-                    <div class="schedule-location">
-                      <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Location</span>
-                      <span class="detail-value"><%= s.location %></span>
-                    </div>
-                  </div>
-                  <div class="schedule-actions">
+                  <div class="schedule-item-actions">
                     <a href="/admin/edit-schedule/<%= s._id %>" class="edit-btn circle-btn" title="Edit schedule"><i class="fas fa-edit"></i></a>
                     <button type="button" class="delete-btn circle-btn delete-trigger" title="Delete schedule" data-delete-url="/admin/delete-schedule/<%= s._id %>" data-schedule-title="<%= s.studentId ? s.studentId.fullName : 'Unknown' %>" data-schedule-date="<%= new Date(s.examDate).toDateString() %>"><i class="fas fa-trash"></i></button>
                   </div>
