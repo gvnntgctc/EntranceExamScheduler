@@ -572,27 +572,6 @@ router.get('/schedules/day/:day', isAdmin, async (req, res) => {
   }
 });
 
-router.get('/weekly-schedule', isAdmin, async (req, res) => {
-  const schedules = await Schedule.find().populate('studentId');
-  const now = new Date();
-  const monthName = now.toLocaleString('default', { month: 'long' });
-  const currentYear = now.getFullYear();
-  const dayCounts = { Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0 };
-  schedules.forEach(schedule => {
-    const d = new Date(schedule.examDate);
-    if (d.getMonth() === now.getMonth() && d.getFullYear() === currentYear) {
-      const dayName = d.toLocaleString('default', { weekday: 'long' });
-      if (dayCounts.hasOwnProperty(dayName)) dayCounts[dayName]++;
-    }
-  });
-  res.render('weekly-schedule', { 
-    dayCounts, monthName, currentYear, 
-    page: 'weekly', 
-    error: req.query.error || '', 
-    success: req.query.success || '' 
-  });
-});
-
 // Get Edit Schedule Page
 router.get('/edit-schedule/:id', isAdmin, async (req, res) => {
   try {

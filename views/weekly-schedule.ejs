@@ -367,7 +367,11 @@
         <p class="page-subtitle">A visual overview of the active exam season for March through August.</p>
       </div>
 
-      <% const displayMonthNumbers = [3, 4, 5, 6, 7, 8];
+      <% const months = [
+           'January', 'February', 'March', 'April', 'May', 'June',
+           'July', 'August', 'September', 'October', 'November', 'December'
+         ];
+         const displayMonthNumbers = [3, 4, 5, 6, 7, 8];
          const totalApplicants = displayMonthNumbers.reduce((sum, num) => sum + (monthCounts[num] || 0), 0);
          const busiestMonth = displayMonthNumbers.reduce((best, num) => {
            const current = monthCounts[num] || 0;
@@ -403,12 +407,6 @@
 
       <div class="monthly-grid">
         <% 
-          const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-          ];
-          const currentYear = new Date().getFullYear();
-          
           months.forEach((month, index) => {
             const monthNum = index + 1;
             // Only show March (3) to August (8)
