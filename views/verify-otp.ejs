@@ -229,9 +229,14 @@
     }
 
     .timer {
-      font-size: 13px;
-      color: #999;
-      margin-top: 10px;
+      font-size: 18px;
+      color: #11998e;
+      margin-top: 15px;
+      font-weight: 600;
+      background: rgba(17, 153, 142, 0.1);
+      padding: 8px 16px;
+      border-radius: 8px;
+      display: inline-block;
     }
 
     .back-link {
@@ -371,12 +376,52 @@
       } else {
         countdownElement.textContent = '00:00';
         countdownElement.style.color = '#c62828';
-        // Optionally disable the verify button or show expired message
+
+        // Disable OTP input
+        const otpInput = document.querySelector('.single-otp-input');
+        if (otpInput) {
+          otpInput.disabled = true;
+          otpInput.style.opacity = '0.5';
+          otpInput.style.cursor = 'not-allowed';
+          otpInput.placeholder = 'Code Expired';
+        }
+
+        // Disable and update verify button
         const verifyBtn = document.querySelector('.btn-verify');
         if (verifyBtn) {
           verifyBtn.disabled = true;
-          verifyBtn.textContent = 'Code Expired';
+          verifyBtn.innerHTML = '<i class="fas fa-times"></i> Code Expired';
           verifyBtn.style.opacity = '0.6';
+          verifyBtn.style.cursor = 'not-allowed';
+        }
+
+        // Show expired message
+        const messageContainer = document.createElement('div');
+        messageContainer.className = 'message error';
+        messageContainer.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Your verification code has expired. Please request a new one.';
+        messageContainer.style.marginBottom = '20px';
+
+        // Insert message before the form
+        const form = document.querySelector('.otp-form');
+        if (form && form.parentNode) {
+          form.parentNode.insertBefore(messageContainer, form);
+        }
+
+        // Highlight resend section
+        const resendSection = document.querySelector('.resend-section');
+        if (resendSection) {
+          resendSection.style.background = 'rgba(255, 235, 238, 0.5)';
+          resendSection.style.border = '1px solid #ef5350';
+          resendSection.style.borderRadius = '8px';
+          resendSection.style.padding = '15px';
+        }
+
+        // Make resend button more prominent
+        const resendBtn = document.querySelector('.btn-resend');
+        if (resendBtn) {
+          resendBtn.style.fontSize = '16px';
+          resendBtn.style.fontWeight = '700';
+          resendBtn.style.color = '#c62828';
         }
       }
     }
