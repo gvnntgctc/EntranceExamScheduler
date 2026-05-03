@@ -141,6 +141,10 @@ async function sendSMS(to, message) {
   }
 }
 
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function isGmail(address) {
   return /^([\w.+-]+)@gmail\.com$/i.test(address);
 }
@@ -211,6 +215,27 @@ router.post('/apply-review', async (req, res) => {
       return res.redirect(`/auth/apply?${params.toString()}`);
     }
 
+    const existingUser = await User.findOne({
+      $or: [
+        { phoneNumber },
+        { email: rawEmail },
+        { fullName: new RegExp(`^${escapeRegExp(fullName)}$`, 'i') }
+      ]
+    });
+
+    if (existingUser) {
+      let errorMessage = 'This information is already registered.';
+      if (existingUser.phoneNumber === phoneNumber) {
+        errorMessage = 'Phone number is already registered.';
+      } else if (existingUser.email === rawEmail) {
+        errorMessage = 'Email is already registered.';
+      } else if (existingUser.fullName && existingUser.fullName.toLowerCase() === fullName.toLowerCase()) {
+        errorMessage = 'Full name is already registered.';
+      }
+      const params = new URLSearchParams({ error: errorMessage, fullName, phoneNumber, email: rawEmail });
+      return res.redirect(`/auth/apply?${params.toString()}`);
+    }
+
     return res.render('apply-review', {
       fullName,
       phoneNumber,
@@ -247,55 +272,48 @@ router.post('/apply-confirm', async (req, res) => {
       return res.redirect(`/auth/apply?${params.toString()}`);
     }
 
-    let user = await User.findOne({ phoneNumber });
+    const existingUser = await User.findOne({
+      $or: [
+        { phoneNumber },
+        { email: rawEmail },
+        { fullName: new RegExp(`^${escapeRegExp(fullName)}$`, 'i') }
+      ]
+    });
+
+    if (existingUser) {
+      let errorMessage = 'This information is already registered.';
+      if (existingUser.phoneNumber === phoneNumber) {
+        errorMessage = 'Phone number is already registered.';
+      } else if (existingUser.email === rawEmail) {
+        errorMessage = 'Email is already registered.';
+      } else if (existingUser.fullName && existingUser.fullName.toLowerCase() === fullName.toLowerCase()) {
+        errorMessage = 'Full name is already registered.';
+      }
+      const params = new URLSearchParams({ error: errorMessage, fullName, phoneNumber, email: rawEmail });
+      return res.redirect(`/auth/apply?${params.toString()}`);
+    }
+
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
-    if (user) {
-      if (user.isVerified) {
-        user.fullName = fullName;
-        user.email = rawEmail;
-        try {
-          await user.save();
-          console.log('Updated verified user:', user);
-          return res.redirect('/auth/apply?success=Your information has been updated. You are already registered and will receive notifications by email.');
-        } catch (err) {
-          console.error('Error updating verified user:', err);
-          return res.redirect('/auth/apply?error=Failed to update information.');
-        }
-      }
-
-      user.fullName = fullName;
-      user.email = rawEmail;
-      user.otp = otp;
-      user.otpExpiry = otpExpiry;
-      try {
-        await user.save();
-        console.log('Updated unverified user:', user);
-      } catch (err) {
-        console.error('Error updating unverified user:', err);
-        return res.redirect('/auth/apply?error=Failed to update registration.');
-      }
-    } else {
-      console.log('Creating new user with:', { phoneNumber, email: rawEmail, fullName });
-      user = new User({
-        phoneNumber,
-        email: rawEmail,
-        fullName,
-        role: 'student',
-        status: 'pending',
-        isVerified: false,
-        resultMessage: 'Your application is pending review. We will notify you by email once schedule/result is set.',
-        otp,
-        otpExpiry
-      });
-      try {
-        await user.save();
-        console.log('New user saved:', user);
-      } catch (err) {
-        console.error('Error saving new user:', err);
-        return res.redirect('/auth/apply?error=Failed to save registration.');
-      }
+    console.log('Creating new user with:', { phoneNumber, email: rawEmail, fullName });
+    const user = new User({
+      phoneNumber,
+      email: rawEmail,
+      fullName,
+      role: 'student',
+      status: 'pending',
+      isVerified: false,
+      resultMessage: 'Your application is pending review. We will notify you by email once schedule/result is set.',
+      otp,
+      otpExpiry
+    });
+    try {
+      await user.save();
+      console.log('New user saved:', user);
+    } catch (err) {
+      console.error('Error saving new user:', err);
+      return res.redirect('/auth/apply?error=Failed to save registration.');
     }
 
     req.session.registrationUserId = user._id;
