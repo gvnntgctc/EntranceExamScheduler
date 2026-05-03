@@ -788,30 +788,20 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
     console.log('Bulk status update request body:', req.body);
     console.log('Session role:', req.session.role);
 
-    let data;
-    try {
-      data = JSON.parse(req.body.data);
-    } catch (e) {
-      console.log('Failed to parse data:', req.body.data);
-      return res.redirect('/admin/students?error=Invalid request data');
+    const studentIdsStr = req.body.studentIds;
+    const status = req.body.status;
+
+    console.log('Raw studentIds string:', studentIdsStr, 'status:', status);
+
+    // Parse studentIds from comma-separated string
+    let studentIds = [];
+    if (studentIdsStr && typeof studentIdsStr === 'string') {
+      studentIds = studentIdsStr.split(',').filter(id => id.trim());
     }
 
-    const { studentIds, status } = data;
+    console.log('Parsed studentIds:', studentIds, 'Length:', studentIds.length);
 
-    console.log('Parsed studentIds:', studentIds, 'Type:', typeof studentIds);
-    console.log('Status:', status);
-
-    // Ensure studentIds is always an array
-    let studentIdsArray = [];
-    if (Array.isArray(studentIds)) {
-      studentIdsArray = studentIds;
-    } else if (studentIds) {
-      studentIdsArray = [studentIds];
-    }
-
-    console.log('Processed studentIds:', studentIdsArray, 'Length:', studentIdsArray.length);
-
-    if (studentIdsArray.length === 0) {
+    if (studentIds.length === 0) {
       console.log('No students selected');
       return res.redirect('/admin/students?error=No students selected');
     }
@@ -821,7 +811,7 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
       return res.redirect('/admin/students?error=Invalid status value');
     }
 
-    const students = await User.find({ _id: { $in: studentIdsArray } });
+    const students = await User.find({ _id: { $in: studentIds } });
     if (students.length === 0) {
       return res.redirect('/admin/students?error=No valid students found');
     }
@@ -890,34 +880,24 @@ router.post('/students/bulk-delete', isAdmin, async (req, res) => {
     console.log('Bulk delete request body:', req.body);
     console.log('Session role:', req.session.role);
 
-    let data;
-    try {
-      data = JSON.parse(req.body.data);
-    } catch (e) {
-      console.log('Failed to parse data:', req.body.data);
-      return res.redirect('/admin/students?error=Invalid request data');
+    const studentIdsStr = req.body.studentIds;
+
+    console.log('Raw studentIds string:', studentIdsStr);
+
+    // Parse studentIds from comma-separated string
+    let studentIds = [];
+    if (studentIdsStr && typeof studentIdsStr === 'string') {
+      studentIds = studentIdsStr.split(',').filter(id => id.trim());
     }
 
-    const { studentIds } = data;
+    console.log('Parsed studentIds:', studentIds, 'Length:', studentIds.length);
 
-    console.log('Parsed studentIds:', studentIds, 'Type:', typeof studentIds);
-
-    // Ensure studentIds is always an array
-    let studentIdsArray = [];
-    if (Array.isArray(studentIds)) {
-      studentIdsArray = studentIds;
-    } else if (studentIds) {
-      studentIdsArray = [studentIds];
-    }
-
-    console.log('Processed studentIds:', studentIdsArray, 'Length:', studentIdsArray.length);
-
-    if (studentIdsArray.length === 0) {
+    if (studentIds.length === 0) {
       console.log('No students selected');
       return res.redirect('/admin/students?error=No students selected');
     }
 
-    const students = await User.find({ _id: { $in: studentIdsArray }, role: 'student' });
+    const students = await User.find({ _id: { $in: studentIds }, role: 'student' });
     if (students.length === 0) {
       return res.redirect('/admin/students?error=No valid students found');
     }

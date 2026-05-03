@@ -908,13 +908,20 @@
         form.method = 'POST';
         form.action = '/admin/students/bulk-status';
         
-        const dataInput = document.createElement('input');
-        dataInput.type = 'hidden';
-        dataInput.name = 'data';
-        dataInput.value = JSON.stringify({ studentIds, status });
-        form.appendChild(dataInput);
+        const studentIdsInput = document.createElement('input');
+        studentIdsInput.type = 'hidden';
+        studentIdsInput.name = 'studentIds';
+        studentIdsInput.value = studentIds.join(',');
+        form.appendChild(studentIdsInput);
+        
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'status';
+        statusInput.value = status;
+        form.appendChild(statusInput);
         
         document.body.appendChild(form);
+        console.log('Submitting form with studentIds:', studentIds.join(','), 'status:', status);
         form.submit();
       }
 
@@ -924,13 +931,14 @@
         form.method = 'POST';
         form.action = '/admin/students/bulk-delete';
 
-        const dataInput = document.createElement('input');
-        dataInput.type = 'hidden';
-        dataInput.name = 'data';
-        dataInput.value = JSON.stringify({ studentIds });
-        form.appendChild(dataInput);
+        const studentIdsInput = document.createElement('input');
+        studentIdsInput.type = 'hidden';
+        studentIdsInput.name = 'studentIds';
+        studentIdsInput.value = studentIds.join(',');
+        form.appendChild(studentIdsInput);
 
         document.body.appendChild(form);
+        console.log('Submitting form with studentIds:', studentIds.join(','));
         form.submit();
       }
 
