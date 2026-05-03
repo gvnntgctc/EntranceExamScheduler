@@ -3,109 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PTC Applicant Registration & Admin Login</title>
+  <title>Admin Login - Exam Scheduler</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/auth.css">
 </head>
 <body>
-  <div class="container <%= showLogin ? 'show-admin' : '' %>" id="container">
-    <% if ((typeof error !== 'undefined' && error.length > 0) || (typeof success !== 'undefined' && success.length > 0)) { %>
-      <div class="alerts-panel">
+  <div class="container single-panel" id="container">
+    <div class="form-container sign-in-container" style="max-width: 420px; margin: auto;">
+      <form action="/auth/login" method="POST">
+        <h1>Admin Login</h1>
+        <p class="subtitle">Access the applicant management portal</p>
+
         <% if (typeof error !== 'undefined' && error.length > 0) { %>
           <div class="message error">
             <i class="fas fa-exclamation-circle"></i> <%= error %>
           </div>
         <% } %>
+
         <% if (typeof success !== 'undefined' && success.length > 0) { %>
           <div class="message success">
             <i class="fas fa-check-circle"></i> <%= success %>
           </div>
         <% } %>
-      </div>
-    <% } %>
-    <div class="pane pane-left">
-      <div class="form-panel">
-        <form action="/auth/apply-review" method="POST" novalidate>
-          <h1>Applicant Registration</h1>
-          <p class="subtitle">Register with your email and phone number for exam updates.</p>
 
-          <div class="input-group">
-            <i class="fas fa-user"></i>
-            <input type="text" name="fullName" placeholder="Full Name" required autocomplete="name" />
-          </div>
-          <div class="input-group">
-            <i class="fas fa-phone"></i>
-            <input type="tel" name="phoneNumber" placeholder="Phone Number" required autocomplete="tel" />
-          </div>
-          <div class="input-group">
-            <i class="fas fa-envelope"></i>
-            <input type="email" name="email" placeholder="Your email" required autocomplete="email" />
-          </div>
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" name="email" placeholder="Admin email" required autocomplete="email" />
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" name="password" placeholder="Password" required autocomplete="current-password" />
+        </div>
 
-          <button class="btn-submit" type="submit">
-            <i class="fas fa-user-plus"></i> Register
-          </button>
-
-          <div class="form-footer">
-            <p>Already an admin?</p>
-            <button type="button" class="btn-ghost" id="showLoginBtn"><i class="fas fa-sign-in-alt"></i> Admin Login</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <div class="pane pane-right">
-      <div class="panel-content logo-view">
-        <img src="/images/logo.png" alt="PTC Logo" class="auth-logo" />
-        <h2>Philippine Technological College</h2>
-        <p>Secure entrance exam registration and campus administration dashboard.</p>
-        <button type="button" class="btn-ghost show-login" id="showLoginBtn2">Admin Login</button>
-      </div>
-
-      <div class="panel-content login-view">
-        <form action="/auth/login" method="POST" novalidate>
-          <h1>Admin Login</h1>
-          <p class="subtitle">Sign in to manage schedules, applicants, and notifications.</p>
-
-          <div class="input-group">
-            <i class="fas fa-envelope"></i>
-            <input type="email" name="email" placeholder="Admin email" required autocomplete="email" />
-          </div>
-          <div class="input-group">
-            <i class="fas fa-lock"></i>
-            <input type="password" name="password" placeholder="Password" required autocomplete="current-password" />
-          </div>
-
-          <button class="btn-submit" type="submit">
-            <i class="fas fa-sign-in-alt"></i> Login
-          </button>
-
-          <button type="button" class="btn-ghost" id="backToRegister"><i class="fas fa-arrow-left"></i> Back to Register</button>
-        </form>
+        <button class="btn-submit" type="submit">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+      </form>
+      <div style="margin-top: 20px; text-align: center;">
+        <p>Applicant? <a href="/auth/apply">Register with your email</a></p>
       </div>
     </div>
   </div>
-
   <script src="/js/disable-once.js"></script>
-  <script>
-    const container = document.getElementById('container');
-    const showLoginButtons = document.querySelectorAll('.show-login');
-    const showLoginBtn = document.getElementById('showLoginBtn');
-    const showLoginBtn2 = document.getElementById('showLoginBtn2');
-    const backToRegister = document.getElementById('backToRegister');
-
-    function openAdminLogin() {
-      container.classList.add('show-admin');
-    }
-
-    function closeAdminLogin() {
-      container.classList.remove('show-admin');
-    }
-
-    if (showLoginBtn) showLoginBtn.addEventListener('click', openAdminLogin);
-    if (showLoginBtn2) showLoginBtn2.addEventListener('click', openAdminLogin);
-    if (backToRegister) backToRegister.addEventListener('click', closeAdminLogin);
-  </script>
 </body>
 </html>
