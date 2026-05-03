@@ -385,7 +385,7 @@ router.get('/students', isAdmin, async (req, res) => {
   }
 });
 
-// Notification history page
+// Admin activity log page
 router.get('/notifications', isAdmin, async (req, res) => {
   try {
     const query = {};
@@ -434,7 +434,7 @@ router.get('/notifications', isAdmin, async (req, res) => {
       search: req.query.search || '',
       status: req.query.status || 'all',
       page: 'notifications',
-      error: 'Failed to load notification history',
+      error: 'Failed to load activity log',
       success: ''
     });
   }
@@ -466,10 +466,10 @@ router.get('/notifications/:id', isAdmin, async (req, res) => {
 router.post('/notifications/clear', isAdmin, async (req, res) => {
   try {
     await Notification.deleteMany({});
-    return res.redirect('/admin/notifications?success=All notification history cleared');
+    return res.redirect('/admin/notifications?success=All activity log entries cleared');
   } catch (error) {
     console.error('Failed to clear notifications:', error);
-    return res.redirect('/admin/notifications?error=Failed to clear notification history');
+    return res.redirect('/admin/notifications?error=Failed to clear activity log');
   }
 });
 
