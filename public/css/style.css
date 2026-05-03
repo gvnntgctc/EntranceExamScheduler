@@ -1049,35 +1049,33 @@ h2 i {
   }
 
   .section-card .schedule-list .schedule-card-header {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
+    gap: 16px;
+    padding: 14px 16px;
     background: #f5f5f5;
     border-bottom: 1px solid #e8e8e8;
     color: inherit !important;
     font-size: inherit !important;
     font-weight: inherit !important;
-    flex-wrap: wrap;
   }
 
   .section-card .schedule-list .schedule-applicant {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     min-width: 0;
     flex: 0 0 auto;
   }
 
   .section-card .schedule-list .schedule-summary {
-    display: flex;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(130px, 1fr));
+    gap: 18px;
     align-items: center;
-    gap: 20px;
-    flex: 1 1 0;
+    justify-items: center;
     min-width: 0;
-    flex-wrap: wrap;
   }
 
   .section-card .schedule-list .schedule-applicant i {
@@ -1156,9 +1154,10 @@ h2 i {
   .section-card .schedule-list .schedule-location {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
     min-width: 130px;
     text-align: center;
+    align-items: center;
     flex: 1 1 130px;
   }
 
