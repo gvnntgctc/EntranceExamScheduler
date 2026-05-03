@@ -686,13 +686,6 @@
       document.getElementById('studentModalStatus').textContent = student.status || 'pending';
       document.getElementById('studentModalNotes').textContent = student.resultMessage || 'No notes yet.';
       
-      // Update status form
-      document.getElementById('studentStatusForm').action = `/admin/students/status/${student._id}`;
-      const passedRadio = document.querySelector('input[name="status"][value="passed"]');
-      const failedRadio = document.querySelector('input[name="status"][value="failed"]');
-      if (passedRadio) passedRadio.checked = student.status === 'passed';
-      if (failedRadio) failedRadio.checked = student.status === 'failed';
-      
       // Update schedules
       const schedulesContainer = document.getElementById('studentSchedulesContainer');
       if (schedules.length > 0) {

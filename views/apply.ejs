@@ -32,12 +32,12 @@
 
         <div class="input-group">
           <i class="fas fa-user"></i>
-          <input id="fullName" type="text" name="fullName" placeholder="Full Name" value="<%= fullName || '' %>" required autocomplete="name" pattern="[A-Za-z ]+" title="Only letters and spaces are allowed" />
+          <input id="fullName" type="text" name="fullName" placeholder="Full Name" value="<%= fullName || '' %>" maxlength="25" required autocomplete="name" pattern="[A-Za-z ]+" title="Only letters and spaces are allowed" />
         </div>
 
         <div class="input-group">
           <i class="fas fa-phone"></i>
-          <input id="phoneNumber" type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber || '' %>" required autocomplete="tel" inputmode="numeric" pattern="[0-9]+" title="Only numbers are allowed" />
+          <input id="phoneNumber" type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber || '' %>" maxlength="11" required autocomplete="tel" inputmode="numeric" pattern="[0-9]+" title="Only numbers are allowed" />
         </div>
 
         <div class="input-group">
@@ -46,7 +46,7 @@
         </div>
 
         <button class="btn-submit" type="submit">
-          <i class="fas fa-paper-plane"></i> Continue to Review
+          <i class="fas fa-paper-plane"></i> Register
         </button>
       </form>
       <div style="margin-top: 20px; text-align: center;">
@@ -62,12 +62,18 @@
     if (fullNameInput) {
       fullNameInput.addEventListener('input', () => {
         fullNameInput.value = fullNameInput.value.replace(/[^A-Za-z ]+/g, '');
+        if (fullNameInput.value.length > 25) {
+          fullNameInput.value = fullNameInput.value.slice(0, 25);
+        }
       });
     }
 
     if (phoneInput) {
       phoneInput.addEventListener('input', () => {
         phoneInput.value = phoneInput.value.replace(/[^0-9]+/g, '');
+        if (phoneInput.value.length > 11) {
+          phoneInput.value = phoneInput.value.slice(0, 11);
+        }
       });
     }
 
@@ -79,9 +85,9 @@
       const nameIsValid = /^[A-Za-z ]+$/.test(fullName);
       const phoneIsValid = /^[0-9]+$/.test(phoneNumber);
 
-      if (!nameIsValid || !phoneIsValid) {
+      if (!nameIsValid || !phoneIsValid || fullName.length > 25 || phoneNumber.length > 11) {
         e.preventDefault();
-        alert('Please enter a valid name using only letters and spaces, and a phone number using only digits.');
+        alert('Please enter a valid name using only letters and spaces (max 25 chars) and a phone number using only digits (max 11 chars).');
         return;
       }
 

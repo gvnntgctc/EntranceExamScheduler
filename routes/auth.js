@@ -236,8 +236,18 @@ router.post('/apply-review', async (req, res) => {
       status: existingUser.status
     } : 'None');
 
-    // Allow proceeding to review even if user exists - they'll be handled in apply-confirm
-    // Only block if user is verified (completed registration)
+    if (existingUser && existingUser.isVerified) {
+      let errorMessage = 'This information is already registered.';
+      if (existingUser.phoneNumber === phoneNumber) {
+        errorMessage = `Phone number ${phoneNumber} is already registered and verified.`;
+      } else if (existingUser.email === rawEmail) {
+        errorMessage = `Email ${rawEmail} is already registered and verified.`;
+      } else if (existingUser.fullName && existingUser.fullName.toLowerCase() === fullName.toLowerCase()) {
+        errorMessage = `Name "${fullName}" is already registered and verified.`;
+      }
+      const params = new URLSearchParams({ error: errorMessage, fullName, phoneNumber, email: rawEmail });
+      return res.redirect(`/auth/apply?${params.toString()}`);
+    }
 
     return res.render('apply-review', {
       fullName,
