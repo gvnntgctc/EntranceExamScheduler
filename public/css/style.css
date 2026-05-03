@@ -148,6 +148,22 @@ body {
   text-decoration: none;
 }
 
+.sidebar-menu a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  transform: translateX(5px);
+}
+
+.sidebar-menu a:hover i {
+  transform: scale(1.1);
+}
+
+.sidebar-menu a.active {
+  background: rgba(76, 175, 80, 0.2);
+  color: #81C784;
+  border-left: 3px solid #4CAF50;
+}
+
 .sidebar-close {
   position: fixed;
   top: 20px;
@@ -206,6 +222,19 @@ body {
   font-size: 18px;
   letter-spacing: 0.5px;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px;
 }
 
 /* Main Content */

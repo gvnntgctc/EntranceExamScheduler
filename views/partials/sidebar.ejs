@@ -2,12 +2,14 @@
 
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <h2><i class="fas fa-cogs"></i> Admin Panel</h2>
+    <h2><img src="/images/logo.png" alt="PTC Logo" class="sidebar-logo"> Admin Panel</h2>
   </div>
 
   <ul class="sidebar-menu">
-    <li><a href="/admin/weekly-schedule" class="<%= page === 'weekly' ? 'active' : '' %>"><i class="fas fa-calendar-week"></i> Exam Schedules</a></li>
-    <li><a href="/admin/add-schedule" class="<%= page === 'addSchedule' ? 'active' : '' %>"><i class="fas fa-plus-circle"></i> Add Schedule</a></li>
-    <li><a href="/admin/students" class="<%= page === 'students' ? 'active' : '' %>"><i class="fas fa-users"></i> Students</a></li>    <li><a href="/admin/notifications" class="<%= page === 'notifications' ? 'active' : '' %>"><i class="fas fa-bell"></i> Notifications</a></li>    <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    <li><a href="/admin/weekly-schedule" class="<%= page === 'weekly' ? 'active' : '' %>"><i class="fas fa-calendar-alt" style="color: #4CAF50;"></i> Exam Schedules</a></li>
+    <li><a href="/admin/add-schedule" class="<%= page === 'addSchedule' ? 'active' : '' %>"><i class="fas fa-calendar-plus" style="color: #8BC34A;"></i> Add Schedule</a></li>
+    <li><a href="/admin/students" class="<%= page === 'students' ? 'active' : '' %>"><i class="fas fa-user-graduate" style="color: #CDDC39;"></i> Students</a></li>
+    <li><a href="/admin/notifications" class="<%= page === 'notifications' ? 'active' : '' %>"><i class="fas fa-bell" style="color: #FF9800;"></i> Notifications</a></li>
+    <li><a href="/auth/logout"><i class="fas fa-sign-out-alt" style="color: #F44336;"></i> Logout</a></li>
   </ul>
 </div>
