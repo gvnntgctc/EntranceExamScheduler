@@ -327,9 +327,9 @@ body.review-screen .review-form {
 
 .review-item {
   display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
+  grid-template-columns: 120px minmax(0, 1fr);
   gap: 18px;
-  align-items: center;
+  align-items: start;
   padding: 14px 0;
   border-bottom: 1px solid rgba(17, 153, 142, 0.12);
 }
@@ -351,6 +351,7 @@ body.review-screen .review-form {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  text-align: right;
   white-space: nowrap;
 }
 
@@ -361,6 +362,7 @@ body.review-screen .review-form {
   text-align: left;
   word-break: break-word;
   overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .review-actions {
