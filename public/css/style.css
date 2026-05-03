@@ -1073,7 +1073,7 @@ h2 i {
     display: grid;
     grid-template-columns: repeat(3, minmax(130px, 1fr));
     gap: 18px;
-    align-items: center;
+    align-items: start;
     justify-items: center;
     min-width: 0;
   }
@@ -2284,7 +2284,7 @@ form.schedule-form {
 
 #examDateDisplay {
   background: #fff;
-  cursor: default;
+  cursor: pointer;
 }
 
 .toast-message {

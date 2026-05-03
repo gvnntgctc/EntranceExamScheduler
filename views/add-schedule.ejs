@@ -81,13 +81,9 @@
               <label for="examDateDisplay"><i class="fas fa-calendar"></i> Exam Date</label>
               <div class="exam-date-card">
                 <input type="hidden" id="examDate" name="examDate" />
-                <input type="text" id="examDateDisplay" placeholder="Select a date from March to August 2026" readonly required aria-label="Selected exam date" aria-describedby="holidayHelp" />
-                <div class="date-selection" id="examDateSelection">
-                  <div class="month-tabs" id="monthTabs" role="tablist" aria-label="Exam month selection"></div>
-                  <div class="date-grid" id="dateGrid" aria-live="polite"></div>
-                </div>
+                <input type="text" id="examDateDisplay" placeholder="Click to choose a date from March to August 2026" readonly required aria-label="Selected exam date" aria-describedby="holidayHelp" />
               </div>
-              <small class="sub-text">Choose a date by clicking a day button instead of typing.</small>
+              <small class="sub-text">Click the field to open the exam date picker.</small>
             </div>
 
             <div class="form-group">
@@ -191,6 +187,19 @@
             <p>No schedules yet. Use the form above to create your first schedule.</p>
           </div>
         <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="examDateModal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="examDateModalTitle">
+      <div class="modal-header">
+        <h2 id="examDateModalTitle">Select Exam Date</h2>
+        <button type="button" class="modal-back" id="examDateModalClose">Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="month-tabs" id="monthTabs" role="tablist" aria-label="Exam month selection"></div>
+        <div class="date-grid" id="dateGrid" aria-live="polite"></div>
       </div>
     </div>
   </div>
@@ -467,6 +476,8 @@
 
     const examDateInput = document.getElementById('examDate');
     const examDateDisplay = document.getElementById('examDateDisplay');
+    const examDateModal = document.getElementById('examDateModal');
+    const examDateModalClose = document.getElementById('examDateModalClose');
     const monthTabs = document.getElementById('monthTabs');
     const dateGrid = document.getElementById('dateGrid');
     const scheduleForm = document.querySelector('.schedule-form');
@@ -637,7 +648,33 @@
       examDateDisplay.value = formatDisplayDate(dateValue);
       clearExamDateValidity();
       renderDateGrid();
+      closeExamDateModal();
     }
+
+    function openExamDateModal() {
+      if (!examDateModal) return;
+      examDateModal.classList.add('active');
+      examDateModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeExamDateModal() {
+      if (!examDateModal) return;
+      examDateModal.classList.remove('active');
+      examDateModal.setAttribute('aria-hidden', 'true');
+    }
+
+    examDateDisplay?.addEventListener('click', openExamDateModal);
+    examDateModalClose?.addEventListener('click', closeExamDateModal);
+    examDateModal?.addEventListener('click', function(event) {
+      if (event.target === examDateModal) {
+        closeExamDateModal();
+      }
+    });
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeExamDateModal();
+      }
+    });
 
     if (monthTabs && dateGrid) {
       renderMonthTabs();
