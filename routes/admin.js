@@ -371,8 +371,8 @@ router.get('/students/view/:id', isAdmin, async (req, res) => {
       search,
       status,
       page: 'students',
-      error: selectedStudent ? '' : 'Unable to load applicant details',
-      success: ''
+      error: req.query.error || (selectedStudent ? '' : 'Unable to load applicant details'),
+      success: req.query.success || ''
     });
   } catch (error) {
     console.error('Error in /students/view/:id route:', error);
