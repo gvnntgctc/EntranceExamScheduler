@@ -280,6 +280,16 @@ router.post('/apply-confirm', async (req, res) => {
       ]
     });
 
+    console.log('Registration attempt:', { fullName, phoneNumber, rawEmail });
+    console.log('Existing user found:', existingUser ? {
+      id: existingUser._id,
+      name: existingUser.fullName,
+      email: existingUser.email,
+      phone: existingUser.phoneNumber,
+      verified: existingUser.isVerified,
+      status: existingUser.status
+    } : 'None');
+
     if (existingUser && existingUser.isVerified) {
       let errorMessage = 'This information is already registered.';
       if (existingUser.phoneNumber === phoneNumber) {
@@ -289,6 +299,7 @@ router.post('/apply-confirm', async (req, res) => {
       } else if (existingUser.fullName && existingUser.fullName.toLowerCase() === fullName.toLowerCase()) {
         errorMessage = 'Full name is already registered.';
       }
+      console.log('Blocking registration due to verified user:', errorMessage);
       const params = new URLSearchParams({ error: errorMessage, fullName, phoneNumber, email: rawEmail });
       return res.redirect(`/auth/apply?${params.toString()}`);
     }
