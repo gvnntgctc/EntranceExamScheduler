@@ -335,6 +335,10 @@ router.get('/students/api/:id', isAdmin, async (req, res) => {
 // Student detail view route
 router.get('/students/view/:id', isAdmin, async (req, res) => {
   try {
+    console.log('=== STUDENTS VIEW ROUTE ===');
+    console.log('Params:', req.params);
+    console.log('Query:', req.query);
+    
     const search = req.query.search || '';
     const status = req.query.status || 'all';
 
@@ -353,16 +357,24 @@ router.get('/students/view/:id', isAdmin, async (req, res) => {
 
     const students = await User.find(query).sort({ createdAt: -1 });
     const studentId = req.params.id;
+    console.log('Student ID from params:', studentId);
     let selectedStudent = null;
     let studentSchedules = [];
 
     if (mongoose.Types.ObjectId.isValid(studentId)) {
+      console.log('Valid ObjectId, finding student...');
       selectedStudent = await User.findById(studentId);
+      console.log('Found selectedStudent:', selectedStudent ? `${selectedStudent.fullName} (${selectedStudent.email})` : 'NULL');
       if (selectedStudent) {
         studentSchedules = await Schedule.find({ studentId }).sort({ examDate: -1 });
+        console.log('Found schedules:', studentSchedules.length);
       }
+    } else {
+      console.log('Invalid ObjectId:', studentId);
     }
 
+    console.log('Rendering with selectedStudent:', selectedStudent ? 'YES' : 'NO');
+    
     res.render('admin-students', {
       students,
       studentSchedules,
