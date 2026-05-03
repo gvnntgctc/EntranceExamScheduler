@@ -1077,23 +1077,146 @@ h2 i {
   color: #333;
 }
 
-.sub-text {
-  color: #888;
-  font-size: 14px;
-  margin-top: 10px;
-}
+  /* Override schedule list styles to keep the list compact and neat */
+  .section-card .schedule-list li {
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 14px;
+    background: #f9fbfb;
+    border-left: 4px solid #11998e;
+  }
 
-/* ==================== */
-/* Form Buttons */
-/* ==================== */
+  .section-card .schedule-list li:hover {
+    transform: translateX(0);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+  }
 
-.form-buttons {
-  display: flex;
-  gap: 15px;
-  margin-top: 20px;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
+  .section-card .schedule-list .schedule-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 0;
+  }
+
+  .section-card .schedule-list .schedule-applicant {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .section-card .schedule-list .schedule-applicant i {
+    font-size: 16px;
+    color: #11998e;
+  }
+
+  .section-card .schedule-list .schedule-applicant strong {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .section-card .schedule-list .schedule-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .section-card .schedule-list .schedule-actions a,
+  .section-card .schedule-list .schedule-actions button {
+    min-width: auto;
+    white-space: nowrap;
+    padding: 8px 12px;
+  }
+
+  .section-card .schedule-list .schedule-actions button {
+    height: auto;
+  }
+
+  .section-card .schedule-list .schedule-card-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .section-card .schedule-list .schedule-time,
+  .section-card .schedule-list .schedule-date,
+  .section-card .schedule-list .schedule-location {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 180px;
+    min-width: 160px;
+  }
+
+  .section-card .schedule-list .detail-label {
+    font-size: 11px;
+    color: #71717a;
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-card .schedule-list .detail-label i {
+    font-size: 12px;
+    color: #11998e;
+  }
+
+  .section-card .schedule-list .detail-value {
+    font-size: 14px;
+    color: #262626;
+    font-weight: 500;
+  }
+
+  .section-card .schedule-list .schedule-location {
+    flex: 1 1 100%;
+  }
+
+  .section-card .schedule-list .schedule-card-row + .schedule-card-row {
+    padding-top: 8px;
+    border-top: 1px solid rgba(17, 25, 39, 0.08);
+    margin-top: 8px;
+  }
+
+  .section-card .schedule-list .schedule-info,
+  .section-card .schedule-list .schedule-details {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    .section-card .schedule-list .schedule-card-row {
+      gap: 16px;
+    }
+
+    .section-card .schedule-list .schedule-time,
+    .section-card .schedule-list .schedule-date,
+    .section-card .schedule-list .schedule-location {
+      flex: 1 1 100%;
+      min-width: 0;
+    }
+
+    .section-card .schedule-list .schedule-card-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .section-card .schedule-list .schedule-actions {
+      justify-content: flex-start;
+    }
+  }
 }
 
 .form-buttons .btn-primary {
@@ -1720,7 +1843,25 @@ h2 i {
     gap: 12px;
     flex-direction: column;
   }
-  
+
+  .section-card .schedule-list .schedule-card-header {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-card .schedule-list .schedule-actions {
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+
+  .section-card .schedule-list .schedule-card-row {
+    width: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+
   .button-group .btn {
     width: 100%;
     justify-content: center;
