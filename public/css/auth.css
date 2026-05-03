@@ -51,7 +51,7 @@ body {
 }
 
 .container.single-panel .form-container form {
-  padding: 0 30px;
+  padding: 40px 30px;
 }
 
 .container.single-panel .overlay-container,
@@ -228,7 +228,7 @@ body.review-screen .form-container {
 
 body.review-screen .review-header {
   text-align: left;
-  margin-bottom: 36px;
+  margin-bottom: 44px;
   padding-bottom: 18px;
   border-bottom: 1px solid rgba(17, 153, 142, 0.08);
 }
