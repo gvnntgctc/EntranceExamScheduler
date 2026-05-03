@@ -95,6 +95,88 @@
       line-height: 1.6;
     }
 
+    .upcoming-card {
+      margin-top: 32px;
+      padding: 24px;
+      border-radius: 26px;
+      background: #ffffff;
+      box-shadow: 0 16px 36px rgba(18, 79, 35, 0.08);
+      border: 1px solid rgba(27, 94, 32, 0.1);
+    }
+
+    .upcoming-card h3 {
+      font-size: 24px;
+      margin: 0 0 10px;
+      color: #163b16;
+    }
+
+    .upcoming-card p {
+      margin: 0 0 22px;
+      color: #4d5f4c;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .exam-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 14px;
+    }
+
+    .exam-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(27, 94, 32, 0.12);
+      background: #f7fbf7;
+    }
+
+    .exam-rank {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: #1b5e20;
+      color: white;
+      font-weight: 700;
+    }
+
+    .exam-details {
+      display: grid;
+      gap: 4px;
+    }
+
+    .exam-details strong {
+      font-size: 15px;
+      color: #17392e;
+    }
+
+    .exam-details span {
+      font-size: 14px;
+      color: #4d5f4c;
+    }
+
+    .exam-location {
+      font-size: 13px;
+      color: #165118;
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .empty-note {
+      margin: 0;
+      color: #5b6b57;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
     .month-details {
       display: flex;
       flex-wrap: wrap;
@@ -423,6 +505,27 @@
             <p class="summary-note"><%= busiestMonth.count %> applicant<%= busiestMonth.count !== 1 ? 's' : '' %> scheduled for this month.</p>
           </div>
         </div>
+      </div>
+
+      <div class="upcoming-card">
+        <h3>Upcoming Entrance Exams</h3>
+        <p>Next scheduled exam dates are listed below in chronological order so you can see the nearest sessions at a glance.</p>
+        <% if (upcomingSchedules && upcomingSchedules.length > 0) { %>
+          <ul class="exam-list">
+            <% upcomingSchedules.forEach((schedule, index) => { %>
+              <li class="exam-item">
+                <span class="exam-rank"><%= index + 1 %></span>
+                <div class="exam-details">
+                  <strong><%= schedule.studentId?.fullName || 'Applicant' %></strong>
+                  <span><%= new Date(schedule.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %> at <%= schedule.examTime %></span>
+                </div>
+                <span class="exam-location"><%= schedule.location %></span>
+              </li>
+            <% }) %>
+          </ul>
+        <% } else { %>
+          <p class="empty-note">No upcoming entrance exams are scheduled yet.</p>
+        <% } %>
       </div>
 
       <div class="monthly-grid">

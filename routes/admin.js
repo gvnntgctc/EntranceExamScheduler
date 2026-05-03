@@ -163,9 +163,16 @@ router.get('/weekly-schedule', isAdmin, async (req, res) => {
       }
     });
 
+    const today = new Date();
+    const upcomingSchedules = schedules
+      .filter(schedule => new Date(schedule.examDate) >= today)
+      .sort((a, b) => new Date(a.examDate) - new Date(b.examDate))
+      .slice(0, 6);
+
     res.render('weekly-schedule', { 
       monthCounts, 
       currentYear, 
+      upcomingSchedules,
       page: 'weekly', 
       error: req.query.error || '', 
       success: req.query.success || '' 
@@ -176,6 +183,7 @@ router.get('/weekly-schedule', isAdmin, async (req, res) => {
     res.render('weekly-schedule', {
       monthCounts: {},
       currentYear: new Date().getFullYear(),
+      upcomingSchedules: [],
       page: 'weekly',
       error: 'Failed to load schedules',
       success: ''
