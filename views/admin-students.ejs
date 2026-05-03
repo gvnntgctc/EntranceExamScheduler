@@ -911,11 +911,13 @@
         form.method = 'POST';
         form.action = '/admin/students/bulk-status';
         
-        const studentIdsInput = document.createElement('input');
-        studentIdsInput.type = 'hidden';
-        studentIdsInput.name = 'studentIds';
-        studentIdsInput.value = studentIds.join(',');
-        form.appendChild(studentIdsInput);
+        studentIds.forEach(id => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'studentIds[]';
+          input.value = id;
+          form.appendChild(input);
+        });
         
         const statusInput = document.createElement('input');
         statusInput.type = 'hidden';
@@ -924,7 +926,7 @@
         form.appendChild(statusInput);
         
         document.body.appendChild(form);
-        console.log('Submitting form with studentIds:', studentIds.join(','), 'status:', status);
+        console.log('Submitting form with studentIds:', studentIds, 'status:', status);
         form.submit();
       }
 
@@ -934,14 +936,16 @@
         form.method = 'POST';
         form.action = '/admin/students/bulk-delete';
 
-        const studentIdsInput = document.createElement('input');
-        studentIdsInput.type = 'hidden';
-        studentIdsInput.name = 'studentIds';
-        studentIdsInput.value = studentIds.join(',');
-        form.appendChild(studentIdsInput);
+        studentIds.forEach(id => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'studentIds[]';
+          input.value = id;
+          form.appendChild(input);
+        });
 
         document.body.appendChild(form);
-        console.log('Submitting form with studentIds:', studentIds.join(','));
+        console.log('Submitting form with studentIds:', studentIds);
         form.submit();
       }
 

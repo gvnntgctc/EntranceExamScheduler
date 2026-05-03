@@ -788,15 +788,17 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
     console.log('Bulk status update request body:', req.body);
     console.log('Session role:', req.session.role);
 
-    const studentIdsStr = req.body.studentIds;
+    let studentIds = req.body.studentIds || req.body['studentIds[]'];
     const status = req.body.status;
 
-    console.log('Raw studentIds string:', studentIdsStr, 'status:', status);
+    console.log('Raw studentIds:', studentIds, 'status:', status, 'type:', typeof studentIds);
 
-    // Parse studentIds from comma-separated string
-    let studentIds = [];
-    if (studentIdsStr && typeof studentIdsStr === 'string') {
-      studentIds = studentIdsStr.split(',').filter(id => id.trim());
+    if (!Array.isArray(studentIds)) {
+      if (typeof studentIds === 'string') {
+        studentIds = studentIds.split(',').map(id => id.trim()).filter(id => id);
+      } else {
+        studentIds = [];
+      }
     }
 
     console.log('Parsed studentIds:', studentIds, 'Length:', studentIds.length);
@@ -880,14 +882,16 @@ router.post('/students/bulk-delete', isAdmin, async (req, res) => {
     console.log('Bulk delete request body:', req.body);
     console.log('Session role:', req.session.role);
 
-    const studentIdsStr = req.body.studentIds;
+    let studentIds = req.body.studentIds || req.body['studentIds[]'];
 
-    console.log('Raw studentIds string:', studentIdsStr);
+    console.log('Raw studentIds:', studentIds, 'type:', typeof studentIds);
 
-    // Parse studentIds from comma-separated string
-    let studentIds = [];
-    if (studentIdsStr && typeof studentIdsStr === 'string') {
-      studentIds = studentIdsStr.split(',').filter(id => id.trim());
+    if (!Array.isArray(studentIds)) {
+      if (typeof studentIds === 'string') {
+        studentIds = studentIds.split(',').map(id => id.trim()).filter(id => id);
+      } else {
+        studentIds = [];
+      }
     }
 
     console.log('Parsed studentIds:', studentIds, 'Length:', studentIds.length);
