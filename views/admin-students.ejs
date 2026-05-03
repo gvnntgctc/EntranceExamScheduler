@@ -433,6 +433,9 @@
                     <button type="button" class="action-btn edit-btn" onclick="viewStudent('<%= student._id.toString() %>')">
                       <i class="fas fa-eye"></i> View
                     </button>
+                    <button type="button" class="action-btn delete-btn" onclick="testModal()">
+                      <i class="fas fa-cog"></i> Test Modal
+                    </button>
                     <button type="button" class="action-btn delete-btn" onclick="openDeleteModal('<%= student._id %>', '<%= student.fullName %>')">
                       <i class="fas fa-trash"></i> Delete
                     </button>
@@ -559,6 +562,34 @@
       form.action = `/admin/students/delete/${deleteStudentId}`;
       document.body.appendChild(form);
       form.submit();
+    }
+
+    // Test modal function
+    function testModal() {
+      console.log('Testing modal display...');
+      
+      // Update modal content with test data
+      document.getElementById('studentModalName').textContent = 'Test Student';
+      document.getElementById('studentModalFullName').textContent = 'Test Student';
+      document.getElementById('studentModalEmail').textContent = 'test@example.com';
+      document.getElementById('studentModalEmail').href = 'mailto:test@example.com';
+      document.getElementById('studentModalPhone').textContent = '123-456-7890';
+      document.getElementById('studentModalDate').textContent = new Date().toDateString();
+      document.getElementById('studentModalStatus').textContent = 'pending';
+      document.getElementById('studentModalNotes').textContent = 'This is a test modal.';
+      
+      // Update status form
+      document.getElementById('studentStatusForm').action = '#';
+      
+      // Update schedules
+      const schedulesContainer = document.getElementById('studentSchedulesContainer');
+      schedulesContainer.innerHTML = '<p>Test modal content loaded successfully!</p>';
+      
+      // Show modal
+      document.getElementById('studentModal').style.display = 'flex';
+      document.getElementById('studentModalBg').style.display = 'block';
+      
+      console.log('Modal should now be visible');
     }
 
     // View student details in modal
