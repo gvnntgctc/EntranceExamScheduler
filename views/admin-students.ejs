@@ -145,21 +145,61 @@
       font-weight: normal;
       margin-left: 8px;
     }
-    .edit-btn {
-      background: #4CAF50;
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      box-shadow: 0 8px 20px rgba(17, 153, 142, 0.08);
+      text-decoration: none;
       color: white;
+      background: #11998e;
     }
-    .edit-btn:hover {
-      background: #45a049;
-      transform: translateY(-2px);
+    .action-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(17, 153, 142, 0.14);
+    }
+    .edit-btn {
+      background: #11998e;
     }
     .delete-btn {
       background: #f44336;
-      color: white;
     }
     .delete-btn:hover {
       background: #da190b;
-      transform: translateY(-2px);
+    }
+    .confirm-delete,
+    .cancel-delete {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .confirm-delete:hover,
+    .cancel-delete:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);
+    }
+    .confirm-delete {
+      background: #f44336;
+      color: white;
+    }
+    .cancel-delete {
+      background: #f1f5f9;
+      color: #334155;
     }
     .modal {
       display: none;
@@ -391,7 +431,6 @@
               <option value="passed" <%= typeof status !== 'undefined' && status === 'passed' ? 'selected' : '' %>>Passed</option>
               <option value="failed" <%= typeof status !== 'undefined' && status === 'failed' ? 'selected' : '' %>>Failed</option>
             </select>
-            <button id="clearSearch" class="btn btn-secondary"><i class="fas fa-times"></i> Clear</button>
           </div>
         <% } %>
 
@@ -471,15 +510,15 @@
                   <i class="fas fa-id-card"></i> Registration Information
                 </h3>
                 <table style="width: 100%; border-collapse: collapse;">
-                  <tr style="">
+                  <tr>
                     <td style="padding: 14px 0; font-weight: 600; color: #555; width: 35%;">Full Name</td>
                     <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;"><%= selectedStudent.fullName %></td>
                   </tr>
-                  <tr style="">
+                  <tr>
                     <td style="padding: 14px 0; font-weight: 600; color: #555;">Email</td>
                     <td style="padding: 14px 0; padding-left: 15px; color: #11998e;"><a href="mailto:<%= selectedStudent.email %>" style="color: #11998e; text-decoration: none; font-weight: 500;"><%= selectedStudent.email %></a></td>
                   </tr>
-                  <tr style="">
+                  <tr>
                     <td style="padding: 14px 0; font-weight: 600; color: #555;">Phone Number</td>
                     <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;"><%= selectedStudent.phoneNumber || 'N/A' %></td>
                   </tr>
