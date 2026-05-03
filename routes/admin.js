@@ -336,7 +336,7 @@ router.get('/students/api/:id', isAdmin, async (req, res) => {
 router.get('/students/view/:id', async (req, res) => {
   console.log('=== STUDENTS VIEW ROUTE HIT ===');
   console.log('Params ID:', req.params.id);
-  console.log('Session role:', req.session.role);
+  console.log('Session role:', req.session ? req.session.role : 'no session');
   
   try {
     const studentId = req.params.id;
@@ -345,7 +345,7 @@ router.get('/students/view/:id', async (req, res) => {
     // Check if it's a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(studentId)) {
       console.log('Invalid ObjectId');
-      return res.status(400).send('Invalid student ID');
+      return res.json({ error: 'Invalid student ID', studentId });
     }
     
     const selectedStudent = await User.findById(studentId);
@@ -353,51 +353,28 @@ router.get('/students/view/:id', async (req, res) => {
     
     if (!selectedStudent) {
       console.log('Student not found in database');
-      return res.status(404).send('Student not found');
+      return res.json({ error: 'Student not found', studentId });
     }
     
     console.log('Student data:', { id: selectedStudent._id, name: selectedStudent.fullName, email: selectedStudent.email });
     
-    // Continue with normal rendering...
-    const search = req.query.search || '';
-    const status = req.query.status || 'all';
-
-    // Build query for filtering student list
-    let query = { role: 'student', isVerified: true };
-    if (status !== 'all') {
-      query.status = status;
-    }
-    if (search) {
-      const searchRegex = new RegExp(escapeRegExp(search), 'i');
-      query.$or = [
-        { fullName: searchRegex },
-        { email: searchRegex }
-      ];
-    }
-
-    const students = await User.find(query).sort({ createdAt: -1 });
-    let studentSchedules = [];
-
-    if (selectedStudent) {
-      studentSchedules = await Schedule.find({ studentId }).sort({ examDate: -1 });
-    }
-
-    console.log('Rendering page with selectedStudent');
-    
-    res.render('admin-students', {
-      students,
-      studentSchedules,
-      selectedStudent,
-      selectedStudentId: studentId,
-      search,
-      status,
-      page: 'students',
-      error: req.query.error || '',
-      success: req.query.success || ''
+    // For now, just return JSON to test if route is working
+    return res.json({
+      success: true,
+      studentId,
+      student: {
+        id: selectedStudent._id,
+        name: selectedStudent.fullName,
+        email: selectedStudent.email,
+        status: selectedStudent.status
+      }
     });
+    
+    // Continue with normal rendering...
+    // ... rest of the code ...
   } catch (error) {
     console.error('Error in /students/view/:id route:', error);
-    res.status(500).send('Internal server error: ' + error.message);
+    return res.json({ error: 'Internal server error', message: error.message });
   }
 });
 
