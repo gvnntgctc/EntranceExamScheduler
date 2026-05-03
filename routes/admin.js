@@ -334,11 +334,31 @@ router.get('/students/api/:id', isAdmin, async (req, res) => {
 
 // Student detail view route
 router.get('/students/view/:id', isAdmin, async (req, res) => {
+  console.log('=== STUDENTS VIEW ROUTE HIT ===');
+  console.log('Params ID:', req.params.id);
+  console.log('Session role:', req.session.role);
+  
   try {
-    console.log('=== STUDENTS VIEW ROUTE ===');
-    console.log('Params:', req.params);
-    console.log('Query:', req.query);
+    const studentId = req.params.id;
+    console.log('Looking for student ID:', studentId);
     
+    // Check if it's a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      console.log('Invalid ObjectId');
+      return res.status(400).send('Invalid student ID');
+    }
+    
+    const selectedStudent = await User.findById(studentId);
+    console.log('Student found:', selectedStudent ? 'YES' : 'NO');
+    
+    if (!selectedStudent) {
+      console.log('Student not found in database');
+      return res.status(404).send('Student not found');
+    }
+    
+    console.log('Student data:', { id: selectedStudent._id, name: selectedStudent.fullName, email: selectedStudent.email });
+    
+    // Continue with normal rendering...
     const search = req.query.search || '';
     const status = req.query.status || 'all';
 
@@ -356,24 +376,13 @@ router.get('/students/view/:id', isAdmin, async (req, res) => {
     }
 
     const students = await User.find(query).sort({ createdAt: -1 });
-    const studentId = req.params.id;
-    console.log('Student ID from params:', studentId);
-    let selectedStudent = null;
     let studentSchedules = [];
 
-    if (mongoose.Types.ObjectId.isValid(studentId)) {
-      console.log('Valid ObjectId, finding student...');
-      selectedStudent = await User.findById(studentId);
-      console.log('Found selectedStudent:', selectedStudent ? `${selectedStudent.fullName} (${selectedStudent.email})` : 'NULL');
-      if (selectedStudent) {
-        studentSchedules = await Schedule.find({ studentId }).sort({ examDate: -1 });
-        console.log('Found schedules:', studentSchedules.length);
-      }
-    } else {
-      console.log('Invalid ObjectId:', studentId);
+    if (selectedStudent) {
+      studentSchedules = await Schedule.find({ studentId }).sort({ examDate: -1 });
     }
 
-    console.log('Rendering with selectedStudent:', selectedStudent ? 'YES' : 'NO');
+    console.log('Rendering page with selectedStudent');
     
     res.render('admin-students', {
       students,
@@ -383,22 +392,12 @@ router.get('/students/view/:id', isAdmin, async (req, res) => {
       search,
       status,
       page: 'students',
-      error: req.query.error || (selectedStudent ? '' : 'Unable to load applicant details'),
+      error: req.query.error || '',
       success: req.query.success || ''
     });
   } catch (error) {
     console.error('Error in /students/view/:id route:', error);
-    res.render('admin-students', {
-      students: [],
-      studentSchedules: [],
-      selectedStudent: null,
-      selectedStudentId: null,
-      search: req.query.search || '',
-      status: req.query.status || 'all',
-      page: 'students',
-      error: `Failed to load students: ${error.message}`,
-      success: ''
-    });
+    res.status(500).send('Internal server error: ' + error.message);
   }
 });
 
