@@ -430,7 +430,7 @@
                     <% } %>
                   </td>
                   <td data-label="Actions" class="actions-column">
-                    <button type="button" class="action-btn edit-btn view-student-btn" data-student-id="<%= student._id %>">
+                    <button type="button" class="action-btn edit-btn" onclick="viewStudent(this.getAttribute('data-student-id'))" data-student-id="<%= student._id.toString() %>">
                       <i class="fas fa-eye"></i> View
                     </button>
                     <button type="button" class="action-btn delete-btn" onclick="openDeleteModal('<%= student._id %>', '<%= student.fullName %>')">
@@ -595,21 +595,12 @@
 
     function viewStudent(studentId) {
       console.log('Viewing student:', studentId);
-      window.location.href = '/admin/students?studentId=' + encodeURIComponent(studentId);
+      console.log('Type of studentId:', typeof studentId);
+      console.log('Encoded:', encodeURIComponent(studentId));
+      const url = '/admin/students?studentId=' + encodeURIComponent(studentId);
+      console.log('Navigating to:', url);
+      window.location.href = url;
     }
-
-    // Add event listeners for view student buttons
-    document.addEventListener('DOMContentLoaded', function() {
-      const viewButtons = document.querySelectorAll('.view-student-btn');
-      viewButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const studentId = this.getAttribute('data-student-id');
-          if (studentId) {
-            viewStudent(studentId);
-          }
-        });
-      });
-    });
 
     function closeStudentModal() {
       window.location.href = '/admin/students';

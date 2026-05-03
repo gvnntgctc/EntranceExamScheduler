@@ -344,11 +344,17 @@ router.get('/students', isAdmin, async (req, res) => {
       selectedStudentId = req.query.studentId;
       console.log('Looking for student ID:', selectedStudentId);
       
-      try {
-        selectedStudent = await User.findById(selectedStudentId);
-        console.log('Found selectedStudent:', selectedStudent ? `${selectedStudent.fullName} (${selectedStudent.email})` : 'NULL');
-      } catch (err) {
-        console.log('Error finding student by ID:', err.message);
+      // Check if it's a valid ObjectId
+      if (!mongoose.Types.ObjectId.isValid(selectedStudentId)) {
+        console.log('Invalid ObjectId:', selectedStudentId);
+        selectedStudent = null;
+      } else {
+        try {
+          selectedStudent = await User.findById(selectedStudentId);
+          console.log('Found selectedStudent:', selectedStudent ? `${selectedStudent.fullName} (${selectedStudent.email})` : 'NULL');
+        } catch (err) {
+          console.log('Error finding student by ID:', err.message);
+        }
       }
       
       if (selectedStudent) {
