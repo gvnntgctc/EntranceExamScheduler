@@ -108,7 +108,21 @@
         <div class="detail-row"><div class="detail-label">Subject</div><div class="detail-value"><%= notification.subject %></div></div>
         <div class="detail-row detail-body-row"><div class="detail-label">Details</div><div class="detail-value detail-body"><%= notification.body %></div></div>
         <div class="detail-row"><div class="detail-label">Status</div><div class="detail-value"><span class="status-pill status-<%= notification.status %>"><%= notification.status %></span></div></div>
-        <div class="detail-row"><div class="detail-label">Sent At</div><div class="detail-value"><%= notification.createdAt.toLocaleString() %></div></div>
+        <div class="detail-row"><div class="detail-label">Sent At</div><div class="detail-value">
+          <% 
+            const date = new Date(notification.createdAt);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            const dateString = `${month}/${day}/${year}`;
+            const timeString = `${displayHours}:${minutes} ${ampm}`;
+          %>
+          <%= dateString %> <%= timeString %>
+        </div></div>
         <div class="detail-row"><div class="detail-label">Error</div><div class="detail-value"><%= notification.errorMessage || 'None' %></div></div>
       </div>
     </div>

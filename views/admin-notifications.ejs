@@ -157,7 +157,21 @@
                     <span class="subject-line"><%= notification.subject %></span>
                   </td>
                   <td><span class="status-pill status-<%= notification.status %>"><%= notification.status %></span></td>
-                  <td><%= notification.createdAt.toLocaleString() %></td>
+                  <td>
+                    <% 
+                      const date = new Date(notification.createdAt);
+                      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                      const day = date.getDate().toString().padStart(2, '0');
+                      const year = date.getFullYear();
+                      const hours = date.getHours();
+                      const minutes = date.getMinutes().toString().padStart(2, '0');
+                      const ampm = hours >= 12 ? 'PM' : 'AM';
+                      const displayHours = hours % 12 || 12;
+                      const dateString = `${month}/${day}/${year}`;
+                      const timeString = `${displayHours}:${minutes} ${ampm}`;
+                    %>
+                    <%= dateString %> <%= timeString %>
+                  </td>
                   <td class="manage-actions">
                     <a href="/admin/notifications/<%= notification._id %>" class="view-details-btn"><i class="fas fa-eye"></i> View</a>
                   </td>
