@@ -29,17 +29,17 @@
 
         <div class="input-group">
           <i class="fas fa-user"></i>
-          <input type="text" name="fullName" placeholder="Full Name" value="<%= fullName || '' %>" required />
+          <input type="text" name="fullName" placeholder="Full Name" value="<%= fullName || '' %>" required autocomplete="name" />
         </div>
 
         <div class="input-group">
           <i class="fas fa-phone"></i>
-          <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber || '' %>" required />
+          <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber || '' %>" required autocomplete="tel" />
         </div>
 
         <div class="input-group">
           <i class="fas fa-envelope"></i>
-          <input type="email" name="email" placeholder="Your email for notifications" value="<%= email || '' %>" required />
+          <input type="email" name="email" placeholder="Your email for notifications" value="<%= email || '' %>" required autocomplete="email" />
         </div>
 
         <button class="btn-submit" type="submit">

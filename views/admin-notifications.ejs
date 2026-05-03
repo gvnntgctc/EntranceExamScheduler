@@ -74,7 +74,7 @@
       <% } %>
       <div class="section-card">
         <div class="search-bar">
-          <input id="notificationSearch" type="search" placeholder="Search recipient, subject, body..." aria-label="Search notifications" value="<%= search %>" />
+          <input id="notificationSearch" type="search" placeholder="Search recipient, subject, body..." aria-label="Search notifications" value="<%= search %>" autocomplete="off" />
           <button id="notificationSearchBtn" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
           <select id="notificationStatus" aria-label="Filter status">
             <option value="all" <%= status==='all' ? 'selected' : '' %>>All Status</option>
