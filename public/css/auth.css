@@ -570,8 +570,8 @@ body.review-screen .review-form {
 /* ==================== */
 
 .logo {
-  width: 200px;
-  height: 200px;
+  width: 80px;
+  height: 80px;
   margin-bottom: 25px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
@@ -583,13 +583,13 @@ body.review-screen .review-form {
 }
 
 .logo img {
-  width: 200px;
-  height: 200px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
 }
 
 .logo i {
-  font-size: 40px;
+  font-size: 30px;
   color: white;
 }
 

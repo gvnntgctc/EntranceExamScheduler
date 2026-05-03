@@ -321,14 +321,14 @@ body {
 
 .school-logo {
   position: absolute;
-  top: -20px;
-  right: 15px;
-  width: 56px;
-  height: 56px;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   overflow: hidden;
   background: white;
-  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .school-logo img {
@@ -1359,8 +1359,8 @@ h2 i {
 }
 
 .school-logo {
-  width: 120px;
-  height: 120px;
+  width: 60px;
+  height: 60px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   display: flex;
@@ -1372,13 +1372,13 @@ h2 i {
 }
 
 .school-logo i {
-  font-size: 50px;
+  font-size: 25px;
   color: white;
 }
 
 .school-logo img {
-  width: 80px;
-  height: 80px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
 }
 
@@ -1610,12 +1610,12 @@ h2 i {
   }
   
   .school-logo {
-    width: 80px;
-    height: 80px;
+    width: 50px;
+    height: 50px;
   }
   
   .school-logo i {
-    font-size: 35px;
+    font-size: 20px;
   }
   
   .school-name {
@@ -3311,8 +3311,8 @@ button.btn-primary:hover {
 }
 
 .page-logo-img {
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
   border-radius: 6px;
   border: 1px solid rgba(17, 153, 142, 0.3);
@@ -3335,8 +3335,8 @@ button.btn-primary:hover {
   }
 
   .page-logo-img {
-    width: 25px;
-    height: 25px;
+    width: 18px;
+    height: 18px;
   
 
     font-size: 14px;
