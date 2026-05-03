@@ -3308,10 +3308,10 @@ button.btn-primary:hover {
   top: 20px;
   right: 20px;
   z-index: 10;
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 14px;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(17, 153, 142, 0.3);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
@@ -3337,11 +3337,13 @@ button.btn-primary:hover {
   .page-logo {
     top: 15px;
     right: 15px;
+    width: 48px;
+    height: 48px;
   }
 
   .page-logo-img {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
   
 
     font-size: 14px;

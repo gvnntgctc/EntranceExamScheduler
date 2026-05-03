@@ -41,8 +41,8 @@ body {
   position: fixed;
   top: 18px;
   right: 18px;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
