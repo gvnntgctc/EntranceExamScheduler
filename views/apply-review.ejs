@@ -8,36 +8,43 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/auth.css">
 </head>
-<body>
-  <div class="container single-panel" id="container">
-    <div class="form-container sign-in-container" style="max-width: 420px; margin: auto;">
-      <h1>Confirm Your Information</h1>
-      <p class="subtitle">Please verify your details before submitting your application.</p>
+<body class="review-screen">
+  <div class="container single-panel review-page" id="container">
+    <div class="form-container sign-in-container">
+      <div class="review-header">
+        <span class="eyebrow">Review</span>
+        <h1>Confirm Your Information</h1>
+        <p class="subtitle">Please verify your details before submitting your application.</p>
+      </div>
 
       <div class="review-card">
         <div class="review-card-header">
-          <i class="fas fa-user-check"></i>
+          <div class="review-icon">
+            <i class="fas fa-user-check"></i>
+          </div>
           <div>
-            <h2>Check your details</h2>
-            <p class="review-note">Make sure everything is correct before we send the verification code. You can go back and edit if needed.</p>
+            <h2>Verify your submission</h2>
+            <p class="review-note">Review each detail carefully before confirming your application.</p>
           </div>
         </div>
 
-        <div class="review-item">
-          <label>Full Name</label>
-          <span><%= fullName %></span>
-        </div>
-        <div class="review-item">
-          <label>Phone Number</label>
-          <span><%= phoneNumber %></span>
-        </div>
-        <div class="review-item">
-          <label>Email</label>
-          <span><%= email %></span>
+        <div class="review-summary">
+          <div class="review-item">
+            <span class="review-label">Full Name</span>
+            <span class="review-value"><%= fullName %></span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Phone Number</span>
+            <span class="review-value"><%= phoneNumber %></span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Email</span>
+            <span class="review-value"><%= email %></span>
+          </div>
         </div>
       </div>
 
-      <form action="/auth/apply-confirm" method="POST">
+      <form class="review-form" action="/auth/apply-confirm" method="POST">
         <input type="hidden" name="fullName" value="<%= fullName %>" />
         <input type="hidden" name="phoneNumber" value="<%= phoneNumber %>" />
         <input type="hidden" name="email" value="<%= email %>" />
