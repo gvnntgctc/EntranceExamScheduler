@@ -259,12 +259,19 @@ router.get('/add-schedule', isAdmin, async (req, res) => {
     
     // Filter out students who already have a schedule
     const students = allStudents.filter(student => !scheduledStudentIds.has(student._id.toString()));
+
+    const scheduleCounts = schedules.reduce((acc, schedule) => {
+      const dateKey = new Date(schedule.examDate).toISOString().split('T')[0];
+      acc[dateKey] = (acc[dateKey] || 0) + 1;
+      return acc;
+    }, {});
     
     const minDate = new Date().toISOString().split('T')[0];
 
     res.render('add-schedule', { 
       schedules,
       students,
+      scheduleCounts,
       minDate,
       page: 'addSchedule',
       error: req.query.error || '',
@@ -278,6 +285,7 @@ router.get('/add-schedule', isAdmin, async (req, res) => {
     res.render('add-schedule', { 
       schedules: [], 
       students,
+      scheduleCounts: {},
       minDate,
       page: 'addSchedule',
       error: 'Failed to load schedules',
@@ -315,6 +323,11 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
     dateStart.setHours(0, 0, 0, 0);
     const dateEnd = new Date(dateStart);
     dateEnd.setHours(23, 59, 59, 999);
+    const dateCount = await Schedule.countDocuments({ examDate: { $gte: dateStart, $lte: dateEnd } });
+    if (dateCount >= 50) {
+      return res.redirect('/admin/add-schedule?error=This exam date has reached the maximum limit of 50 scheduled applicants');
+    }
+
     const existing = await Schedule.findOne({ studentId: student._id, examDate: { $gte: dateStart, $lte: dateEnd } });
     if (existing) {
       return res.redirect('/admin/add-schedule?error=This student already has a scheduled exam on that day');
@@ -790,6 +803,20 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
     const oldDate = new Date(schedule.examDate).toLocaleDateString();
     const oldTime = schedule.examTime;
     const oldLocation = schedule.location;
+
+    const dateStart = new Date(examDate);
+    dateStart.setHours(0, 0, 0, 0);
+    const dateEnd = new Date(dateStart);
+    dateEnd.setHours(23, 59, 59, 999);
+
+    const dateCount = await Schedule.countDocuments({
+      examDate: { $gte: dateStart, $lte: dateEnd },
+      _id: { $ne: schedule._id }
+    });
+
+    if (dateCount >= 50) {
+      return res.redirect(`/admin/edit-schedule/${id}?error=That exam date has already reached the maximum limit of 50 scheduled applicants`);
+    }
 
     // Update the schedule
     schedule.examDate = new Date(examDate);
