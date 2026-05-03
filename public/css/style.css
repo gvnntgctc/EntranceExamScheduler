@@ -3066,7 +3066,7 @@ button.btn-primary:hover {
 
 /* STUDENT MODAL STYLES */
 .student-modal-bg {
-  display: none !important;
+  display: none;
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
@@ -3079,7 +3079,7 @@ button.btn-primary:hover {
 }
 
 .student-modal {
-  display: none !important;
+  display: none;
   position: fixed !important;
   top: 50% !important;
   left: 50% !important;
