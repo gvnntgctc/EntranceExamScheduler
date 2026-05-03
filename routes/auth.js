@@ -280,14 +280,17 @@ router.post('/apply-confirm', async (req, res) => {
       ]
     });
 
-    console.log('Registration attempt:', { fullName, phoneNumber, rawEmail });
+    console.log('=== REGISTRATION ATTEMPT ===');
+    console.log('Input data:', { fullName, phoneNumber, rawEmail });
     console.log('Existing user found:', existingUser ? {
       id: existingUser._id,
       name: existingUser.fullName,
       email: existingUser.email,
       phone: existingUser.phoneNumber,
       verified: existingUser.isVerified,
-      status: existingUser.status
+      status: existingUser.status,
+      otp: existingUser.otp ? 'EXISTS' : 'NULL',
+      otpExpiry: existingUser.otpExpiry
     } : 'None');
 
     if (existingUser && existingUser.isVerified) {
@@ -309,16 +312,17 @@ router.post('/apply-confirm', async (req, res) => {
 
     let user;
     if (existingUser && !existingUser.isVerified) {
-      // Update existing pending user with new OTP
-      console.log('Updating existing pending user:', existingUser._id);
+      // Update existing pending user with new OTP - allow re-registration
+      console.log('🔄 UPDATING existing pending user:', existingUser._id);
       existingUser.otp = otp;
       existingUser.otpExpiry = otpExpiry;
       existingUser.resultMessage = 'Your application is pending review. We will notify you by email once schedule/result is set.';
       await existingUser.save();
       user = existingUser;
+      console.log('✅ Updated pending user with new OTP');
     } else {
       // Create new user
-      console.log('Creating new user with:', { phoneNumber, email: rawEmail, fullName });
+      console.log('🆕 Creating new user');
       user = new User({
         phoneNumber,
         email: rawEmail,
@@ -332,7 +336,7 @@ router.post('/apply-confirm', async (req, res) => {
       });
       try {
         await user.save();
-        console.log('New user saved:', user);
+        console.log('✅ New user saved with ID:', user._id);
       } catch (err) {
         console.error('Error saving new user:', err);
         return res.redirect('/auth/apply?error=Failed to save registration.');
