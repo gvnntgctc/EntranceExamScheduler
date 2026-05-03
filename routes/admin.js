@@ -311,6 +311,27 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
   }
 });
 
+// Student detail API route
+router.get('/students/api/:id', isAdmin, async (req, res) => {
+  try {
+    const studentId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      return res.status(400).json({ error: 'Invalid student ID' });
+    }
+
+    const student = await User.findById(studentId).lean();
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    const studentSchedules = await Schedule.find({ studentId }).sort({ examDate: -1 }).lean();
+    return res.json({ student, studentSchedules });
+  } catch (error) {
+    console.error('Error in /students/api/:id route:', error);
+    return res.status(500).json({ error: 'Failed to load student details' });
+  }
+});
+
 // Student detail view route
 router.get('/students/view/:id', isAdmin, async (req, res) => {
   try {

@@ -430,9 +430,9 @@
                     <% } %>
                   </td>
                   <td data-label="Actions" class="actions-column">
-                    <a href="/admin/students/view/<%= student._id.toString() %>" class="action-btn edit-btn" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                    <button type="button" class="action-btn edit-btn view-student-btn" data-student-id="<%= student._id.toString() %>">
                       <i class="fas fa-eye"></i> View
-                    </a>
+                    </button>
                     <button type="button" class="action-btn delete-btn" onclick="openDeleteModal('<%= student._id %>', '<%= student.fullName %>')">
                       <i class="fas fa-trash"></i> Delete
                     </button>
@@ -548,6 +548,12 @@
     </div>
   </div>
 
+  <!-- Dynamic Student Detail Modal -->
+  <div id="dynamicStudentModalContainer" class="student-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 9998; align-items: center; justify-content: center;">
+    <div id="dynamicStudentModalContent" class="student-modal-content" style="background: white; border-radius: 16px; width: 90%; max-width: 650px; max-height: 90vh; overflow: auto; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);">
+    </div>
+  </div>
+
   <!-- Delete Confirmation Modal -->
   <div id="deleteModal" class="modal">
     <div class="modal-content">
@@ -651,6 +657,152 @@
         };
       }
     })();
+
+    function createStudentModalHtml(student, schedules) {
+      const scheduleItems = schedules.length > 0
+        ? schedules.map((s, idx) => `
+            <li style="${idx > 0 ? 'padding-top: 15px; margin-top: 15px;' : ''}">
+              <div style="background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%); padding: 16px; border-radius: 10px; border-left: 4px solid #11998e;">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                  <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #11998e; font-weight: 600;">
+                      <i class="fas fa-calendar"></i> ${new Date(s.examDate).toDateString()}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; color: #555; margin-bottom: 6px; font-size: 14px;">
+                      <i class="fas fa-clock"></i> <strong>Time:</strong> ${s.examTime}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; color: #555; font-size: 14px;">
+                      <i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> ${s.location}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>`).join('')
+        : `<div style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 2px dashed #ddd;">
+              <i class="fas fa-calendar-alt" style="font-size: 48px; color: #ccc; display: block; margin-bottom: 12px;"></i>
+              <p style="color: #999; margin: 0; font-size: 16px; font-style: italic;">No exam schedules assigned yet</p>
+           </div>`;
+
+      return `
+        <div style="display: flex; flex-direction: column; height: 100%;">
+          <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 30px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(17, 153, 142, 0.2);">
+            <div style="display: flex; align-items: center; gap: 15px;">
+              <div style="font-size: 32px; background: rgba(255, 255, 255, 0.2); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              <div>
+                <div style="font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Student Profile</div>
+                <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: white;">${student.fullName}</h2>
+              </div>
+            </div>
+            <button onclick="closeStudentModal()" style="background: rgba(255, 255, 255, 0.25); border: none; color: white; font-size: 24px; cursor: pointer; padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div style="padding: 30px; overflow-y: auto; flex: 1; background: #f8f9fa; max-height: calc(90vh - 150px);">
+            <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e0e0e0;">
+              <h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; border: none;">
+                <i class="fas fa-id-card"></i> Registration Information
+              </h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555; width: 35%;">Full Name</td>
+                  <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;">${student.fullName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555;">Email</td>
+                  <td style="padding: 14px 0; padding-left: 15px; color: #11998e;"><a href="mailto:${student.email}" style="color: #11998e; text-decoration: none; font-weight: 500;">${student.email}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555;">Phone Number</td>
+                  <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;">${student.phoneNumber || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555;">Registered Date</td>
+                  <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;">${student.createdAt ? new Date(student.createdAt).toDateString() : 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555;">Application Status</td>
+                  <td style="padding: 14px 0; padding-left: 15px; font-weight: 700; color: #333;">${student.status || 'pending'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555;">Status Notes</td>
+                  <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;">${student.resultMessage || 'No notes yet.'}</td>
+                </tr>
+              </table>
+            </div>
+            <div style="background: white; padding: 20px 25px 25px 25px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 20px;">
+              <h3 style="color: #11998e; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Update Result Status</h3>
+              <form method="POST" action="/admin/students/status/${student._id}">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                  <label style="display: flex; align-items: center; gap: 6px;"><input type="radio" name="status" value="passed" ${student.status === 'passed' ? 'checked' : ''} /> Passed</label>
+                  <label style="display: flex; align-items: center; gap: 6px;"><input type="radio" name="status" value="failed" ${student.status === 'failed' ? 'checked' : ''} /> Failed</label>
+                </div>
+                <button type="submit" class="action-btn edit-btn" style="margin-top: 0;">Apply Status</button>
+              </form>
+            </div>
+            <div style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0;">
+              <h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; border: none;"><i class="fas fa-calendar-check"></i> Exam Schedules (${schedules.length})</h3>
+              <ul style="list-style: none; padding: 0; margin: 0;">
+                ${scheduleItems}
+              </ul>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function openStudentModal(student, schedules) {
+      const container = document.getElementById('dynamicStudentModalContainer');
+      const content = document.getElementById('dynamicStudentModalContent');
+      if (!container || !content) return;
+      content.innerHTML = createStudentModalHtml(student, schedules);
+      container.style.display = 'flex';
+    }
+
+    function closeStudentModal() {
+      const container = document.getElementById('dynamicStudentModalContainer');
+      if (container) {
+        container.style.display = 'none';
+        container.querySelector('#dynamicStudentModalContent').innerHTML = '';
+      } else {
+        window.location.href = '/admin/students';
+      }
+    }
+
+    function loadStudentDetails(studentId) {
+      if (!studentId) return;
+      fetch(`/admin/students/api/${encodeURIComponent(studentId)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+          openStudentModal(data.student, data.studentSchedules || []);
+        })
+        .catch(err => {
+          console.error('Failed to load student details:', err);
+          alert('Failed to load student details. Please refresh and try again.');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.view-student-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const studentId = this.getAttribute('data-student-id');
+          loadStudentDetails(studentId);
+        });
+      });
+
+      const modalContainer = document.getElementById('dynamicStudentModalContainer');
+      if (modalContainer) {
+        modalContainer.addEventListener('click', function(e) {
+          if (e.target === modalContainer) {
+            closeStudentModal();
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html>
