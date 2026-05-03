@@ -154,7 +154,7 @@
                   </div>
                   <div class="schedule-actions">
                     <a href="/admin/edit-schedule/<%= s._id %>" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>
-                    <form method="POST" action="/admin/delete-schedule/<%= s._id %>" class="delete-form" data-schedule-title="<%= s.studentId ? s.studentId.fullName : 'Unknown' %>" data-schedule-date="<%= new Date(s.examDate).toDateString() %>" style="display:inline;">
+                    <form method="POST" action="/admin/delete-schedule/<%= s._id %>" class="delete-form" data-schedule-title="<%= s.studentId ? s.studentId.fullName : 'Unknown' %>" data-schedule-date="<%= new Date(s.examDate).toDateString() %>">
                       <button type="submit" class="delete-btn"><i class="fas fa-trash"></i> Delete</button>
                     </form>
                   </div>
