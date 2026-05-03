@@ -164,15 +164,28 @@ router.get('/weekly-schedule', isAdmin, async (req, res) => {
     });
 
     const today = new Date();
-    const upcomingSchedules = schedules
+    const upcomingDates = schedules
       .filter(schedule => new Date(schedule.examDate) >= today)
       .sort((a, b) => new Date(a.examDate) - new Date(b.examDate))
+      .reduce((acc, schedule) => {
+        const dateObj = new Date(schedule.examDate);
+        const dateKey = dateObj.toISOString().split('T')[0];
+        const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+        const existing = acc.find(item => item.dateKey === dateKey);
+        if (existing) {
+          existing.count += 1;
+        } else {
+          acc.push({ dateKey, displayDate, count: 1 });
+        }
+        return acc;
+      }, [])
       .slice(0, 6);
 
     res.render('weekly-schedule', { 
       monthCounts, 
       currentYear, 
-      upcomingSchedules,
+      upcomingDates,
       page: 'weekly', 
       error: req.query.error || '', 
       success: req.query.success || '' 
@@ -183,7 +196,7 @@ router.get('/weekly-schedule', isAdmin, async (req, res) => {
     res.render('weekly-schedule', {
       monthCounts: {},
       currentYear: new Date().getFullYear(),
-      upcomingSchedules: [],
+      upcomingDates: [],
       page: 'weekly',
       error: 'Failed to load schedules',
       success: ''
