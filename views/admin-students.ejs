@@ -406,6 +406,23 @@
             </select>
             <button id="clearSearch" class="btn btn-secondary"><i class="fas fa-times"></i> Clear</button>
           </div>
+
+          <!-- Bulk Actions Bar -->
+          <div class="bulk-actions-bar" style="display: flex; gap: 10px; align-items: center; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="selectAll" style="width: 18px; height: 18px;">
+              <label for="selectAll" style="font-weight: 600; color: #333; margin: 0;">Select All</label>
+            </div>
+            <div style="flex: 1;"></div>
+            <div style="display: flex; gap: 10px;">
+              <button id="bulkPassBtn" class="action-btn edit-btn" style="background: #28a745; border-color: #28a745;" disabled>
+                <i class="fas fa-check"></i> Pass Selected
+              </button>
+              <button id="bulkFailBtn" class="action-btn delete-btn" style="background: #dc3545; border-color: #dc3545;" disabled>
+                <i class="fas fa-times"></i> Fail Selected
+              </button>
+            </div>
+          </div>
         <% } %>
 
         <% if (students.length === 0) { %>
@@ -418,6 +435,7 @@
           <table class="students-table" id="studentsGrid">
             <thead>
               <tr>
+                <th style="width: 50px;"><input type="checkbox" id="selectAll" style="width: 18px; height: 18px;"></th>
                 <th>#</th>
                 <th>Full Name</th>
                 <th>Email</th>
@@ -429,6 +447,7 @@
             <tbody>
               <% students.forEach((student, index) => { %>
                 <tr>
+                  <td data-label="Select"><input type="checkbox" class="student-checkbox" value="<%= student._id %>" style="width: 18px; height: 18px;"></td>
                   <td data-label="#"><strong><%= index + 1 %></strong></td>
                   <td data-label="Full Name" class="student-name"><%= student.fullName %></td>
                   <td data-label="Email" class="student-email"><%= student.email %></td>
@@ -785,6 +804,10 @@
             student.row.style.display = 'none';
           }
         });
+
+        // Update bulk operations after filtering
+        updateSelectAllState();
+        updateBulkButtons();
       }
 
       // Add event listeners for live filtering
@@ -796,8 +819,119 @@
           searchInput.value = ''; 
           statusFilter.value = 'all';
           filterTable();
+          updateSelectAllState();
+          updateBulkButtons();
         });
       }
+    })();
+
+    // Bulk Operations
+    let updateBulkButtons, updateSelectAllState;
+    
+    (function() {
+      const selectAllCheckbox = document.getElementById('selectAll');
+      const studentCheckboxes = document.querySelectorAll('.student-checkbox');
+      const bulkPassBtn = document.getElementById('bulkPassBtn');
+      const bulkFailBtn = document.getElementById('bulkFailBtn');
+      const bulkActionsBar = document.querySelector('.bulk-actions-bar');
+
+      if (!bulkActionsBar) return; // No bulk actions bar if no students
+
+      updateBulkButtons = function() {
+        const checkedBoxes = document.querySelectorAll('.student-checkbox:checked');
+        const hasSelection = checkedBoxes.length > 0;
+        
+        bulkPassBtn.disabled = !hasSelection;
+        bulkFailBtn.disabled = !hasSelection;
+        
+        bulkPassBtn.style.opacity = hasSelection ? '1' : '0.5';
+        bulkFailBtn.style.opacity = hasSelection ? '1' : '0.5';
+      };
+
+      updateSelectAllState = function() {
+        const visibleCheckboxes = Array.from(studentCheckboxes).filter(cb => {
+          const row = cb.closest('tr');
+          return row.style.display !== 'none';
+        });
+        
+        const checkedVisibleBoxes = visibleCheckboxes.filter(cb => cb.checked);
+        const allVisibleChecked = visibleCheckboxes.length > 0 && checkedVisibleBoxes.length === visibleCheckboxes.length;
+        const someVisibleChecked = checkedVisibleBoxes.length > 0;
+        
+        selectAllCheckbox.checked = allVisibleChecked;
+        selectAllCheckbox.indeterminate = someVisibleChecked && !allVisibleChecked;
+      };
+
+      // Select All functionality
+      selectAllCheckbox.addEventListener('change', function() {
+        const isChecked = this.checked;
+        const visibleCheckboxes = Array.from(studentCheckboxes).filter(cb => {
+          const row = cb.closest('tr');
+          return row.style.display !== 'none';
+        });
+        
+        visibleCheckboxes.forEach(cb => {
+          cb.checked = isChecked;
+        });
+        
+        updateBulkButtons();
+      });
+
+      // Individual checkbox changes
+      studentCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+          updateSelectAllState();
+          updateBulkButtons();
+        });
+      });
+
+      // Bulk action handlers
+      bulkPassBtn.addEventListener('click', function() {
+        const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+        if (selectedIds.length === 0) return;
+        
+        if (confirm(`Are you sure you want to mark ${selectedIds.length} student(s) as PASSED? This will send notification emails.`)) {
+          submitBulkStatus(selectedIds, 'passed');
+        }
+      });
+
+      bulkFailBtn.addEventListener('click', function() {
+        const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+        if (selectedIds.length === 0) return;
+        
+        if (confirm(`Are you sure you want to mark ${selectedIds.length} student(s) as FAILED? This will send notification emails.`)) {
+          submitBulkStatus(selectedIds, 'failed');
+        }
+      });
+
+      function submitBulkStatus(studentIds, status) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/students/bulk-status';
+        
+        // Add student IDs
+        studentIds.forEach(id => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'studentIds';
+          input.value = id;
+          form.appendChild(input);
+        });
+        
+        // Add status
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'status';
+        statusInput.value = status;
+        form.appendChild(statusInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+      }
+
+      // Initial state
+      updateBulkButtons();
+      updateSelectAllState();
     })();
 
     function closeStudentModal() {

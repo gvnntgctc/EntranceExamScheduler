@@ -782,6 +782,82 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
   }
 });
 
+// Bulk status update route
+router.post('/students/bulk-status', isAdmin, async (req, res) => {
+  try {
+    const { studentIds, status } = req.body;
+
+    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+      return res.redirect('/admin/students?error=No students selected');
+    }
+
+    if (!['passed', 'failed'].includes(status)) {
+      return res.redirect('/admin/students?error=Invalid status value');
+    }
+
+    const students = await User.find({ _id: { $in: studentIds } });
+    if (students.length === 0) {
+      return res.redirect('/admin/students?error=No valid students found');
+    }
+
+    let updatedCount = 0;
+    let emailCount = 0;
+
+    for (const student of students) {
+      if (student.status !== status) {
+        student.status = status;
+        student.notificationSent = false;
+
+        let statusMessage = '';
+        let emailSubject = '';
+        let emailBody = '';
+
+        if (status === 'passed') {
+          statusMessage = 'Congratulations! Your application has been approved.';
+          emailSubject = 'Admission Decision: APPROVED - Bachelor of Science in Information Technology (BSIT)';
+          emailBody = `Dear Applicant,\n\nCongratulations!\n\nWe are delighted to inform you that you have SUCCESSFULLY PASSED the entrance examination for the Bachelor of Science in Information Technology (BSIT) program.\n\n═══════════════════════════════════════════════════════════════════════════════\nADMISSION STATUS\n═══════════════════════════════════════════════════════════════════════════════\n\nAdmission Status: APPROVED\nProgram: Bachelor of Science in Information Technology (BSIT)\nDecision Date: ${new Date().toLocaleDateString()}\n\nYour outstanding performance on the entrance examination demonstrates the technical knowledge and analytical ability required to succeed in our rigorous IT program.\n\n═══════════════════════════════════════════════════════════════════════════════\nNEXT STEPS\n═══════════════════════════════════════════════════════════════════════════════\n\n1. Check your email for your official exam schedule confirmation\n2. Review all exam details including date, time, and location\n3. Prepare for your enrollment procedures as instructed\n4. Contact our Admissions Office for any clarifications\n\nWe are excited to welcome you to our academic community. We look forward to supporting your educational journey and helping you develop the skills needed for a successful career in Information Technology.\n\nShould you have any questions or require further information, please contact our Admissions Office.\n\nOnce again, congratulations on your achievement!\n\nWarm regards,\n\nAdmissions Office\nBachelor of Science in Information Technology Program\nEntranceExam Administration`;
+        } else if (status === 'failed') {
+          statusMessage = 'Your application was not approved at this time.';
+          emailSubject = 'Admission Decision: NOT APPROVED - Entrance Examination Results';
+          emailBody = `Dear Applicant,\n\nRe: Entrance Examination Results for BSIT Program\n\nWe sincerely appreciate your interest in the Bachelor of Science in Information Technology (BSIT) program and the effort you invested in preparing for and taking the entrance examination.\n\n═══════════════════════════════════════════════════════════════════════════════\nADMISSION STATUS\n═══════════════════════════════════════════════════════════════════════════════\n\nAdmission Status: NOT APPROVED\nProgram: Bachelor of Science in Information Technology (BSIT)\nDecision Date: ${new Date().toLocaleDateString()}\n\n═══════════════════════════════════════════════════════════════════════════════\nRECOMMENDATIONS\n═══════════════════════════════════════════════════════════════════════════════\n\nUnfortunately, your performance on the entrance examination did not meet the minimum passing standards required for admission to the BSIT program at this time.\n\nWe encourage you to consider the following options:\n\n1. Reapply in the next admission cycle (typically offered in the following semester/academic year)\n2. Review and strengthen your foundational knowledge in mathematics and computer science concepts\n3. Participate in our preparatory workshops and review materials (if available)\n4. Contact our Admissions Office for guidance on areas for improvement\n\n═══════════════════════════════════════════════════════════════════════════════\nCONTACT INFORMATION\n═══════════════════════════════════════════════════════════════════════════════\n\nDo not hesitate to contact our Admissions Office if you would like feedback on your examination performance or guidance for future applications. We are here to support your academic aspirations.\n\nWe wish you the very best in your future endeavors.\n\nSincerely,\n\nAdmissions Office\nBachelor of Science in Information Technology Program\nEntranceExam Administration`;
+        }
+
+        student.resultMessage = statusMessage;
+        await student.save();
+        updatedCount++;
+
+        // Log status update in activity log
+        await Notification.create({
+          recipientId: student._id,
+          recipientEmail: student.email,
+          subject: 'Application Status Updated',
+          body: `Admin updated application status to: ${status.toUpperCase()}`,
+          status: 'sent'
+        });
+
+        const sent = await sendEmail({
+          recipientId: student._id,
+          to: student.email,
+          subject: emailSubject,
+          text: emailBody
+        });
+
+        if (sent) {
+          student.notificationSent = true;
+          await student.save();
+          emailCount++;
+        }
+      }
+    }
+
+    const message = `Updated ${updatedCount} student(s) to ${status}. ${emailCount} notification(s) sent.`;
+    return res.redirect(`/admin/students?success=${encodeURIComponent(message)}`);
+  } catch (error) {
+    console.error('Failed to bulk update status:', error);
+    return res.redirect('/admin/students?error=Failed to update student statuses');
+  }
+});
+
 
 // Detailed Schedule for a specific day
 router.get('/schedules/day/:day', isAdmin, async (req, res) => {
