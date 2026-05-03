@@ -37,6 +37,27 @@ body {
   overflow: visible;
 }
 
+.page-logo {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.page-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .container.single-panel .form-container {
   position: static;
   width: 100%;
