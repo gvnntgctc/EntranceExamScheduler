@@ -311,6 +311,64 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
   }
 });
 
+// Student detail view route
+router.get('/students/view/:id', isAdmin, async (req, res) => {
+  try {
+    const search = req.query.search || '';
+    const status = req.query.status || 'all';
+
+    // Build query for filtering student list
+    let query = { role: 'student', isVerified: true };
+    if (status !== 'all') {
+      query.status = status;
+    }
+    if (search) {
+      const searchRegex = new RegExp(escapeRegExp(search), 'i');
+      query.$or = [
+        { fullName: searchRegex },
+        { email: searchRegex }
+      ];
+    }
+
+    const students = await User.find(query).sort({ createdAt: -1 });
+    const studentId = req.params.id;
+    let selectedStudent = null;
+    let studentSchedules = [];
+
+    if (mongoose.Types.ObjectId.isValid(studentId)) {
+      selectedStudent = await User.findById(studentId);
+      if (selectedStudent) {
+        studentSchedules = await Schedule.find({ studentId }).sort({ examDate: -1 });
+      }
+    }
+
+    res.render('admin-students', {
+      students,
+      studentSchedules,
+      selectedStudent,
+      selectedStudentId: studentId,
+      search,
+      status,
+      page: 'students',
+      error: selectedStudent ? '' : 'Unable to load applicant details',
+      success: ''
+    });
+  } catch (error) {
+    console.error('Error in /students/view/:id route:', error);
+    res.render('admin-students', {
+      students: [],
+      studentSchedules: [],
+      selectedStudent: null,
+      selectedStudentId: null,
+      search: req.query.search || '',
+      status: req.query.status || 'all',
+      page: 'students',
+      error: `Failed to load students: ${error.message}`,
+      success: ''
+    });
+  }
+});
+
 // Students List Page
 router.get('/students', isAdmin, async (req, res) => {
   try {
