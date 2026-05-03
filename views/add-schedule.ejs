@@ -21,6 +21,7 @@
   <div class="main-content">
     <div class="container">
       <h1><i class="fas fa-plus-circle"></i> Add New Schedule</h1>
+      <p class="page-subtitle">Create new exam schedules with holiday-aware validation and manage existing bookings from one centralized page.</p>
       
       <% if (error && error.length > 0) { %>
         <div class="message error">
@@ -35,6 +36,20 @@
       <% } %>
 
       <div class="section-card">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span>Total applicants</span>
+            <strong><%= students ? students.length : 0 %></strong>
+          </div>
+          <div class="stat-card">
+            <span>Total schedules</span>
+            <strong><%= schedules ? schedules.length : 0 %></strong>
+          </div>
+          <div class="stat-card">
+            <span>Upcoming exams</span>
+            <strong><%= schedules ? schedules.filter(s => new Date(s.examDate) >= new Date()).length : 0 %></strong>
+          </div>
+        </div>
         <h2><i class="fas fa-calendar-plus"></i> Create Schedule</h2>
         <form action="/admin/add-schedule" method="POST" class="schedule-form" role="form" aria-label="Add schedule form">
           <div class="form-group">
@@ -53,8 +68,8 @@
           
           <div class="form-group">
             <label for="examDate"><i class="fas fa-calendar"></i> Exam Date</label>
-            <input type="date" id="examDate" name="examDate" min="<%= minDate %>" required aria-required="true" aria-label="Exam date" />
-            <p class="holiday-help">These dates are holidays and cannot be scheduled:</p>
+            <input type="date" id="examDate" name="examDate" min="<%= minDate %>" required aria-required="true" aria-label="Exam date" aria-describedby="holidayHelp" />
+            <p class="holiday-help" id="holidayHelp">These dates are holidays and cannot be scheduled:</p>
             <ul class="holiday-list">
               <% const holidayList = typeof holidays !== 'undefined' ? holidays : []; %>
               <% if (holidayList.length) { %>
@@ -93,7 +108,10 @@
       </div>
 
       <div class="section-card">
-        <h2><i class="fas fa-list"></i> Existing Schedules</h2>
+        <div class="section-header">
+          <h2><i class="fas fa-list"></i> Existing Schedules</h2>
+          <span class="student-count"><%= schedules && schedules.length ? schedules.length : 0 %> scheduled</span>
+        </div>
         <% if (schedules && schedules.length) { %>
           <!-- Search Bar -->
           <div class="search-bar-container">
@@ -109,7 +127,6 @@
                 <i class="fas fa-times"></i> Clear
               </button>
             </div>
-          </div>
           </div>
 
           <ul class="schedule-list" id="schedulesList">
@@ -154,155 +171,17 @@
   </div>
 
   <script src="/js/script.js"></script>
-  <style>
-    .search-bar-container {
-      margin-bottom: 20px;
-    }
-
-    .search-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #f8f9fa;
-      padding: 12px 16px;
-      border-radius: 8px;
-      border: 2px solid #e0e0e0;
-      transition: all 0.3s ease;
-    }
-
-    .search-container:focus-within {
-      border-color: #11998e;
-      background: white;
-      box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.1);
-    }
-
-    .search-container i {
-      color: #11998e;
-      font-size: 16px;
-    }
-
-    .search-input {
-      border: none;
-      background: transparent;
-      flex: 1;
-      font-size: 14px;
-      outline: none;
-      color: #333;
-    }
-
-    .search-input::placeholder {
-      color: #999;
-    }
-
-    .clear-btn {
-      background: #e74c3c;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-    }
-
-    .clear-btn:hover {
-      background: #c0392b;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
-    }
-
-    .clear-btn:active {
-      transform: translateY(0);
-    }
-
-    .holiday-help {
-      margin: 10px 0 6px;
-      color: #555;
-      font-size: 13px;
-    }
-
-    .holiday-list {
-      margin: 0 0 12px;
-      padding-left: 20px;
-      list-style: disc;
-    }
-
-    .holiday-list li {
-      color: #c0392b;
-      font-weight: 700;
-      margin-bottom: 4px;
-      font-size: 14px;
-    }
-
-    .holiday-list li span {
-      color: #c0392b;
-      font-weight: 500;
-    }
-
-    .holiday-warning {
-      margin-top: 8px;
-      color: #c0392b;
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .pagination-controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 15px;
-      margin-top: 25px;
-      padding-top: 20px;
-      border-top: 1px solid #eee;
-    }
-
-    .pagination-btn {
-      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .pagination-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
-    }
-
-    .pagination-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .page-info {
-      font-size: 14px;
-      font-weight: 600;
-      color: #666;
-      min-width: 80px;
-      text-align: center;
-    }
-  </style>
   <script>
     // PAGINATION FOR EXISTING SCHEDULES
     const ITEMS_PER_PAGE = 10;
     let currentPage = 1;
     const schedulesList = document.getElementById('schedulesList');
     let allSchedules = [];
+    let originalScheduleOrder = [];
 
     if (schedulesList) {
       allSchedules = Array.from(schedulesList.querySelectorAll('li'));
+      originalScheduleOrder = [...allSchedules];
       
       // Initialize all schedules with dataset.hidden = 'false'
       allSchedules.forEach(item => {
@@ -312,26 +191,22 @@
       
       // Define displayPage function first
       function displayPage(pageNumber) {
-        // Get all visible (non-filtered) schedules
         const visibleSchedules = allSchedules.filter(item => item.dataset.hidden !== 'true');
         
         const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
         const endIndex = startIndex + ITEMS_PER_PAGE;
         
-        // Hide all schedules first
         allSchedules.forEach(item => {
           item.style.display = 'none';
         });
         
-        // Show only the schedules for this page
         visibleSchedules.slice(startIndex, endIndex).forEach(item => {
           item.style.display = 'flex';
         });
 
-        const totalPages = Math.ceil(visibleSchedules.length / ITEMS_PER_PAGE);
+        const totalPages = Math.max(1, Math.ceil(visibleSchedules.length / ITEMS_PER_PAGE));
         document.getElementById('pageInfo').textContent = `Page ${pageNumber} of ${totalPages}`;
         
-        // Disable Previous button on first page
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
         
@@ -339,15 +214,13 @@
         if (nextBtn) nextBtn.disabled = pageNumber === totalPages;
       }
 
-      // Make displayPage globally available
       window.displayPage = displayPage;
 
-      // Display the first page
       displayPage(currentPage);
 
       window.nextPage = function() {
         const visibleSchedules = allSchedules.filter(item => item.dataset.hidden !== 'true');
-        const totalPages = Math.ceil(visibleSchedules.length / ITEMS_PER_PAGE);
+        const totalPages = Math.max(1, Math.ceil(visibleSchedules.length / ITEMS_PER_PAGE));
         if (currentPage < totalPages) {
           currentPage++;
           displayPage(currentPage);
@@ -361,21 +234,24 @@
         }
       };
 
-      // SEARCH FUNCTIONALITY
       const searchInput = document.getElementById('scheduleSearch');
       const clearBtn = document.getElementById('clearBtn');
+
+      function restoreOriginalOrder() {
+        originalScheduleOrder.forEach(item => schedulesList.appendChild(item));
+        allSchedules = [...originalScheduleOrder];
+      }
 
       function performSearch() {
         const searchTerm = searchInput.value.toLowerCase();
         currentPage = 1;
 
         if (searchTerm === '') {
-          // If search is empty, show all schedules in original order
           allSchedules.forEach(item => {
             item.dataset.hidden = 'false';
           });
+          restoreOriginalOrder();
         } else {
-          // Separate matching and non-matching items
           const matchingItems = [];
           const nonMatchingItems = [];
           
@@ -390,18 +266,15 @@
             }
           });
           
-          // Reorder: matching items first, then non-matching
           const orderedItems = [...matchingItems, ...nonMatchingItems];
-          orderedItems.forEach((item, index) => {
-            allSchedules[index] = item;
-          });
+          allSchedules = orderedItems;
+          orderedItems.forEach(item => schedulesList.appendChild(item));
         }
 
         displayPage(currentPage);
       }
 
       if (searchInput) {
-        // Search automatically as user types
         searchInput.addEventListener('input', performSearch);
       }
 
@@ -412,6 +285,7 @@
           allSchedules.forEach(item => {
             item.dataset.hidden = 'false';
           });
+          restoreOriginalOrder();
           displayPage(currentPage);
         });
       }
