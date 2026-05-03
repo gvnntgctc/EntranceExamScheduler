@@ -480,6 +480,20 @@ router.get('/students', isAdmin, async (req, res) => {
     // Build query for filtering
     let query = { role: 'student', isVerified: true };
     
+    // Filter by search term if provided
+    if (req.query.search && req.query.search.trim()) {
+      const searchRegex = new RegExp(req.query.search.trim(), 'i');
+      query.$or = [
+        { fullName: searchRegex },
+        { email: searchRegex }
+      ];
+    }
+    
+    // Filter by status if provided and not 'all'
+    if (req.query.status && req.query.status !== 'all') {
+      query.status = req.query.status;
+    }
+    
     console.log('Final query:', JSON.stringify(query, null, 2));
     
     let students = [];
@@ -539,6 +553,8 @@ router.get('/students', isAdmin, async (req, res) => {
       studentSchedules: [],
       selectedStudent: null,
       selectedStudentId: null,
+      search: req.query.search || '',
+      status: req.query.status || 'all',
       page: 'students',
       error: `Failed to load students: ${error.message}`,
       success: ''

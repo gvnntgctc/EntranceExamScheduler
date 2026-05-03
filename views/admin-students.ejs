@@ -744,51 +744,59 @@
       }
     });
 
-    // Search and Filter functionality
+    // Search and Filter functionality - Live filtering without page reload
     (function() {
       const searchInput = document.getElementById('studentSearch');
       const statusFilter = document.getElementById('statusFilter');
       const clearBtn = document.getElementById('clearSearch');
+      const tableBody = document.querySelector('#studentsGrid tbody');
       
-      if (!searchInput || !statusFilter) return;
+      if (!searchInput || !statusFilter || !tableBody) return;
 
-      function updateFilters() {
-        const searchValue = searchInput.value.trim();
+      // Store original data from page load
+      const allRows = Array.from(tableBody.querySelectorAll('tr'));
+      const students = allRows.map(row => ({
+        row: row,
+        name: row.querySelector('.student-name')?.textContent || '',
+        email: row.querySelector('.student-email')?.textContent || '',
+        status: row.querySelector('.status-badge')?.textContent?.trim().toLowerCase() || 'pending',
+        date: row.querySelector('.student-date')?.textContent || ''
+      }));
+
+      function filterTable() {
+        const searchValue = searchInput.value.trim().toLowerCase();
         const statusValue = statusFilter.value;
         
-        // Build query string
-        const params = new URLSearchParams();
-        if (searchValue) params.set('search', searchValue);
-        if (statusValue !== 'all') params.set('status', statusValue);
+        let visibleCount = 0;
         
-        // Update URL without page reload
-        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-        window.location.href = newUrl;
+        students.forEach((student, index) => {
+          const matchesSearch = searchValue === '' || 
+            student.name.toLowerCase().includes(searchValue) ||
+            student.email.toLowerCase().includes(searchValue);
+          
+          const matchesStatus = statusValue === 'all' || student.status.includes(statusValue.toLowerCase());
+          
+          if (matchesSearch && matchesStatus) {
+            student.row.style.display = '';
+            visibleCount++;
+            // Update index for visible rows
+            student.row.querySelector('td:first-child strong').textContent = visibleCount;
+          } else {
+            student.row.style.display = 'none';
+          }
+        });
       }
 
-      // Add event listeners
-      searchInput.addEventListener('input', debounce(updateFilters, 500));
-      statusFilter.addEventListener('change', updateFilters);
+      // Add event listeners for live filtering
+      searchInput.addEventListener('input', filterTable);
+      statusFilter.addEventListener('change', filterTable);
       
       if (clearBtn) {
         clearBtn.addEventListener('click', () => { 
           searchInput.value = ''; 
           statusFilter.value = 'all';
-          window.location.href = window.location.pathname;
+          filterTable();
         });
-      }
-
-      // Debounce function to limit API calls
-      function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-          const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-          };
-          clearTimeout(timeout);
-          timeout = setTimeout(later, wait);
-        };
       }
     })();
 
