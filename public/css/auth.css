@@ -322,27 +322,21 @@ body.review-screen .review-form {
   background: #f9fdfb;
   border: 1px solid rgba(17, 153, 142, 0.16);
   border-radius: 24px;
-  padding: 22px;
+  padding: 20px;
 }
 
 .review-item {
   display: grid;
-  grid-template-columns: 120px minmax(0, 1fr);
+  grid-template-columns: auto 1fr;
   gap: 18px;
-  align-items: start;
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(17, 153, 142, 0.12);
-}
-
-.review-item:nth-child(odd) {
+  align-items: center;
+  padding: 16px 18px;
   background: rgba(17, 153, 142, 0.04);
   border-radius: 16px;
-  padding: 14px 18px;
 }
 
 .review-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+  padding-bottom: 16px;
 }
 
 .review-label {
@@ -360,8 +354,8 @@ body.review-screen .review-form {
   font-size: 16px;
   font-weight: 700;
   text-align: left;
-  word-break: break-word;
-  overflow-wrap: break-word;
+  word-break: normal;
+  overflow-wrap: anywhere;
   min-width: 0;
 }
 
