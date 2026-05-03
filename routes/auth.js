@@ -399,10 +399,39 @@ router.post('/verify-otp', async (req, res) => {
       return res.redirect('/auth/verify-otp?error=Failed to complete registration.');
     }
 
+    const verificationDate = new Date().toLocaleDateString('en-PH', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    const verifiedText = `Dear ${user.fullName || user.email},\n\n` +
+      `Congratulations. Your email address has been successfully verified for the Philippine Technological College entrance examination registration.\n\n` +
+      `══════════════════════════════════════════════════════════════════════\n` +
+      `APPLICATION CONFIRMATION\n` +
+      `══════════════════════════════════════════════════════════════════════\n\n` +
+      `Applicant Name: ${user.fullName}\n` +
+      `Email Address: ${user.email}\n` +
+      `Phone Number: ${user.phoneNumber}\n` +
+      `Verification Status: Verified\n` +
+      `Verification Date: ${verificationDate}\n\n` +
+      `══════════════════════════════════════════════════════════════════════\n` +
+      `NEXT STEPS\n` +
+      `══════════════════════════════════════════════════════════════════════\n\n` +
+      `1. Your application is now pending review by the Admissions Committee.\n` +
+      `2. You will receive a separate email once your exam schedule has been confirmed.\n` +
+      `3. Please monitor your inbox regularly and add our address to your safe sender list.\n\n` +
+      `If you have questions, please contact the Admissions Office.\n\n` +
+      `Best regards,\n\n` +
+      `Admissions Office\n` +
+      `Philippine Technological College\n` +
+      `Entrance Exam Administration`;
+
     await sendEmail({
       to: user.email,
-      subject: 'Application Verified',
-      text: `Your email has been verified. You will receive exam schedule and status notifications by email.`
+      subject: 'Application Verified — Entrance Exam Registration',
+      text: verifiedText
     });
 
     // Clean up session
@@ -434,10 +463,24 @@ router.post('/resend-otp', async (req, res) => {
 
     console.log('✅ New OTP generated for resend:', email);
 
+    const otpMessage = `Dear Applicant,\n\n` +
+      `Your request for a new verification code has been processed. Please use the code below to complete your email verification.\n\n` +
+      `══════════════════════════════════════════════════════════════════════\n` +
+      `VERIFICATION CODE\n` +
+      `══════════════════════════════════════════════════════════════════════\n\n` +
+      `One-time verification code: ${otp}\n` +
+      `Expires in: 3 minutes\n\n` +
+      `Please enter this code in the portal to verify your email address.\n\n` +
+      `If you did not request this code, please disregard this email.\n\n` +
+      `Best regards,\n\n` +
+      `Admissions Office\n` +
+      `Philippine Technological College\n` +
+      `Entrance Exam Administration`;
+
     const emailSent = await sendEmail({
       to: email,
-      subject: 'Entrance Exam - New Verification Code',
-      text: `Your new verification code is ${otp}. It expires in 3 minutes.`
+      subject: 'Entrance Exam — Verification Code Resent',
+      text: otpMessage
     });
 
     if (!emailSent) {
