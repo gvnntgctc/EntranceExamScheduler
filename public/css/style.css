@@ -3297,10 +3297,11 @@ button.btn-primary:hover {
     font-size: 16px;
     padding: 10px 16px;
   }
+}
 
-/* ==================== */
-/* Page Logo Styles */
-/* ==================== */
+ /* ==================== */
+ /* Page Logo Styles */
+ /* ==================== */
 
 .page-logo {
   position: absolute;
@@ -3336,8 +3337,8 @@ button.btn-primary:hover {
   .page-logo-img {
     width: 25px;
     height: 25px;
-  }
-}
+  
+
     font-size: 14px;
   }
 
