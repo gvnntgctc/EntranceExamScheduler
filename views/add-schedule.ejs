@@ -163,8 +163,8 @@
                     </div>
                   </div>
                   <div class="schedule-actions">
-                    <a href="/admin/edit-schedule/<%= s._id %>" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>
-                    <button type="button" class="delete-btn delete-trigger" data-delete-url="/admin/delete-schedule/<%= s._id %>" data-schedule-title="<%= s.studentId ? s.studentId.fullName : 'Unknown' %>" data-schedule-date="<%= new Date(s.examDate).toDateString() %>"><i class="fas fa-trash"></i> Delete</button>
+                    <a href="/admin/edit-schedule/<%= s._id %>" class="edit-btn circle-btn" title="Edit schedule"><i class="fas fa-edit"></i></a>
+                    <button type="button" class="delete-btn circle-btn delete-trigger" title="Delete schedule" data-delete-url="/admin/delete-schedule/<%= s._id %>" data-schedule-title="<%= s.studentId ? s.studentId.fullName : 'Unknown' %>" data-schedule-date="<%= new Date(s.examDate).toDateString() %>"><i class="fas fa-trash"></i></button>
                   </div>
                 </div>
               </li>

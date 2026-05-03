@@ -409,10 +409,6 @@
 
           <!-- Bulk Actions Bar -->
           <div class="bulk-actions-bar" style="display: flex; gap: 10px; align-items: center; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <input type="checkbox" id="selectAll" style="width: 18px; height: 18px;">
-              <label for="selectAll" style="font-weight: 600; color: #333; margin: 0;">Select All</label>
-            </div>
             <div style="flex: 1;"></div>
             <div style="display: flex; gap: 10px;">
               <button id="bulkPassBtn" class="action-btn edit-btn" style="background: #28a745; border-color: #28a745;" disabled>
@@ -539,17 +535,6 @@
                 </tr>
               </table>
             </div>
-            <div style="background: white; padding: 20px 25px 25px 25px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 20px;">
-              <h3 style="color: #11998e; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Update Result Status</h3>
-              <form id="studentStatusForm" method="POST" action="">
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
-                  <label style="display: flex; align-items: center; gap: 6px;"><input type="radio" name="status" value="passed" /> Passed</label>
-                  <label style="display: flex; align-items: center; gap: 6px;"><input type="radio" name="status" value="failed" /> Failed</label>
-                </div>
-                <button type="submit" class="action-btn edit-btn" style="margin-top: 0;">Apply Status</button>
-              </form>
-            </div>
-
             <div id="studentSchedulesContainer" style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0;">
               <!-- Schedules will be populated by JavaScript -->
             </div>
@@ -750,32 +735,6 @@
       document.getElementById('studentModalLoader').style.display = 'none';
       document.getElementById('studentModalContent').style.display = 'block';
     }
-
-    // Handle status form submission
-    document.getElementById('studentStatusForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const formData = new FormData(this);
-      const studentId = this.action.split('/').pop();
-      
-      try {
-        const response = await fetch(`/admin/students/status/${studentId}`, {
-          method: 'POST',
-          body: formData
-        });
-        
-        if (response.ok) {
-          // Reload the student data to show updated status
-          await viewStudent(studentId);
-          alert('Status updated successfully!');
-        } else {
-          alert('Failed to update status');
-        }
-      } catch (error) {
-        console.error('Error updating status:', error);
-        alert('Failed to update status');
-      }
-    });
 
     // Close modal when clicking outside
     document.getElementById('deleteModal').addEventListener('click', function(e) {
