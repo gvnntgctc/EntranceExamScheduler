@@ -51,7 +51,7 @@ body {
 }
 
 .container.single-panel .form-container form {
-  padding: 40px 30px;
+  padding: 0 30px;
 }
 
 .container.single-panel .overlay-container,
@@ -238,7 +238,7 @@ body.review-screen .review-header .eyebrow {
   align-items: center;
   justify-content: center;
   padding: 8px 14px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   background: rgba(17, 153, 142, 0.14);
   color: #0f5132;
   border-radius: 999px;
@@ -250,7 +250,7 @@ body.review-screen .review-header .eyebrow {
 
 body.review-screen .review-header h1 {
   font-size: 28px;
-  margin: 0 0 16px;
+  margin-bottom: 10px;
   color: #17392e;
 }
 
