@@ -523,7 +523,7 @@
         </div>
 
         <div class="upcoming-card">
-          <h3>Upcoming Entrance Exams</h3>
+          <h3>Upcoming Entrance Exam Dates</h3>
           <p>Next scheduled exam dates are listed below in chronological order so you can see the nearest sessions at a glance.</p>
           <% if (upcomingSchedules && upcomingSchedules.length > 0) { %>
             <ul class="exam-list">
@@ -531,10 +531,9 @@
                 <li class="exam-item">
                   <span class="exam-rank"><%= index + 1 %></span>
                   <div class="exam-details">
-                    <strong><%= schedule.studentId?.fullName || 'Applicant' %></strong>
-                    <span><%= new Date(schedule.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %> at <%= schedule.examTime %></span>
+                    <strong><%= new Date(schedule.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></strong>
+                    <span><%= schedule.examTime %></span>
                   </div>
-                  <span class="exam-location"><%= schedule.location %></span>
                 </li>
               <% }) %>
             </ul>
