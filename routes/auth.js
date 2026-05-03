@@ -353,7 +353,16 @@ router.get('/verify-otp', (req, res) => {
   }
   const error = req.query.error || '';
   const success = req.query.success || '';
-  res.render('verify-otp', { email: req.session.registrationEmail, error, success });
+  const otpExpiry = new Date(req.session.pendingRegistration.otpExpiry);
+  const countdownSeconds = Number.isFinite(otpExpiry.getTime())
+    ? Math.max(0, Math.ceil((otpExpiry - Date.now()) / 1000))
+    : 180;
+  res.render('verify-otp', {
+    email: req.session.registrationEmail,
+    error,
+    success,
+    countdownSeconds
+  });
 });
 
 // Verify OTP (POST)

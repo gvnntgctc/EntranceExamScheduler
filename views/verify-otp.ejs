@@ -280,9 +280,6 @@
 </head>
 <body>
   <div class="container single-panel">
-    <div class="page-logo">
-      <img src="/images/logo.png" alt="PTC Logo" />
-    </div>
     <div class="header">
       <i class="fas fa-lock"></i>
       <h1>Verify OTP</h1>
@@ -332,7 +329,7 @@
       <p class="resend-text">Didn't receive the OTP?</p>
       <div class="resend-actions">
         <form action="/auth/resend-otp" method="POST" style="display: inline;">
-          <button type="submit" class="btn-resend">
+          <button type="submit" class="btn-resend" id="resendBtn" disabled>
             <i class="fas fa-redo"></i> Resend OTP
           </button>
         </form>
@@ -371,20 +368,26 @@
     });
 
     // OTP Countdown Timer
-    let countdownTime = 3 * 60; // 3 minutes in seconds
+    let countdownTime = <%= countdownSeconds || 180 %>; // seconds remaining from session
     const countdownElement = document.getElementById('countdown');
+    const resendBtn = document.getElementById('resendBtn');
 
     function updateCountdown() {
       const minutes = Math.floor(countdownTime / 60);
       const seconds = countdownTime % 60;
       countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
+      // Update resend button state
       if (countdownTime > 0) {
+        resendBtn.disabled = true;
+        resendBtn.style.opacity = '0.5';
+        resendBtn.style.cursor = 'not-allowed';
         countdownTime--;
         setTimeout(updateCountdown, 1000);
       } else {
         countdownElement.textContent = '00:00';
         countdownElement.style.color = '#c62828';
+        resendBtn.disabled = true;
 
         // Disable OTP input
         const otpInput = document.querySelector('.single-otp-input');
@@ -425,9 +428,11 @@
           resendSection.style.padding = '15px';
         }
 
-        // Make resend button more prominent
-        const resendBtn = document.querySelector('.btn-resend');
+        // Make resend button more prominent and enable it
         if (resendBtn) {
+          resendBtn.disabled = false;
+          resendBtn.style.opacity = '1';
+          resendBtn.style.cursor = 'pointer';
           resendBtn.style.fontSize = '16px';
           resendBtn.style.fontWeight = '700';
           resendBtn.style.color = '#c62828';
