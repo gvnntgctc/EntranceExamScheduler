@@ -903,45 +903,64 @@
       });
 
       function submitBulkStatus(studentIds, status) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/admin/students/bulk-status';
-        
-        // Add student IDs
-        studentIds.forEach(id => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = 'studentIds';
-          input.value = id;
-          form.appendChild(input);
+        fetch('/admin/students/bulk-status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            studentIds: studentIds,
+            status: status
+          })
+        })
+        .then(response => {
+          if (response.redirected) {
+            window.location.href = response.url;
+          } else {
+            return response.text();
+          }
+        })
+        .then(data => {
+          if (data) {
+            console.log('Response:', data);
+            // If not redirected, reload the page
+            window.location.reload();
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while updating student statuses.');
         });
-        
-        // Add status
-        const statusInput = document.createElement('input');
-        statusInput.type = 'hidden';
-        statusInput.name = 'status';
-        statusInput.value = status;
-        form.appendChild(statusInput);
-        
-        document.body.appendChild(form);
-        form.submit();
       }
 
       function submitBulkDelete(studentIds) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/admin/students/bulk-delete';
-
-        studentIds.forEach(id => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = 'studentIds';
-          input.value = id;
-          form.appendChild(input);
+        fetch('/admin/students/bulk-delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            studentIds: studentIds
+          })
+        })
+        .then(response => {
+          if (response.redirected) {
+            window.location.href = response.url;
+          } else {
+            return response.text();
+          }
+        })
+        .then(data => {
+          if (data) {
+            console.log('Response:', data);
+            // If not redirected, reload the page
+            window.location.reload();
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while deleting students.');
         });
-
-        document.body.appendChild(form);
-        form.submit();
       }
 
       // Initial state

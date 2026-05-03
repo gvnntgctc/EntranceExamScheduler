@@ -785,18 +785,41 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
 // Bulk status update route
 router.post('/students/bulk-status', isAdmin, async (req, res) => {
   try {
-    let { studentIds, status } = req.body;
+    console.log('Bulk status update request body:', req.body);
+    console.log('Content-Type:', req.headers['content-type']);
 
-    // Ensure studentIds is always an array
-    if (!Array.isArray(studentIds)) {
-      studentIds = studentIds ? [studentIds] : [];
+    let studentIdsRaw, status;
+
+    if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
+      // JSON request
+      studentIdsRaw = req.body.studentIds;
+      status = req.body.status;
+    } else {
+      // Form data
+      studentIdsRaw = req.body.studentIds;
+      status = req.body.status;
     }
 
+    console.log('Raw studentIds:', studentIdsRaw, 'Type:', typeof studentIdsRaw);
+    console.log('Status:', status);
+
+    // Ensure studentIds is always an array
+    let studentIds = [];
+    if (Array.isArray(studentIdsRaw)) {
+      studentIds = studentIdsRaw;
+    } else if (studentIdsRaw) {
+      studentIds = [studentIdsRaw];
+    }
+
+    console.log('Processed studentIds:', studentIds, 'Length:', studentIds.length);
+
     if (studentIds.length === 0) {
+      console.log('No students selected');
       return res.redirect('/admin/students?error=No students selected');
     }
 
     if (!['passed', 'failed'].includes(status)) {
+      console.log('Invalid status:', status);
       return res.redirect('/admin/students?error=Invalid status value');
     }
 
@@ -866,14 +889,33 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
 // Bulk delete students and their schedules
 router.post('/students/bulk-delete', isAdmin, async (req, res) => {
   try {
-    let { studentIds } = req.body;
+    console.log('Bulk delete request body:', req.body);
+    console.log('Content-Type:', req.headers['content-type']);
 
-    // Ensure studentIds is always an array
-    if (!Array.isArray(studentIds)) {
-      studentIds = studentIds ? [studentIds] : [];
+    let studentIdsRaw;
+
+    if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
+      // JSON request
+      studentIdsRaw = req.body.studentIds;
+    } else {
+      // Form data
+      studentIdsRaw = req.body.studentIds;
     }
 
+    console.log('Raw studentIds:', studentIdsRaw, 'Type:', typeof studentIdsRaw);
+
+    // Ensure studentIds is always an array
+    let studentIds = [];
+    if (Array.isArray(studentIdsRaw)) {
+      studentIds = studentIdsRaw;
+    } else if (studentIdsRaw) {
+      studentIds = [studentIdsRaw];
+    }
+
+    console.log('Processed studentIds:', studentIds, 'Length:', studentIds.length);
+
     if (studentIds.length === 0) {
+      console.log('No students selected');
       return res.redirect('/admin/students?error=No students selected');
     }
 
