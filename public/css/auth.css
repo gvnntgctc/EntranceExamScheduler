@@ -6,11 +6,7 @@
 
 body {
   font-family: 'Roboto', sans-serif;
-  background: url('/images/ptc.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background: linear-gradient(180deg, #eef7f0 0%, #ffffff 100%);
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -20,89 +16,280 @@ body {
 
 .container {
   position: relative;
-  width: 850px;
+  width: 900px;
   max-width: 100%;
-  min-height: 650px;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+  min-height: 680px;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 28px 80px rgba(17, 90, 76, 0.12);
+  overflow: hidden;
+  display: flex;
+}
+
+.alerts-panel {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pane {
+  width: 50%;
+  min-height: 100%;
+  position: relative;
+}
+
+.pane-left {
+  background: #f9fdf9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+}
+
+.pane-right {
+  background: linear-gradient(180deg, #1b5e20 0%, #2e7d32 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
   overflow: hidden;
 }
 
-/* Single-panel mode for simple login/apply layouts */
-.container.single-panel {
-  width: 420px;
-  min-height: auto;
-  padding: 30px 0;
-  overflow: visible;
-}
-
-.container.single-panel .form-container {
-  position: static;
+.form-panel {
   width: 100%;
-  height: auto;
-  top: unset;
-  left: unset;
-  display: block;
-  opacity: 1;
-  transform: none;
-  padding: 0;
-  background: none;
+  max-width: 360px;
 }
 
-.container.single-panel .form-container form {
-  padding: 0 30px;
-}
-
-.container.single-panel .overlay-container,
-.container.single-panel .overlay,
-.container.single-panel .overlay-panel {
-  display: none;
-}
-
-
-/* ==================== */
-/* Form Containers */
-/* ==================== */
-
-.form-container {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow-y: auto;
-  transition: all 0.6s ease-in-out;
-}
-
-.form-container form {
+.form-panel form {
   width: 100%;
-  padding: 40px;
   text-align: center;
 }
 
-.sign-in-container {
+.panel-content {
+  position: absolute;
+  top: 0;
   left: 0;
-  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 40px;
+  transition: transform 0.7s ease, opacity 0.7s ease;
 }
 
-.sign-up-container {
-  left: 0;
-  opacity: 0;
-  z-index: 1;
-}
-
-.container.right-panel-active .sign-in-container {
-  transform: translateX(100%);
-  opacity: 0;
-}
-
-.container.right-panel-active .sign-up-container {
-  transform: translateX(100%);
+.logo-view {
+  transform: translateX(0);
   opacity: 1;
-  z-index: 5;
+}
+
+.login-view {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.container.show-admin .logo-view {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.container.show-admin .login-view {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.auth-logo {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  border-radius: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.12);
+  padding: 18px;
+}
+
+h1 {
+  font-size: 32px;
+  color: #1f3e1f;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #586f5a;
+  font-size: 15px;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-group i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #1b5e20;
+  font-size: 16px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 15px 15px 15px 45px;
+  border: 2px solid #dce7dd;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: #ffffff;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #1b5e20;
+  background: #f8fff6;
+  box-shadow: 0 0 16px rgba(27, 94, 32, 0.12);
+}
+
+.input-group input::placeholder {
+  color: #9aa69a;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(17, 153, 142, 0.2);
+}
+
+.btn-ghost {
+  padding: 12px 28px;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  color: white;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.form-footer {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.form-footer p {
+  color: #4c5a4d;
+  font-size: 14px;
+}
+
+.message {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.message.error {
+  background: #fdecea;
+  color: #9c1f1f;
+  border: 1px solid #f5c3c3;
+}
+
+.message.success {
+  background: #e9fbe7;
+  color: #1f5831;
+  border: 1px solid #b9e6c2;
+}
+
+.login-view form {
+  width: 100%;
+}
+
+.login-view button.btn-ghost {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .pane,
+  .form-panel,
+  .panel-content {
+    width: 100%;
+  }
+
+  .pane-left,
+  .pane-right {
+    width: 100%;
+    min-height: auto;
+    padding: 40px 24px;
+  }
+
+  .panel-content {
+    position: relative;
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    transition: none;
+  }
+
+  .login-view {
+    display: none;
+  }
+
+  .container.show-admin .logo-view {
+    display: none;
+  }
+
+  .container.show-admin .login-view {
+    display: flex;
+  }
+
+  .logo-view {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 /* ==================== */

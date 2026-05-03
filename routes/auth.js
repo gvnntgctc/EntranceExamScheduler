@@ -153,7 +153,8 @@ function isGmail(address) {
 router.get('/login', (req, res) => {
   const error = req.query.error || '';
   const success = req.query.success || '';
-  res.render('auth', { error, success });
+  const showLogin = req.query.showLogin === '1' || !!error;
+  res.render('auth', { error, success, showLogin });
 });
 
 // Redirect /register to /apply
@@ -168,7 +169,7 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ email: (email || '').toLowerCase() });
 
     if (!user || user.role !== 'admin' || user.password !== password) {
-      return res.redirect('/auth/login?error=Invalid admin credentials.');
+      return res.redirect('/auth/login?error=Invalid admin credentials.&showLogin=1');
     }
 
     req.session.userId = user._id;
