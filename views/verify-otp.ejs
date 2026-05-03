@@ -212,6 +212,13 @@
       margin-bottom: 10px;
     }
 
+    .resend-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
     .btn-resend {
       background: transparent;
       color: #11998e;
@@ -229,14 +236,11 @@
     }
 
     .timer {
-      font-size: 18px;
+      font-size: 14px;
       color: #11998e;
-      margin-top: 15px;
+      margin-top: 10px;
       font-weight: 600;
-      background: rgba(17, 153, 142, 0.1);
-      padding: 8px 16px;
-      border-radius: 8px;
-      display: inline-block;
+      display: block;
     }
 
     .back-link {
@@ -323,13 +327,15 @@
 
     <div class="resend-section">
       <p class="resend-text">Didn't receive the OTP?</p>
-      <form action="/auth/resend-otp" method="POST" style="display: inline;">
-        <button type="submit" class="btn-resend">
-          <i class="fas fa-redo"></i> Resend OTP
-        </button>
-      </form>
-      <div class="timer">
-        ⏱️ <span id="countdown">03:00</span> remaining
+      <div class="resend-actions">
+        <form action="/auth/resend-otp" method="POST" style="display: inline;">
+          <button type="submit" class="btn-resend">
+            <i class="fas fa-redo"></i> Resend OTP
+          </button>
+        </form>
+        <div class="timer">
+          <span id="countdown">03:00</span>
+        </div>
       </div>
     </div>
 
