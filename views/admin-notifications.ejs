@@ -81,12 +81,6 @@
             <option value="sent" <%= status==='sent' ? 'selected' : '' %>>Sent</option>
             <option value="failed" <%= status==='failed' ? 'selected' : '' %>>Failed</option>
           </select>
-          <button id="clearNotificationFilter" class="btn btn-secondary"><i class="fas fa-times"></i> Clear</button>
-          <form id="clearAllForm" method="POST" action="/admin/notifications/clear" style="display:inline;margin-left: 6px;">
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete all activity log entries? This cannot be undone.');">
-              <i class="fas fa-trash-alt"></i> Clear All
-            </button>
-          </form>
         </div>
 
         <div class="table-responsive">
@@ -133,7 +127,6 @@
   <script>
     const searchInput = document.getElementById('notificationSearch');
     const statusSelect = document.getElementById('notificationStatus');
-    const clearBtn = document.getElementById('clearNotificationFilter');
     let notificationSearchTimer = null;
 
     function applyFilters() {
@@ -160,11 +153,6 @@
 
     statusSelect.addEventListener('change', applyFilters);
     document.getElementById('notificationSearchBtn').addEventListener('click', applyFilters);
-    clearBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      statusSelect.value = 'all';
-      window.location = '/admin/notifications';
-    });
   </script>
 </body>
 </html>

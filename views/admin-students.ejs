@@ -430,10 +430,10 @@
                     <% } %>
                   </td>
                   <td data-label="Actions" class="actions-column">
-                    <button class="action-btn edit-btn" onclick="viewStudent('<%= student._id %>')">
+                    <button type="button" class="action-btn edit-btn" onclick="viewStudent('<%= student._id %>')">
                       <i class="fas fa-eye"></i> View
                     </button>
-                    <button class="action-btn delete-btn" onclick="openDeleteModal('<%= student._id %>', '<%= student.fullName %>')">
+                    <button type="button" class="action-btn delete-btn" onclick="openDeleteModal('<%= student._id %>', '<%= student.fullName %>')">
                       <i class="fas fa-trash"></i> Delete
                     </button>
                   </td>
@@ -595,7 +595,7 @@
 
     function viewStudent(studentId) {
       console.log('Viewing student:', studentId);
-      window.location.href = `/admin/students?studentId=${studentId}`;
+      window.location.href = '/admin/students?studentId=' + encodeURIComponent(studentId);
     }
 
     function closeStudentModal() {
