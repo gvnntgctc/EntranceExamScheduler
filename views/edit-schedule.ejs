@@ -49,35 +49,46 @@
       
       <div class="section-card">
         <h2><i class="fas fa-calendar-alt"></i> Update Schedule Details</h2>
-        <form action="/admin/edit-schedule/<%= schedule._id %>" method="POST" class="schedule-form">
-          <div class="form-group">
-            <label for="studentName"><i class="fas fa-user"></i> Applicant Name</label>
-            <input type="text" id="studentName" name="studentName" value="<%= schedule.studentId ? schedule.studentId.fullName : '' %>" disabled />
-            <small class="sub-text">This is a specific applicant's schedule</small>
+        <form action="/admin/edit-schedule/<%= schedule._id %>" method="POST" class="schedule-form" role="form" aria-label="Edit schedule form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="studentName"><i class="fas fa-user"></i> Applicant Name</label>
+              <input type="text" id="studentName" name="studentName" value="<%= schedule.studentId ? schedule.studentId.fullName : '' %>" disabled />
+              <small class="sub-text">This is a specific applicant's schedule</small>
+            </div>
+            
+            <div class="form-group exam-date-container">
+              <label for="examDateDisplay"><i class="fas fa-calendar"></i> Exam Date</label>
+              <div class="exam-date-card">
+                <input type="hidden" id="examDate" name="examDate" value="<%= schedule.examDate ? new Date(schedule.examDate).toISOString().split('T')[0] : '' %>" />
+                <input type="text" id="examDateDisplay" placeholder="Click to choose a date from March to August 2026" readonly required aria-label="Selected exam date" aria-describedby="holidayHelp" />
+              </div>
+              <small class="sub-text">Click the field to open the exam date picker.</small>
+            </div>
+            
+            <div class="form-group">
+              <label for="examTime"><i class="fas fa-clock"></i> Exam Time</label>
+              <select id="examTime" name="examTime" required aria-required="true" aria-label="Select exam time slot">
+                <option value="">Choose a time slot</option>
+                <option value="7:00-8:30 A.M" <% if(schedule.examTime === '7:00-8:30 A.M') { %>selected<% } %>>7:00-8:30 A.M</option>
+                <option value="9:00-10:30 A.M" <% if(schedule.examTime === '9:00-10:30 A.M') { %>selected<% } %>>9:00-10:30 A.M</option>
+                <option value="1:30-3:00 P.M" <% if(schedule.examTime === '1:30-3:00 P.M') { %>selected<% } %>>1:30-3:00 P.M</option>
+                <option value="3:30-5:00 P.M" <% if(schedule.examTime === '3:30-5:00 P.M') { %>selected<% } %>>3:30-5:00 P.M</option>
+              </select>
+              <small class="sub-text">Select a time slot for the applicant's exam.</small>
+            </div>
+            
+            <div class="form-group">
+              <label for="location"><i class="fas fa-map-marker-alt"></i> Location</label>
+              <input type="text" id="location" name="location" value="<%= schedule.location || '3rd Floor PTC Main Campus' %>" disabled />
+              <input type="hidden" name="location" value="<%= schedule.location || '3rd Floor PTC Main Campus' %>" />
+              <small class="sub-text">Fixed location for all exams</small>
+            </div>
           </div>
-          
-          <div class="form-group">
-            <label for="examDate"><i class="fas fa-calendar"></i> Exam Date</label>
-            <input type="date" id="examDate" name="examDate" value="<%= schedule.examDate ? new Date(schedule.examDate).toISOString().split('T')[0] : '' %>" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="examTime"><i class="fas fa-clock"></i> Exam Time</label>
-            <select id="examTime" name="examTime" required aria-required="true" aria-label="Select exam time slot">
-              <option value="">Choose a time slot</option>
-              <option value="7:00-8:30 A.M" <% if(schedule.examTime === '7:00-8:30 A.M') { %>selected<% } %>>7:00-8:30 A.M</option>
-              <option value="9:00-10:30 A.M" <% if(schedule.examTime === '9:00-10:30 A.M') { %>selected<% } %>>9:00-10:30 A.M</option>
-              <option value="1:30-3:00 P.M" <% if(schedule.examTime === '1:30-3:00 P.M') { %>selected<% } %>>1:30-3:00 P.M</option>
-              <option value="3:30-5:00 P.M" <% if(schedule.examTime === '3:30-5:00 P.M') { %>selected<% } %>>3:30-5:00 P.M</option>
-            </select>
-            <small class="sub-text">Select a time slot for the applicant's exam.</small>
-          </div>
-          
-          <div class="form-group">
-            <label for="location"><i class="fas fa-map-marker-alt"></i> Location</label>
-            <input type="text" id="location" name="location" value="<%= schedule.location || '3rd Floor PTC Main Campus' %>" disabled />
-            <input type="hidden" name="location" value="<%= schedule.location || '3rd Floor PTC Main Campus' %>" />
-            <small class="sub-text">Fixed location for all exams</small>
+
+          <div class="holiday-panel"></div>
+            <p id="holidayWarning" class="holiday-warning" aria-live="polite"></p>
+            <p id="capacityWarning" class="holiday-warning" aria-live="polite"></p>
           </div>
           
           <div class="form-buttons">
@@ -92,7 +103,294 @@
       </div>
     </div>
   </div>
+
+  <div class="modal-overlay" id="examDateModal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="examDateModalTitle">
+      <div class="modal-header">
+        <h2 id="examDateModalTitle">Select Exam Date</h2>
+        <button type="button" class="modal-back" id="examDateModalClose">Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="calendar-banner">
+          <button type="button" id="prevMonth" aria-label="Previous month">‹</button>
+          <div class="calendar-title" id="calendarTitle">March 2026</div>
+          <button type="button" id="nextMonth" aria-label="Next month">›</button>
+        </div>
+        <div class="weekday-row" aria-hidden="true">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="date-grid" id="dateGrid" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
   
+  <script id="scheduleData" type="application/json">{"scheduleCounts":<%- JSON.stringify(scheduleCounts || {}) %>}</script>
   <script src="/js/script.js"></script>
-</body>
-</html>
+  <script>
+    const scheduleData = JSON.parse(document.getElementById('scheduleData').textContent || '{}');
+    const scheduleCounts = scheduleData.scheduleCounts || {};
+    const examDateInput = document.getElementById('examDate');
+    const examDateDisplay = document.getElementById('examDateDisplay');
+    const examDateModal = document.getElementById('examDateModal');
+    const examDateModalClose = document.getElementById('examDateModalClose');
+    const prevMonthBtn = document.getElementById('prevMonth');
+    const nextMonthBtn = document.getElementById('nextMonth');
+    const calendarTitle = document.getElementById('calendarTitle');
+    const dateGrid = document.getElementById('dateGrid');
+    const scheduleForm = document.querySelector('.schedule-form');
+    const holidayWarning = document.getElementById('holidayWarning');
+    const capacityWarning = document.getElementById('capacityWarning');
+    const holidays = {
+      '03-08': "International Women's Day",
+      '04-09': 'Day of Valor',
+      '05-01': 'Labor Day',
+      '06-12': 'Independence Day',
+      '08-21': 'Ninoy Aquino Day',
+      '08-31': 'National Heroes Day'
+    };
+
+    const allowedMonths = [
+      { label: 'March 2026', year: 2026, month: 2 },
+      { label: 'April 2026', year: 2026, month: 3 },
+      { label: 'May 2026', year: 2026, month: 4 },
+      { label: 'June 2026', year: 2026, month: 5 },
+      { label: 'July 2026', year: 2026, month: 6 },
+      { label: 'August 2026', year: 2026, month: 7 }
+    ];
+
+    let activeMonthIndex = 0;
+
+    function initializeMonthIndex() {
+      if (!examDateInput || !examDateInput.value) return;
+      const dateValue = examDateInput.value;
+      const [year, month] = dateValue.split('-');
+      const monthNum = parseInt(month, 10);
+      const matchingIndex = allowedMonths.findIndex(m => m.year === parseInt(year, 10) && m.month + 1 === monthNum);
+      if (matchingIndex !== -1) {
+        activeMonthIndex = matchingIndex;
+      }
+    }
+
+    function pad(value) {
+      return String(value).padStart(2, '0');
+    }
+
+    function formatHolidayKey(dateValue) {
+      const [year, month, day] = dateValue.split('-');
+      return `${month}-${day}`;
+    }
+
+    function formatDisplayDate(dateValue) {
+      const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+      return new Date(dateValue).toLocaleDateString('en-US', options);
+    }
+
+    function validateHolidayDate(value) {
+      if (!value) return true;
+      const key = formatHolidayKey(value);
+      const name = holidays[key];
+      if (name) {
+        if (holidayWarning) {
+          holidayWarning.textContent = `Cannot schedule on holiday: ${name}`;
+        }
+        return false;
+      }
+      if (holidayWarning) {
+        holidayWarning.textContent = '';
+      }
+      return true;
+    }
+
+    function validateCapacityDate(value) {
+      if (!value) {
+        if (capacityWarning) {
+          capacityWarning.textContent = '';
+        }
+        return true;
+      }
+      const count = scheduleCounts[value] || 0;
+      if (count >= 50) {
+        if (capacityWarning) {
+          capacityWarning.textContent = 'This date is fully booked with the maximum of 50 scheduled applicants.';
+        }
+        return false;
+      }
+      if (capacityWarning) {
+        capacityWarning.textContent = `Current booked applicants for this date: ${count}.`;
+      }
+      return true;
+    }
+
+    function setExamDateInvalid(message) {
+      if (holidayWarning) {
+        holidayWarning.textContent = message;
+      }
+      if (examDateDisplay) {
+        examDateDisplay.setCustomValidity(message);
+      }
+    }
+
+    function clearExamDateValidity() {
+      if (holidayWarning) {
+        holidayWarning.textContent = '';
+      }
+      if (capacityWarning) {
+        capacityWarning.textContent = '';
+      }
+      if (examDateDisplay) {
+        examDateDisplay.setCustomValidity('');
+      }
+    }
+
+    function getDayCount(year, month) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function renderCalendarTitle() {
+      if (!calendarTitle) return;
+      const { label } = allowedMonths[activeMonthIndex];
+      calendarTitle.textContent = label;
+      if (prevMonthBtn) {
+        prevMonthBtn.disabled = activeMonthIndex === 0;
+      }
+      if (nextMonthBtn) {
+        nextMonthBtn.disabled = activeMonthIndex === allowedMonths.length - 1;
+      }
+    }
+
+    function isDatePast(dateValue) {
+      const selected = new Date(dateValue);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return selected < today;
+    }
+
+    function renderDateGrid() {
+      if (!dateGrid) return;
+      dateGrid.innerHTML = '';
+      const { year, month } = allowedMonths[activeMonthIndex];
+      const firstDay = new Date(year, month, 1).getDay();
+      const dayCount = getDayCount(year, month);
+
+      for (let i = 0; i < firstDay; i += 1) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'date-cell empty-cell';
+        dateGrid.appendChild(emptyCell);
+      }
+
+      for (let day = 1; day <= dayCount; day += 1) {
+        const dateValue = `${year}-${pad(month + 1)}-${pad(day)}`;
+        const cell = document.createElement('div');
+        cell.className = 'date-cell';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'date-button';
+        button.textContent = day;
+
+        const holiday = holidays[formatHolidayKey(dateValue)];
+        const count = scheduleCounts[dateValue] || 0;
+        const dayOfWeek = new Date(dateValue).getDay();
+        const weekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const disabled = holiday || weekend || count >= 50 || isDatePast(dateValue);
+        if (disabled) {
+          button.disabled = true;
+          if (holiday) {
+            button.classList.add('disabled-holiday');
+            button.title = `${holiday} - unavailable`;
+          } else if (weekend) {
+            button.classList.add('disabled-weekend');
+            button.title = 'Weekend - unavailable';
+          } else if (count >= 50) {
+            button.classList.add('disabled-full');
+            button.title = 'Fully booked';
+          } else {
+            button.title = 'Past date';
+          }
+        } else {
+          button.addEventListener('click', () => {
+            selectExamDate(dateValue);
+          });
+        }
+
+        if (examDateInput && examDateInput.value === dateValue) {
+          button.classList.add('active');
+        }
+
+        cell.appendChild(button);
+        dateGrid.appendChild(cell);
+      }
+
+      const totalCells = firstDay + dayCount;
+      for (let i = totalCells; i < 42; i += 1) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'date-cell empty-cell';
+        dateGrid.appendChild(emptyCell);
+      }
+    }
+
+    function selectExamDate(dateValue) {
+      if (!examDateInput || !examDateDisplay) return;
+      examDateInput.value = dateValue;
+      examDateDisplay.value = formatDisplayDate(dateValue);
+      clearExamDateValidity();
+      renderDateGrid();
+      closeExamDateModal();
+    }
+
+    function openExamDateModal() {
+      if (!examDateModal) return;
+      initializeMonthIndex();
+      renderCalendarTitle();
+      renderDateGrid();
+      examDateModal.classList.add('active');
+      examDateModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeExamDateModal() {
+      if (!examDateModal) return;
+      examDateModal.classList.remove('active');
+      examDateModal.setAttribute('aria-hidden', 'true');
+    }
+
+    examDateDisplay?.addEventListener('click', openExamDateModal);
+    examDateModalClose?.addEventListener('click', closeExamDateModal);
+    examDateModal?.addEventListener('click', function(event) {
+      if (event.target === examDateModal) {
+        closeExamDateModal();
+      }
+    });
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeExamDateModal();
+      }
+    });
+
+    prevMonthBtn?.addEventListener('click', function() {
+      if (activeMonthIndex > 0) {
+        activeMonthIndex -= 1;
+        renderCalendarTitle();
+        renderDateGrid();
+      }
+    });
+
+    nextMonthBtn?.addEventListener('click', function() {
+      if (activeMonthIndex < allowedMonths.length - 1) {
+        activeMonthIndex += 1;
+        renderCalendarTitle();
+        renderDateGrid();
+      }
+    });
+
+    // Initialize display with existing date if available
+    if (examDateInput && examDateInput.value) {
+      examDateDisplay.value = formatDisplayDate(examDateInput.value);
+    }
+
+    scheduleForm?.addEventListener('submit', function(event) {
+      if (!examDateInput || !examDateInput.value) {
+        setExamDateInvalid('Please select an exam date between March and August 2026.');
+        examDateDisplay?.reportValidity();
+        event.preventDefault();
+      }
+    });
+  </script>

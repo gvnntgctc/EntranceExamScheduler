@@ -826,8 +826,17 @@ router.get('/edit-schedule/:id', isAdmin, async (req, res) => {
       return res.redirect('/admin/add-schedule?error=Schedule not found');
     }
 
+    // Get schedule counts for capacity checking in the calendar
+    const allSchedules = await Schedule.find().populate('studentId');
+    const scheduleCounts = allSchedules.reduce((acc, sched) => {
+      const dateKey = new Date(sched.examDate).toISOString().split('T')[0];
+      acc[dateKey] = (acc[dateKey] || 0) + 1;
+      return acc;
+    }, {});
+
     res.render('edit-schedule', { 
       schedule,
+      scheduleCounts,
       page: 'editSchedule',
       error: req.query.error || '',
       success: req.query.success || ''
