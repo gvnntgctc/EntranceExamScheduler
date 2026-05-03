@@ -411,13 +411,13 @@
           <div class="bulk-actions-bar" style="display: flex; gap: 10px; align-items: center; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
             <div style="flex: 1;"></div>
             <div style="display: flex; gap: 10px;">
-              <button id="bulkPassBtn" class="action-btn edit-btn" style="background: #28a745; border-color: #28a745;" disabled>
+              <button type="button" id="bulkPassBtn" class="action-btn edit-btn" style="background: #28a745; border-color: #28a745;" disabled>
                 <i class="fas fa-check"></i> Pass Selected
               </button>
-              <button id="bulkFailBtn" class="action-btn delete-btn" style="background: #dc3545; border-color: #dc3545;" disabled>
+              <button type="button" id="bulkFailBtn" class="action-btn delete-btn" style="background: #dc3545; border-color: #dc3545;" disabled>
                 <i class="fas fa-times"></i> Fail Selected
               </button>
-              <button id="bulkDeleteBtn" class="action-btn delete-btn" style="background: #c82333; border-color: #bd2130;" disabled>
+              <button type="button" id="bulkDeleteBtn" class="action-btn delete-btn" style="background: #c82333; border-color: #bd2130;" disabled>
                 <i class="fas fa-trash"></i> Delete Selected
               </button>
             </div>
@@ -546,7 +546,7 @@
   </div>
 
   <form id="bulkActionForm" method="POST" style="display:none;">
-    <input type="hidden" name="studentIds" id="bulkStudentIds" />
+    <div id="bulkStudentIdsContainer"></div>
     <input type="hidden" name="status" id="bulkStatus" />
   </form>
 
@@ -561,10 +561,10 @@
         <p id="bulkConfirmMessage" style="margin: 0; color: #334155; line-height: 1.6;"></p>
       </div>
       <div class="modal-actions">
-        <button id="bulkConfirmBtn" class="confirm-delete" style="background: #28a745; border-color: #28a745;">
+        <button type="button" id="bulkConfirmBtn" class="confirm-delete" style="background: #28a745; border-color: #28a745;">
           <i class="fas fa-check"></i> Confirm
         </button>
-        <button id="bulkCancelBtn" class="cancel-delete" style="background: #f3f4f6; color: #111;">
+        <button type="button" id="bulkCancelBtn" class="cancel-delete" style="background: #f3f4f6; color: #111;">
           <i class="fas fa-times"></i> Cancel
         </button>
       </div>
@@ -910,14 +910,26 @@
         }
       });
 
+      function setBulkStudentInputs(studentIds) {
+        const container = document.getElementById('bulkStudentIdsContainer');
+        container.innerHTML = '';
+
+        studentIds.forEach(id => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'studentIds[]';
+          input.value = id;
+          container.appendChild(input);
+        });
+      }
+
       function submitBulkStatus(studentIds, status) {
         console.log('Submitting bulk status update:', studentIds, status);
         const form = document.getElementById('bulkActionForm');
-        const studentIdsField = document.getElementById('bulkStudentIds');
         const statusField = document.getElementById('bulkStatus');
 
+        setBulkStudentInputs(studentIds);
         form.action = '/admin/students/bulk-status';
-        studentIdsField.value = studentIds.join(',');
         statusField.value = status;
         form.submit();
       }
@@ -925,11 +937,10 @@
       function submitBulkDelete(studentIds) {
         console.log('Submitting bulk delete:', studentIds);
         const form = document.getElementById('bulkActionForm');
-        const studentIdsField = document.getElementById('bulkStudentIds');
         const statusField = document.getElementById('bulkStatus');
 
+        setBulkStudentInputs(studentIds);
         form.action = '/admin/students/bulk-delete';
-        studentIdsField.value = studentIds.join(',');
         statusField.value = '';
         form.submit();
       }
