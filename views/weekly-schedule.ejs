@@ -21,7 +21,10 @@
 
     .schedule-hero {
       display: grid;
-      grid-template-columns: 1.6fr 1fr;
+      grid-template-columns: 1.4fr 0.9fr;
+      grid-template-areas:
+        "hero-copy summary-grid"
+        "upcoming-card summary-grid";
       gap: 18px;
       margin-bottom: 32px;
       padding: 24px 24px;
@@ -29,6 +32,19 @@
       border-radius: 28px;
       box-shadow: 0 18px 40px rgba(18, 79, 35, 0.08);
       border: 1px solid rgba(27, 94, 32, 0.12);
+    }
+
+    .hero-copy {
+      grid-area: hero-copy;
+    }
+
+    .summary-grid {
+      grid-area: summary-grid;
+    }
+
+    .upcoming-card {
+      grid-area: upcoming-card;
+      margin-top: 0;
     }
 
     .hero-tag {
@@ -97,8 +113,7 @@
 
     .upcoming-card {
       margin-top: 16px;
-      grid-column: 1 / -1;
-      padding: 20px;
+      padding: 18px;
       border-radius: 24px;
       background: #ffffff;
       box-shadow: 0 12px 28px rgba(18, 79, 35, 0.08);
