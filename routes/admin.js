@@ -291,6 +291,15 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
 
     await newSchedule.save();
 
+    // Log schedule creation in activity log
+    await Notification.create({
+      recipientId: student._id,
+      recipientEmail: student.email,
+      subject: 'Schedule Added',
+      body: `Admin created exam schedule: ${new Date(examDate).toLocaleDateString()} at ${examTime} in ${location}`,
+      status: 'sent'
+    });
+
     // Notify applicant with schedule details
     const scheduleEmail = `Dear ${student.fullName || student.email},\n\nRe: Official Exam Schedule - Bachelor of Science in Information Technology Program\n\nWe are writing to confirm your examination schedule for the BSIT entrance examination.\n\n═══════════════════════════════════════════════════════════════════════════════\nEXAMINATION DETAILS\n═══════════════════════════════════════════════════════════════════════════════\n\nExamination Date: ${new Date(examDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\nExamination Time: ${examTime}\nExamination Location: ${location}\n\n═══════════════════════════════════════════════════════════════════════════════\nIMPORTANT INSTRUCTIONS\n═══════════════════════════════════════════════════════════════════════════════\n\n✓ ARRIVAL TIME: Please arrive AT LEAST 15 MINUTES BEFORE your scheduled examination time.\n\n✓ REQUIRED DOCUMENTS: Bring a valid government-issued ID for verification purposes.\n\n✓ PROHIBITED ITEMS: Mobile phones, calculators (unless explicitly permitted), notes, and other unauthorized materials are strictly not allowed in the examination room.\n\n✓ DRESS CODE: Professional attire is recommended.\n\n✓ CONDUCT: Academic integrity is paramount. Any form of cheating or misconduct will result in automatic disqualification.\n\n═══════════════════════════════════════════════════════════════════════════════\nADDITIONAL INFORMATION\n═══════════════════════════════════════════════════════════════════════════════\n\n• The examination will test your knowledge in mathematics, computer science fundamentals, and logical reasoning.\n• Duration: Approximately 2-3 hours (specific duration will be announced at the examination venue)\n• Results will be communicated within 2-3 weeks following the examination date.\n\nIf you have any questions regarding your examination schedule or require any clarifications, please contact our Admissions Office immediately.\n\nBest wishes for your examination!\n\nRegards,\n\nAdmissions Office\nBachelor of Science in Information Technology Program\nEntranceExam Administration`;
     const notificationSent = await sendEmail({
@@ -574,6 +583,15 @@ router.post('/students/delete/:id', isAdmin, async (req, res) => {
 
     if (student.role !== 'student') return res.redirect('/admin/students?error=Cannot delete this user');
 
+    // Log student deletion in activity log
+    await Notification.create({
+      recipientId: student._id,
+      recipientEmail: student.email,
+      subject: 'Student Account Deleted',
+      body: `Admin deleted student account: ${student.fullName} (${student.email}). All associated schedules were also removed.`,
+      status: 'sent'
+    });
+
     await Schedule.deleteMany({ studentId: student._id });
     await User.findByIdAndDelete(student._id);
 
@@ -625,6 +643,15 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
     await student.save();
 
     console.log('[ADMIN STATUS] Sending to:', student.email, 'status:', status, 'message:', student.resultMessage);
+
+    // Log status update in activity log
+    await Notification.create({
+      recipientId: student._id,
+      recipientEmail: student.email,
+      subject: 'Application Status Updated',
+      body: `Admin updated application status to: ${status.toUpperCase()}`,
+      status: 'sent'
+    });
 
     const sent = await sendEmail({
       recipientId: student._id,
@@ -718,12 +745,29 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
       return res.redirect('/admin/add-schedule?error=Schedule not found');
     }
 
+    // Get student info for logging
+    const student = await User.findById(schedule.studentId);
+    
+    // Store old values for comparison
+    const oldDate = new Date(schedule.examDate).toLocaleDateString();
+    const oldTime = schedule.examTime;
+    const oldLocation = schedule.location;
+
     // Update the schedule
     schedule.examDate = new Date(examDate);
     schedule.examTime = examTime.trim();
     schedule.location = location.trim();
 
     await schedule.save();
+
+    // Log schedule update in activity log
+    await Notification.create({
+      recipientId: schedule.studentId,
+      recipientEmail: student?.email,
+      subject: 'Schedule Updated',
+      body: `Admin updated exam schedule from [${oldDate} at ${oldTime} in ${oldLocation}] to [${new Date(examDate).toLocaleDateString()} at ${examTime.trim()} in ${location.trim()}]`,
+      status: 'sent'
+    });
 
     return res.redirect('/admin/add-schedule?success=Schedule updated successfully');
   } catch (error) {
@@ -741,6 +785,18 @@ router.post('/delete-schedule/:id', isAdmin, async (req, res) => {
     if (!schedule) {
       return res.redirect('/admin/add-schedule?error=Schedule not found');
     }
+
+    // Get student info for logging
+    const student = await User.findById(schedule.studentId);
+    
+    // Log schedule deletion in activity log
+    await Notification.create({
+      recipientId: schedule.studentId,
+      recipientEmail: student?.email,
+      subject: 'Schedule Deleted',
+      body: `Admin deleted exam schedule: ${new Date(schedule.examDate).toLocaleDateString()} at ${schedule.examTime} in ${schedule.location}`,
+      status: 'sent'
+    });
 
     await Schedule.findByIdAndDelete(id);
     return res.redirect('/admin/add-schedule?success=Schedule deleted successfully');
