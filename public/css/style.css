@@ -2022,11 +2022,78 @@ form.schedule-form {
   max-width: none;
 }
 
+.schedule-form .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.schedule-form .form-group {
+  margin-bottom: 0;
+}
+
+.schedule-form .holiday-panel {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #e6e6e6;
+}
+
+.schedule-form .suggestions-container {
+  position: relative;
+}
+
+.schedule-form .suggestions-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.08);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 20;
+}
+
+.schedule-form .suggestion-item,
+.schedule-form .suggestion-empty {
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #333;
+}
+
+.schedule-form .suggestion-item {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.schedule-form .suggestion-item:hover,
+.schedule-form .suggestion-item.active {
+  background: #f0f9f5;
+}
+
+.schedule-form .suggestion-empty {
+  color: #777;
+}
+
 label {
   display: block;
   margin-bottom: 6px;
   font-weight: 600;
   color: #333;
+}
+
+@media (max-width: 768px) {
+  .schedule-form .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-form .suggestions-list {
+    position: relative;
+    top: 10px;
+  }
 }
 
 input, select {
