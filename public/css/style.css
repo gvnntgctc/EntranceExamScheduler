@@ -804,12 +804,17 @@ h2 i {
 }
 
 .delete-btn {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  background: #ffffff;
+  color: #c0392b;
+  border: 1px solid #c0392b;
+  transition: all 0.25s ease;
 }
 
 .delete-btn:hover {
+  background: #c0392b;
+  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.35);
 }
 
 .cancel-btn {
@@ -2037,6 +2042,81 @@ form.schedule-form {
   margin-top: 15px;
   padding-top: 10px;
   border-top: 1px solid #e6e6e6;
+}
+
+.schedule-form .date-selection {
+  margin-top: 10px;
+}
+
+.schedule-form .month-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.schedule-form .month-tabs button {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #1f2937;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.schedule-form .month-tabs button.active {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #fff;
+}
+
+.schedule-form .date-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+  gap: 8px;
+}
+
+.schedule-form .date-grid button {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #1f2937;
+  border-radius: 10px;
+  padding: 10px 0;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.schedule-form .date-grid button:hover:not(:disabled) {
+  background: #eff6ff;
+}
+
+.schedule-form .date-grid button.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.schedule-form .date-grid button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background: #f8fafc;
+}
+
+.schedule-form .date-grid button.disabled-holiday {
+  border-color: #ef4444;
+  color: #b91c1c;
+}
+
+.schedule-form .date-grid button.disabled-full {
+  border-color: #6b7280;
+}
+
+#examDateDisplay {
+  background: #f1f5f9;
+  cursor: default;
 }
 
 .toast-message {

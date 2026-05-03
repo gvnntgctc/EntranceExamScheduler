@@ -78,8 +78,14 @@
             </div>
 
             <div class="form-group">
-              <label for="examDate"><i class="fas fa-calendar"></i> Exam Date</label>
-              <input type="date" id="examDate" name="examDate" min="<%= minDate %>" max="<%= maxDate %>" required aria-required="true" aria-label="Exam date" aria-describedby="holidayHelp" />
+              <label for="examDateDisplay"><i class="fas fa-calendar"></i> Exam Date</label>
+              <input type="hidden" id="examDate" name="examDate" />
+              <input type="text" id="examDateDisplay" placeholder="Select a date from March to August 2026" readonly required aria-label="Selected exam date" aria-describedby="holidayHelp" />
+              <div class="date-selection" id="examDateSelection">
+                <div class="month-tabs" id="monthTabs" role="tablist" aria-label="Exam month selection"></div>
+                <div class="date-grid" id="dateGrid" aria-live="polite"></div>
+              </div>
+              <small class="sub-text">Choose a date by clicking a day button instead of typing.</small>
             </div>
 
             <div class="form-group">
@@ -158,7 +164,7 @@
                 </div>
                 <div class="schedule-actions">
                   <a href="/admin/edit-schedule/<%= s._id %>" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>
-                  <form method="POST" action="/admin/delete-schedule/<%= s._id %>" style="display:inline;">
+                  <form method="POST" action="/admin/delete-schedule/<%= s._id %>" class="delete-form" data-schedule-title="<%= s.studentId ? s.studentId.fullName : 'Unknown' %>" data-schedule-date="<%= new Date(s.examDate).toDateString() %>" style="display:inline;">
                     <button type="submit" class="delete-btn"><i class="fas fa-trash"></i> Delete</button>
                   </form>
                 </div>
@@ -186,6 +192,21 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="deleteConfirmModal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+      <div class="modal-header">
+        <h2 id="deleteModalTitle">Confirm Delete</h2>
+      </div>
+      <div class="modal-body">
+        <p id="deleteModalMessage">Are you sure you want to delete this schedule? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:12px; padding:20px 28px 24px; border-top:1px solid #eee;">
+        <button type="button" class="btn btn-secondary" id="deleteModalCancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="deleteModalConfirm">Delete Schedule</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const scheduleCounts = <%- JSON.stringify(scheduleCounts || {}) %>;
     const toastMessage = document.getElementById('toastMessage');
@@ -196,7 +217,45 @@
       setTimeout(() => toastMessage.classList.remove('show'), 4500);
     }
 
-      // Live applicant search with hidden ID selection
+    const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+    const deleteModalMessage = document.getElementById('deleteModalMessage');
+    const deleteModalCancel = document.getElementById('deleteModalCancel');
+    const deleteModalConfirm = document.getElementById('deleteModalConfirm');
+    let pendingDeleteForm = null;
+
+    document.querySelectorAll('.delete-form').forEach(form => {
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        pendingDeleteForm = form;
+        const title = form.dataset.scheduleTitle || 'this schedule';
+        const date = form.dataset.scheduleDate || '';
+        deleteModalMessage.textContent = date
+          ? `Are you sure you want to delete ${title}'s schedule on ${date}? This action cannot be undone.`
+          : 'Are you sure you want to delete this schedule? This action cannot be undone.';
+        deleteConfirmModal.classList.add('active');
+        deleteConfirmModal.setAttribute('aria-hidden', 'false');
+      });
+    });
+
+    function closeDeleteModal() {
+      deleteConfirmModal.classList.remove('active');
+      deleteConfirmModal.setAttribute('aria-hidden', 'true');
+      pendingDeleteForm = null;
+    }
+
+    deleteModalCancel?.addEventListener('click', closeDeleteModal);
+    deleteConfirmModal?.addEventListener('click', function(event) {
+      if (event.target === deleteConfirmModal) {
+        closeDeleteModal();
+      }
+    });
+    deleteModalConfirm?.addEventListener('click', function() {
+      if (pendingDeleteForm) {
+        pendingDeleteForm.submit();
+      }
+    });
+
+    // Live applicant search with hidden ID selection
     const studentOptions = <%- JSON.stringify(students || []) %>;
     const studentSearchInput = document.getElementById('studentSearch');
     const studentIdInput = document.getElementById('studentId');
@@ -397,6 +456,10 @@
     }
 
     const examDateInput = document.getElementById('examDate');
+    const examDateDisplay = document.getElementById('examDateDisplay');
+    const monthTabs = document.getElementById('monthTabs');
+    const dateGrid = document.getElementById('dateGrid');
+    const scheduleForm = document.querySelector('.schedule-form');
     const holidayWarning = document.getElementById('holidayWarning');
     const capacityWarning = document.getElementById('capacityWarning');
     const holidays = {
@@ -408,9 +471,29 @@
       '08-31': 'National Heroes Day'
     };
 
+    const allowedMonths = [
+      { label: 'March 2026', year: 2026, month: 2 },
+      { label: 'April 2026', year: 2026, month: 3 },
+      { label: 'May 2026', year: 2026, month: 4 },
+      { label: 'June 2026', year: 2026, month: 5 },
+      { label: 'July 2026', year: 2026, month: 6 },
+      { label: 'August 2026', year: 2026, month: 7 }
+    ];
+
+    let activeMonthIndex = 0;
+
+    function pad(value) {
+      return String(value).padStart(2, '0');
+    }
+
     function formatHolidayKey(dateValue) {
       const [year, month, day] = dateValue.split('-');
       return `${month}-${day}`;
+    }
+
+    function formatDisplayDate(dateValue) {
+      const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+      return new Date(dateValue).toLocaleDateString('en-US', options);
     }
 
     function validateHolidayDate(value) {
@@ -421,16 +504,10 @@
         if (holidayWarning) {
           holidayWarning.textContent = `Cannot schedule on holiday: ${name}`;
         }
-        if (examDateInput) {
-          examDateInput.setCustomValidity('Holiday date selected');
-        }
         return false;
       }
       if (holidayWarning) {
         holidayWarning.textContent = '';
-      }
-      if (examDateInput) {
-        examDateInput.setCustomValidity('');
       }
       return true;
     }
@@ -447,36 +524,11 @@
         if (capacityWarning) {
           capacityWarning.textContent = 'This date is fully booked with the maximum of 50 scheduled applicants.';
         }
-        if (examDateInput) {
-          examDateInput.setCustomValidity('Date capacity reached');
-        }
         return false;
       }
       if (capacityWarning) {
         capacityWarning.textContent = `Current booked applicants for this date: ${count}.`;
       }
-      if (examDateInput) {
-        examDateInput.setCustomValidity('');
-      }
-      return true;
-    }
-
-    function validateExamDateValue(value) {
-      const allowedDateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      const maxDateValue = '<%= maxDate %>';
-      if (!allowedDateRegex.test(value)) {
-        return false;
-      }
-
-      const parsed = new Date(value);
-      if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) {
-        return false;
-      }
-
-      if (value < '<%= minDate %>' || value > maxDateValue) {
-        return false;
-      }
-
       return true;
     }
 
@@ -484,30 +536,111 @@
       if (holidayWarning) {
         holidayWarning.textContent = message;
       }
-      if (examDateInput) {
-        examDateInput.setCustomValidity(message);
+      if (examDateDisplay) {
+        examDateDisplay.setCustomValidity(message);
       }
     }
 
-    if (examDateInput) {
-      examDateInput.addEventListener('input', function() {
-        validateHolidayDate(this.value);
-        validateCapacityDate(this.value);
-      });
-      examDateInput.addEventListener('change', function() {
-        if (!validateExamDateValue(this.value)) {
-          setExamDateInvalid('Please enter a valid exam date between today and the next 2 years.');
-          this.value = '';
-          return;
-        }
+    function clearExamDateValidity() {
+      if (holidayWarning) {
+        holidayWarning.textContent = '';
+      }
+      if (capacityWarning) {
+        capacityWarning.textContent = '';
+      }
+      if (examDateDisplay) {
+        examDateDisplay.setCustomValidity('');
+      }
+    }
 
-        const holidayValid = validateHolidayDate(this.value);
-        const capacityValid = validateCapacityDate(this.value);
-        if (!holidayValid || !capacityValid) {
-          this.value = '';
-        }
+    function getDayCount(year, month) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function renderMonthTabs() {
+      if (!monthTabs) return;
+      monthTabs.innerHTML = '';
+      allowedMonths.forEach((month, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = index === activeMonthIndex ? 'active' : '';
+        button.textContent = month.label;
+        button.addEventListener('click', () => {
+          activeMonthIndex = index;
+          renderMonthTabs();
+          renderDateGrid();
+        });
+        monthTabs.appendChild(button);
       });
     }
+
+    function isDatePast(dateValue) {
+      const selected = new Date(dateValue);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return selected < today;
+    }
+
+    function renderDateGrid() {
+      if (!dateGrid) return;
+      dateGrid.innerHTML = '';
+      const { year, month } = allowedMonths[activeMonthIndex];
+      const dayCount = getDayCount(year, month);
+      for (let day = 1; day <= dayCount; day += 1) {
+        const dateValue = `${year}-${pad(month + 1)}-${pad(day)}`;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'date-button';
+        button.textContent = day;
+
+        const holiday = holidays[formatHolidayKey(dateValue)];
+        const count = scheduleCounts[dateValue] || 0;
+        const disabled = holiday || count >= 50 || isDatePast(dateValue);
+        if (disabled) {
+          button.disabled = true;
+          if (holiday) {
+            button.classList.add('disabled-holiday');
+            button.title = `${holiday} - unavailable`;
+          } else if (count >= 50) {
+            button.classList.add('disabled-full');
+            button.title = 'Fully booked';
+          } else {
+            button.title = 'Past date';
+          }
+        } else {
+          button.addEventListener('click', () => {
+            selectExamDate(dateValue);
+          });
+        }
+
+        if (examDateInput && examDateInput.value === dateValue) {
+          button.classList.add('active');
+        }
+
+        dateGrid.appendChild(button);
+      }
+    }
+
+    function selectExamDate(dateValue) {
+      if (!examDateInput || !examDateDisplay) return;
+      examDateInput.value = dateValue;
+      examDateDisplay.value = formatDisplayDate(dateValue);
+      clearExamDateValidity();
+      renderDateGrid();
+    }
+
+    if (monthTabs && dateGrid) {
+      renderMonthTabs();
+      renderDateGrid();
+    }
+
+    scheduleForm?.addEventListener('submit', function(event) {
+      if (!examDateInput || !examDateInput.value) {
+        setExamDateInvalid('Please select an exam date between March and August 2026.');
+        examDateDisplay?.reportValidity();
+        event.preventDefault();
+      }
+    });
   </script>
 </body>
 </html>

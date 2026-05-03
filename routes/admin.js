@@ -287,8 +287,8 @@ router.get('/add-schedule', isAdmin, async (req, res) => {
       return acc;
     }, {});
     
-    const minDate = new Date().toISOString().split('T')[0];
-    const maxDate = new Date(new Date().getFullYear() + 2, 11, 31).toISOString().split('T')[0];
+    const minDate = '2026-03-01';
+    const maxDate = '2026-08-31';
 
     res.render('add-schedule', { 
       schedules,
@@ -304,8 +304,8 @@ router.get('/add-schedule', isAdmin, async (req, res) => {
   } catch (error) {
     console.error(error);
     const students = [];
-    const minDate = new Date().toISOString().split('T')[0];
-    const maxDate = new Date(new Date().getFullYear() + 2, 11, 31).toISOString().split('T')[0];
+    const minDate = '2026-03-01';
+    const maxDate = '2026-08-31';
     res.render('add-schedule', { 
       schedules: [], 
       students,
@@ -341,9 +341,10 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const maxExamDate = new Date(today.getFullYear() + 2, 11, 31);
-    if (parsedExamDate < today || parsedExamDate > maxExamDate) {
-      return res.redirect('/admin/add-schedule?error=Exam date must be between today and the end of the next 2 years');
+    const allowedStart = new Date(2026, 2, 1);
+    const allowedEnd = new Date(2026, 7, 31);
+    if (parsedExamDate < today || parsedExamDate < allowedStart || parsedExamDate > allowedEnd) {
+      return res.redirect('/admin/add-schedule?error=Exam date must be between March 1, 2026 and August 31, 2026');
     }
 
     // Try to find student by id first, otherwise allow using email or full name text
