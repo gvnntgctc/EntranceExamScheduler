@@ -1005,6 +1005,12 @@ h2 i {
   margin-top: 20px;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-start;
+}
+
+.form-buttons .btn-primary {
+  min-width: 180px;
+  flex: 1;
 }
 
 .btn-secondary {
@@ -1963,6 +1969,11 @@ form {
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+form.schedule-form {
+  width: 100%;
+  max-width: none;
 }
 
 label {
