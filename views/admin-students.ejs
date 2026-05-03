@@ -417,6 +417,9 @@
               <button id="bulkFailBtn" class="action-btn delete-btn" style="background: #dc3545; border-color: #dc3545;" disabled>
                 <i class="fas fa-times"></i> Fail Selected
               </button>
+              <button id="bulkDeleteBtn" class="action-btn delete-btn" style="background: #c82333; border-color: #bd2130;" disabled>
+                <i class="fas fa-trash"></i> Delete Selected
+              </button>
             </div>
           </div>
         <% } %>
@@ -460,9 +463,6 @@
                   <td data-label="Actions" class="actions-column">
                     <button type="button" class="action-btn edit-btn" onclick="viewStudent('<%= student._id.toString() %>')">
                       <i class="fas fa-eye"></i> View
-                    </button>
-                    <button type="button" class="action-btn delete-btn" onclick="openDeleteModal('<%= student._id %>', '<%= student.fullName %>')">
-                      <i class="fas fa-trash"></i> Delete
                     </button>
                   </td>
                 </tr>
@@ -545,28 +545,7 @@
     </div>
   </div>
 
-  <!-- Delete Confirmation Modal -->
-  <div id="deleteModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <i class="fas fa-exclamation-circle"></i>
-        Confirm Delete
-      </div>
-      <div class="modal-body">
-        Are you sure you want to delete <strong id="studentNameDisplay"></strong>? This action will also remove all their exam schedules and cannot be undone.
-      </div>
-      <div class="modal-actions">
-        <button class="confirm-delete" onclick="confirmDelete()">
-          <i class="fas fa-trash"></i> Yes, Delete
-        </button>
-        <button class="cancel-delete" onclick="closeDeleteModal()">
-          <i class="fas fa-times"></i> Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bulk Status Confirmation Modal -->
+  <!-- Bulk Status / Delete Confirmation Modal -->
   <div id="bulkConfirmModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -589,28 +568,6 @@
 
   <script src="/js/script.js"></script>
   <script>
-    let deleteStudentId = null;
-
-    function openDeleteModal(studentId, studentName) {
-      deleteStudentId = studentId;
-      document.getElementById('studentNameDisplay').textContent = studentName;
-      document.getElementById('deleteModal').classList.add('show');
-    }
-
-    function closeDeleteModal() {
-      deleteStudentId = null;
-      document.getElementById('deleteModal').classList.remove('show');
-    }
-
-    function confirmDelete() {
-      if (!deleteStudentId) return;
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = `/admin/students/delete/${deleteStudentId}`;
-      document.body.appendChild(form);
-      form.submit();
-    }
-
     // Student data cache
     const studentDataCache = {};
 
@@ -729,13 +686,6 @@
       document.getElementById('studentModalContent').style.display = 'block';
     }
 
-    // Close modal when clicking outside
-    document.getElementById('deleteModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeDeleteModal();
-      }
-    });
-
     // Search and Filter functionality - Live filtering without page reload
     (function() {
       const searchInput = document.getElementById('studentSearch');
@@ -810,6 +760,7 @@
       const studentCheckboxes = document.querySelectorAll('.student-checkbox');
       const bulkPassBtn = document.getElementById('bulkPassBtn');
       const bulkFailBtn = document.getElementById('bulkFailBtn');
+      const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
       const bulkActionsBar = document.querySelector('.bulk-actions-bar');
       const bulkConfirmModal = document.getElementById('bulkConfirmModal');
       const bulkConfirmMessage = document.getElementById('bulkConfirmMessage');
@@ -827,9 +778,11 @@
         
         bulkPassBtn.disabled = !hasSelection;
         bulkFailBtn.disabled = !hasSelection;
+        bulkDeleteBtn.disabled = !hasSelection;
         
         bulkPassBtn.style.opacity = hasSelection ? '1' : '0.5';
         bulkFailBtn.style.opacity = hasSelection ? '1' : '0.5';
+        bulkDeleteBtn.style.opacity = hasSelection ? '1' : '0.5';
       };
 
       updateSelectAllState = function() {
@@ -855,9 +808,17 @@
       function openBulkConfirm(action, selectedIds) {
         pendingBulkIds = selectedIds;
         pendingBulkStatus = action;
-        bulkConfirmMessage.textContent = `You are about to mark ${selectedIds.length} applicant(s) as ${action.toUpperCase()}. This will send notification emails to each selected applicant.`;
-        bulkConfirmBtn.textContent = action === 'passed' ? 'Confirm Pass' : 'Confirm Fail';
-        bulkConfirmBtn.style.background = action === 'passed' ? '#28a745' : '#dc3545';
+
+        if (action === 'deleted') {
+          bulkConfirmMessage.textContent = `You are about to permanently delete ${selectedIds.length} applicant(s). This will also remove all their exam schedules and cannot be undone.`;
+          bulkConfirmBtn.textContent = 'Confirm Delete';
+          bulkConfirmBtn.style.background = '#dc3545';
+        } else {
+          bulkConfirmMessage.textContent = `You are about to mark ${selectedIds.length} applicant(s) as ${action.toUpperCase()}. This will send notification emails to each selected applicant.`;
+          bulkConfirmBtn.textContent = action === 'passed' ? 'Confirm Pass' : 'Confirm Fail';
+          bulkConfirmBtn.style.background = action === 'passed' ? '#28a745' : '#dc3545';
+        }
+
         bulkConfirmModal.classList.add('show');
       }
 
@@ -921,6 +882,12 @@
         openBulkConfirm('failed', selectedIds);
       });
 
+      bulkDeleteBtn.addEventListener('click', function() {
+        const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+        if (selectedIds.length === 0) return;
+        openBulkConfirm('deleted', selectedIds);
+      });
+
       bulkCancelBtn.addEventListener('click', function() {
         closeBulkConfirm();
       });
@@ -928,7 +895,11 @@
       bulkConfirmBtn.addEventListener('click', function() {
         if (!pendingBulkIds.length || !pendingBulkStatus) return;
         closeBulkConfirm();
-        submitBulkStatus(pendingBulkIds, pendingBulkStatus);
+        if (pendingBulkStatus === 'deleted') {
+          submitBulkDelete(pendingBulkIds);
+        } else {
+          submitBulkStatus(pendingBulkIds, pendingBulkStatus);
+        }
       });
 
       function submitBulkStatus(studentIds, status) {
@@ -952,6 +923,23 @@
         statusInput.value = status;
         form.appendChild(statusInput);
         
+        document.body.appendChild(form);
+        form.submit();
+      }
+
+      function submitBulkDelete(studentIds) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/students/bulk-delete';
+
+        studentIds.forEach(id => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'studentIds';
+          input.value = id;
+          form.appendChild(input);
+        });
+
         document.body.appendChild(form);
         form.submit();
       }

@@ -203,9 +203,15 @@ router.post('/apply-review', async (req, res) => {
 
     const phoneRegex = /^(\+63|0)9\d{9}$/;
     const emailRegex = /^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$/;
+    const nameRegex = /^[A-Za-z. ]+$/;
 
     if (!fullName || !phoneNumber || !rawEmail) {
       const params = new URLSearchParams({ error: 'All fields are required.', fullName, phoneNumber, email: rawEmail });
+      return res.redirect(`/auth/apply?${params.toString()}`);
+    }
+
+    if (!nameRegex.test(fullName)) {
+      const params = new URLSearchParams({ error: 'Invalid name format. Only letters, periods, and spaces are allowed.', fullName, phoneNumber, email: rawEmail });
       return res.redirect(`/auth/apply?${params.toString()}`);
     }
 
@@ -269,9 +275,15 @@ router.post('/apply-confirm', async (req, res) => {
 
     const phoneRegex = /^(\+63|0)9\d{9}$/;
     const emailRegex = /^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$/;
+    const nameRegex = /^[A-Za-z. ]+$/;
 
     if (!fullName || !phoneNumber || !rawEmail) {
       const params = new URLSearchParams({ error: 'All fields are required.', fullName, phoneNumber, email: rawEmail });
+      return res.redirect(`/auth/apply?${params.toString()}`);
+    }
+
+    if (!nameRegex.test(fullName)) {
+      const params = new URLSearchParams({ error: 'Invalid name format. Only letters, periods, and spaces are allowed.', fullName, phoneNumber, email: rawEmail });
       return res.redirect(`/auth/apply?${params.toString()}`);
     }
 

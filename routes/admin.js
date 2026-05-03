@@ -858,6 +858,38 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
   }
 });
 
+// Bulk delete students and their schedules
+router.post('/students/bulk-delete', isAdmin, async (req, res) => {
+  try {
+    const { studentIds } = req.body;
+
+    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+      return res.redirect('/admin/students?error=No students selected');
+    }
+
+    const students = await User.find({ _id: { $in: studentIds }, role: 'student' });
+    if (students.length === 0) {
+      return res.redirect('/admin/students?error=No valid students found');
+    }
+
+    for (const student of students) {
+      await Schedule.deleteMany({ studentId: student._id });
+      await Notification.create({
+        recipientId: student._id,
+        recipientEmail: student.email,
+        subject: 'Student Account Deleted',
+        body: `Admin deleted student account: ${student.fullName} (${student.email}). All associated schedules were also removed.`,
+        status: 'sent'
+      });
+      await User.findByIdAndDelete(student._id);
+    }
+
+    return res.redirect('/admin/students?success=Selected students deleted successfully');
+  } catch (error) {
+    console.error('Failed to bulk delete students:', error);
+    return res.redirect('/admin/students?error=Failed to delete selected students');
+  }
+});
 
 // Detailed Schedule for a specific day
 router.get('/schedules/day/:day', isAdmin, async (req, res) => {
