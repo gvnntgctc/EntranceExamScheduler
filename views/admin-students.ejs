@@ -563,17 +563,29 @@
 
     // View student details in modal
     async function viewStudent(studentId) {
+      console.log('viewStudent called with ID:', studentId);
       try {
+        console.log('Fetching from:', `/admin/students/api/${studentId}`);
         const response = await fetch(`/admin/students/api/${studentId}`);
+        console.log('Response status:', response.status);
         if (!response.ok) {
-          alert('Failed to load student details');
+          console.error('Response not ok:', response.status, response.statusText);
+          alert('Failed to load student details: ' + response.status);
           return;
         }
         
         const data = await response.json();
+        console.log('Received data:', data);
         const student = data.student;
         const schedules = data.studentSchedules || [];
         
+        if (!student) {
+          console.error('No student data in response');
+          alert('No student data received');
+          return;
+        }
+        
+        console.log('Updating modal content...');
         // Update modal content
         document.getElementById('studentModalName').textContent = student.fullName;
         document.getElementById('studentModalFullName').textContent = student.fullName;
@@ -628,13 +640,14 @@
           </div>`;
         }
         
+        console.log('Showing modal...');
         // Show modal
         document.getElementById('studentModal').style.display = 'flex';
         document.getElementById('studentModalBg').style.display = 'block';
         
       } catch (error) {
         console.error('Error loading student details:', error);
-        alert('Failed to load student details');
+        alert('Failed to load student details: ' + error.message);
       }
     }
 
