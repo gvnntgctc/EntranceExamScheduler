@@ -15,6 +15,27 @@ function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function buildNotificationAction(notification) {
+  const recipientName = notification.recipientId?.fullName || notification.recipientEmail || 'recipient';
+  const subject = (notification.subject || '').toLowerCase();
+  const failed = notification.status === 'failed';
+  const suffix = failed ? ' (failed)' : '';
+
+  if (subject.includes('schedule')) {
+    return `Scheduled exam for ${recipientName}${suffix}`;
+  }
+  if (subject.includes('admission') || subject.includes('decision') || subject.includes('notice')) {
+    return `Sent admission status update to ${recipientName}${suffix}`;
+  }
+  if (subject.includes('exam result')) {
+    return `Updated application status for ${recipientName}${suffix}`;
+  }
+  if (subject.includes('reset') && subject.includes('otp')) {
+    return `Sent password reset instructions to ${recipientName}${suffix}`;
+  }
+  return `Sent notification to ${recipientName}${suffix}`;
+}
+
 let transporter = null;
 if (nodemailer && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
   const service = (process.env.EMAIL_SERVICE || 'outlook').toLowerCase();
@@ -380,8 +401,7 @@ router.get('/notifications', isAdmin, async (req, res) => {
 
       query.$or = [
         { recipientEmail: searchRegex },
-        { subject: searchRegex },
-        { body: searchRegex }
+        { subject: searchRegex }
       ];
 
       const matchedUsers = await User.find({ fullName: searchRegex }, '_id');
@@ -394,8 +414,13 @@ router.get('/notifications', isAdmin, async (req, res) => {
       .sort({ createdAt: -1 })
       .populate('recipientId');
 
+    const notificationsWithActions = notifications.map(notification => {
+      notification.actionDescription = buildNotificationAction(notification);
+      return notification;
+    });
+
     res.render('admin-notifications', {
-      notifications,
+      notifications: notificationsWithActions,
       search: req.query.search || '',
       status: req.query.status || 'all',
       page: 'notifications',
@@ -422,6 +447,8 @@ router.get('/notifications/:id', isAdmin, async (req, res) => {
     if (!notification) {
       return res.redirect('/admin/notifications?error=Notification not found');
     }
+
+    notification.actionDescription = buildNotificationAction(notification);
 
     res.render('admin-notification-detail', {
       notification,

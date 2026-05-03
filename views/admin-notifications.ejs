@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin - Notification History</title>
+  <title>Admin - Activity Log</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <link href="/css/style.css" rel="stylesheet" />
   <style>
@@ -65,7 +65,7 @@
   <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
   <div class="main-content">
     <div class="container">
-      <h1><i class="fas fa-bell"></i> Notification History</h1>
+      <h1><i class="fas fa-bell"></i> Admin Activity Log</h1>
       <% if (error && error.length > 0) { %>
         <div class="message error"><i class="fas fa-exclamation-circle"></i> <%= error %></div>
       <% } %>
@@ -74,7 +74,7 @@
       <% } %>
       <div class="section-card">
         <div class="search-bar">
-          <input id="notificationSearch" type="search" placeholder="Search recipient, subject, body..." aria-label="Search notifications" value="<%= search %>" autocomplete="off" />
+          <input id="notificationSearch" type="search" placeholder="Search recipient or action..." aria-label="Search notifications" value="<%= search %>" autocomplete="off" />
           <button id="notificationSearchBtn" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
           <select id="notificationStatus" aria-label="Filter status">
             <option value="all" <%= status==='all' ? 'selected' : '' %>>All Status</option>
@@ -95,22 +95,22 @@
               <tr>
                 <th>#</th>
                 <th>Recipient</th>
-                <th>Subject</th>
+                <th>Action</th>
                 <th>Status</th>
                 <th>Sent At</th>
                 <th>Error</th>
-                <th>Action</th>
+                <th>Manage</th>
               </tr>
             </thead>
             <tbody>
               <% if (notifications.length === 0) { %>
-                <tr><td colspan="6" style="text-align:center; color:#66788a;">No notifications tracked yet.</td></tr>
+                <tr><td colspan="7" style="text-align:center; color:#66788a;">No activity tracked yet.</td></tr>
               <% } %>
               <% notifications.forEach((notification, idx) => { %>
                 <tr>
                   <td><%= idx + 1 %></td>
                   <td><%= notification.recipientId ? notification.recipientId.fullName || notification.recipientEmail : notification.recipientEmail %></td>
-                  <td><%= notification.subject %></td>
+                  <td><%= notification.actionDescription %></td>
                   <td><span class="status-pill status-<%= notification.status %>"><%= notification.status %></span></td>
                   <td><%= notification.createdAt.toLocaleString() %></td>
                   <td><%= notification.errorMessage || '-' %></td>
