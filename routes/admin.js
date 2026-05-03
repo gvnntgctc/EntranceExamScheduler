@@ -789,11 +789,23 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
     console.log('Session role:', req.session.role);
     console.log('Headers:', req.headers);
 
-    let studentIds = req.body.studentIds || req.body['studentIds[]'];
-    const status = req.body.status;
+    let data;
+    if (req.body.data) {
+      try {
+        data = JSON.parse(req.body.data);
+      } catch (e) {
+        console.log('Failed to parse JSON data, trying legacy format');
+        data = req.body;
+      }
+    } else {
+      data = req.body;
+    }
 
+    let studentIds = data.studentIds || req.body.studentIds || req.body['studentIds[]'];
+    const status = data.status || req.body.status;
+
+    console.log('Parsed data:', data);
     console.log('Raw studentIds:', studentIds, 'status:', status, 'type:', typeof studentIds);
-    console.log('studentIds[] specifically:', req.body['studentIds[]']);
 
     if (Array.isArray(studentIds)) {
       studentIds = studentIds.map(id => String(id).trim()).filter(id => id);
@@ -887,10 +899,22 @@ router.post('/students/bulk-delete', isAdmin, async (req, res) => {
     console.log('Session role:', req.session.role);
     console.log('Headers:', req.headers);
 
-    let studentIds = req.body.studentIds || req.body['studentIds[]'];
+    let data;
+    if (req.body.data) {
+      try {
+        data = JSON.parse(req.body.data);
+      } catch (e) {
+        console.log('Failed to parse JSON data, trying legacy format');
+        data = req.body;
+      }
+    } else {
+      data = req.body;
+    }
 
+    let studentIds = data.studentIds || req.body.studentIds || req.body['studentIds[]'];
+
+    console.log('Parsed data:', data);
     console.log('Raw studentIds:', studentIds, 'type:', typeof studentIds);
-    console.log('studentIds[] specifically:', req.body['studentIds[]']);
 
     if (Array.isArray(studentIds)) {
       studentIds = studentIds.map(id => String(id).trim()).filter(id => id);

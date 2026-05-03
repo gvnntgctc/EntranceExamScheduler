@@ -545,13 +545,12 @@
     </div>
   </div>
 
-  <form id="bulkStatusForm" method="POST" action="/admin/students/bulk-status" style="display:none;">
-    <div id="bulkStatusStudentIdsContainer"></div>
-    <input type="hidden" name="status" id="bulkStatusStatus" />
+  <form id="bulkStatusForm" method="POST" action="/admin/students/bulk-status" style="display:none;" enctype="application/json">
+    <input type="hidden" name="data" id="bulkStatusData" />
   </form>
 
-  <form id="bulkDeleteForm" method="POST" action="/admin/students/bulk-delete" style="display:none;">
-    <div id="bulkDeleteStudentIdsContainer"></div>
+  <form id="bulkDeleteForm" method="POST" action="/admin/students/bulk-delete" style="display:none;" enctype="application/json">
+    <input type="hidden" name="data" id="bulkDeleteData" />
   </form>
 
   <!-- Bulk Status / Delete Confirmation Modal -->
@@ -951,13 +950,13 @@
       function submitBulkStatus(studentIds, status) {
         console.log('Submitting bulk status update:', studentIds, status);
         const form = document.getElementById('bulkStatusForm');
-        const statusField = document.getElementById('bulkStatusStatus');
+        const dataField = document.getElementById('bulkStatusData');
 
-        setBulkStudentInputs('bulkStatusStudentIdsContainer', studentIds);
-        statusField.value = status;
+        const data = JSON.stringify({ studentIds, status });
+        dataField.value = data;
 
         console.log('Form action:', form.action);
-        console.log('Form data:', new FormData(form));
+        console.log('JSON data:', data);
 
         form.submit();
       }
@@ -965,11 +964,13 @@
       function submitBulkDelete(studentIds) {
         console.log('Submitting bulk delete:', studentIds);
         const form = document.getElementById('bulkDeleteForm');
+        const dataField = document.getElementById('bulkDeleteData');
 
-        setBulkStudentInputs('bulkDeleteStudentIdsContainer', studentIds);
+        const data = JSON.stringify({ studentIds });
+        dataField.value = data;
 
         console.log('Form action:', form.action);
-        console.log('Form data:', new FormData(form));
+        console.log('JSON data:', data);
 
         form.submit();
       }
