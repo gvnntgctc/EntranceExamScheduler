@@ -889,11 +889,25 @@ h2 i {
 }
 
 .schedule-actions {
-  display: flex;
-  gap: 10px;
+  display: inline-flex;
+  gap: 8px;
   align-items: center;
-  flex-wrap: wrap;
   justify-content: flex-end;
+  flex-wrap: nowrap;
+  min-width: 0;
+  margin-left: auto;
+}
+
+.schedule-actions form {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+}
+
+.schedule-actions a,
+.schedule-actions button {
+  min-width: 110px;
+  white-space: nowrap;
 }
 
 /* ==================== */
@@ -1011,6 +1025,7 @@ h2 i {
 .form-buttons .btn-primary {
   min-width: 180px;
   flex: 1;
+  justify-content: center;
 }
 
 .btn-secondary {
