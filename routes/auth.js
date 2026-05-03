@@ -323,8 +323,8 @@ router.post('/apply-confirm', async (req, res) => {
 
     console.log('✅ Registration data stored in session for:', rawEmail);
 
-    const pendingSubject = 'Entrance Exam - Registration Pending';
-    const pendingText = `Hello ${fullName || rawEmail},\n\nYour registration has been received and your account is currently pending review.\n\nYour verification code is ${otp}. It expires in 3 minutes.\n\nWe will notify you by email once your account is approved and when your exam schedule is available.\n\nThank you for applying.`;
+    const pendingSubject = 'Application Received - Entrance Examination Registration Confirmation';
+    const pendingText = `Dear ${fullName || rawEmail},\n\nThank you for submitting your application for admission to our Bachelor of Science in Information Technology (BSIT) program.\n\nWe are pleased to confirm that we have successfully received your registration. Your application is currently under review by our Admissions Committee.\n\n═══════════════════════════════════════════════════════════════════════════════\nVERIFICATION CODE\n═══════════════════════════════════════════════════════════════════════════════\n\nYour one-time verification code is: ${otp}\n\nIMPORTANT: This code will expire in 3 minutes. Please enter this code to complete your email verification.\n\n═══════════════════════════════════════════════════════════════════════════════\nNEXT STEPS\n═══════════════════════════════════════════════════════════════════════════════\n\n1. Enter your verification code in the portal\n2. Wait for admission decision notification\n3. Once approved, you will receive your exam schedule details\n\nWe will communicate with you via email regarding all updates about your application status and examination schedule. Please monitor your inbox regularly.\n\nIf you have any questions or concerns, please contact our Admissions Office.\n\nBest regards,\n\nAdmissions Office\nBachelor of Science in Information Technology Program\nEntranceExam Administration`;
 
     const emailSent = await sendEmail({
       to: rawEmail,
