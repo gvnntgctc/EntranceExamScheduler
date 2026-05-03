@@ -280,7 +280,7 @@ router.post('/apply-confirm', async (req, res) => {
       ]
     });
 
-    if (existingUser) {
+    if (existingUser && existingUser.isVerified) {
       let errorMessage = 'This information is already registered.';
       if (existingUser.phoneNumber === phoneNumber) {
         errorMessage = 'Phone number is already registered.';
@@ -296,24 +296,36 @@ router.post('/apply-confirm', async (req, res) => {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     const otpExpiry = new Date(Date.now() + 3 * 60 * 1000);
 
-    console.log('Creating new user with:', { phoneNumber, email: rawEmail, fullName });
-    const user = new User({
-      phoneNumber,
-      email: rawEmail,
-      fullName,
-      role: 'student',
-      status: 'pending',
-      isVerified: false,
-      resultMessage: 'Your application is pending review. We will notify you by email once schedule/result is set.',
-      otp,
-      otpExpiry
-    });
-    try {
-      await user.save();
-      console.log('New user saved:', user);
-    } catch (err) {
-      console.error('Error saving new user:', err);
-      return res.redirect('/auth/apply?error=Failed to save registration.');
+    let user;
+    if (existingUser && !existingUser.isVerified) {
+      // Update existing pending user with new OTP
+      console.log('Updating existing pending user:', existingUser._id);
+      existingUser.otp = otp;
+      existingUser.otpExpiry = otpExpiry;
+      existingUser.resultMessage = 'Your application is pending review. We will notify you by email once schedule/result is set.';
+      await existingUser.save();
+      user = existingUser;
+    } else {
+      // Create new user
+      console.log('Creating new user with:', { phoneNumber, email: rawEmail, fullName });
+      user = new User({
+        phoneNumber,
+        email: rawEmail,
+        fullName,
+        role: 'student',
+        status: 'pending',
+        isVerified: false,
+        resultMessage: 'Your application is pending review. We will notify you by email once schedule/result is set.',
+        otp,
+        otpExpiry
+      });
+      try {
+        await user.save();
+        console.log('New user saved:', user);
+      } catch (err) {
+        console.error('Error saving new user:', err);
+        return res.redirect('/auth/apply?error=Failed to save registration.');
+      }
     }
 
     req.session.registrationUserId = user._id;
