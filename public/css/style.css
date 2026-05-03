@@ -653,11 +653,12 @@ h2 i {
 }
 
 .holiday-warning {
-  margin-top: 8px;
+  margin-top: 4px;
   color: #c0392b;
-  font-size: 14px;
-  font-weight: 700;
-  min-height: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 18px;
+  line-height: 1.2;
 }
 
 .pagination-controls {
@@ -2174,69 +2175,94 @@ form.schedule-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
-  align-items: flex-start;
+  align-items: start;
 }
 
 .schedule-form .form-group {
   margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.schedule-form .form-group label {
+  display: block;
+  margin-bottom: 0;
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+}
+
+.schedule-form .form-group label i {
+  margin-right: 8px;
+  color: #11998e;
+}
+
+.schedule-form .form-group input,
+.schedule-form .form-group select {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.schedule-form .form-group input:focus,
+.schedule-form .form-group select:focus {
+  outline: none;
+  border-color: #11998e;
+  box-shadow: 0 0 10px rgba(17, 153, 142, 0.2);
 }
 
 .schedule-form .holiday-panel {
-  margin-top: 15px;
-  padding-top: 10px;
-  border-top: 1px solid #e6e6e6;
+  margin-top: 8px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.schedule-form .sub-text {
+  display: none;
 }
 
 .schedule-form .exam-date-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
+  margin-bottom: 0;
 }
 
 .schedule-form .exam-date-card {
-  background: #f8fafc;
-  border: 1px solid #dbeafe;
-  border-radius: 18px;
-  padding: 18px;
-  box-shadow: inset 0 0 0 1px rgba(147, 197, 253, 0.15);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
 }
 
 .schedule-form .exam-date-card input#examDateDisplay {
   background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-size: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 16px;
   color: #111827;
-  margin-bottom: 14px;
+  margin-bottom: 0;
+  transition: all 0.3s ease;
+}
+
+.schedule-form .exam-date-card input#examDateDisplay:focus {
+  outline: none;
+  border-color: #11998e;
+  box-shadow: 0 0 10px rgba(17, 153, 142, 0.2);
 }
 
 .schedule-form .date-selection {
-  margin-top: 6px;
+  display: none;
 }
 
 .schedule-form .month-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.schedule-form .month-tabs button {
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #1f2937;
-  border-radius: 999px;
-  padding: 10px 14px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.schedule-form .month-tabs button.active {
-  border-color: #2563eb;
-  background: #2563eb;
-  color: #fff;
+  display: none;
 }
 
 .modal-body .date-grid {
