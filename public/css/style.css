@@ -1059,6 +1059,7 @@ h2 i {
     color: inherit !important;
     font-size: inherit !important;
     font-weight: inherit !important;
+    flex-wrap: wrap;
   }
 
   .section-card .schedule-list .schedule-applicant {
@@ -1066,7 +1067,17 @@ h2 i {
     align-items: center;
     gap: 8px;
     min-width: 0;
-    flex: 1;
+    flex: 0 0 auto;
+  }
+
+  .section-card .schedule-list .schedule-summary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex: 1 1 0;
+    min-width: 0;
+    flex-wrap: wrap;
   }
 
   .section-card .schedule-list .schedule-applicant i {
@@ -1146,8 +1157,9 @@ h2 i {
     display: flex;
     flex-direction: column;
     gap: 3px;
-    min-width: 140px;
-    flex: 1 1 0;
+    min-width: 130px;
+    text-align: center;
+    flex: 1 1 130px;
   }
 
   .section-card .schedule-list .schedule-location {
