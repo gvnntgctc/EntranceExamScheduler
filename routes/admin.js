@@ -19,22 +19,60 @@ function escapeRegExp(text) {
 function buildNotificationAction(notification) {
   const recipientName = notification.recipientId?.fullName || notification.recipientEmail || 'recipient';
   const subject = (notification.subject || '').toLowerCase();
+  const body = (notification.body || '').toLowerCase();
   const failed = notification.status === 'failed';
   const suffix = failed ? ' (failed)' : '';
 
-  if (subject.includes('schedule')) {
-    return `Scheduled exam for ${recipientName}${suffix}`;
+  // Schedule actions
+  if (subject.includes('schedule added') || body.includes('created exam schedule')) {
+    return `✅ Schedule Created for ${recipientName}`;
   }
-  if (subject.includes('admission') || subject.includes('decision') || subject.includes('notice')) {
-    return `Sent admission status update to ${recipientName}${suffix}`;
+  if (subject.includes('schedule updated') || body.includes('updated exam schedule')) {
+    return `📝 Schedule Updated for ${recipientName}`;
   }
-  if (subject.includes('exam result')) {
-    return `Updated application status for ${recipientName}${suffix}`;
+  if (subject.includes('schedule deleted') || body.includes('deleted exam schedule')) {
+    return `🗑️ Schedule Deleted for ${recipientName}`;
   }
-  if (subject.includes('reset') && subject.includes('otp')) {
-    return `Sent password reset instructions to ${recipientName}${suffix}`;
+  
+  // Student deletion
+  if (subject.includes('student account deleted') || body.includes('deleted student account')) {
+    return `❌ Student Account Deleted: ${recipientName}`;
   }
-  return `Sent notification to ${recipientName}${suffix}`;
+  
+  // Application status
+  if (subject.includes('application status updated') || subject.includes('status updated')) {
+    const statusMatch = body.match(/status to:\s*(passed|failed|pending|approved|not approved)/i);
+    if (statusMatch) {
+      const statusText = statusMatch[1].toUpperCase();
+      return `📋 Application Status Updated to ${statusText} for ${recipientName}`;
+    }
+    return `📋 Application Status Updated for ${recipientName}${suffix}`;
+  }
+  
+  // Admission decisions (emails)
+  if (subject.includes('admission decision') || subject.includes('approved') || subject.includes('not approved')) {
+    if (subject.includes('approved')) {
+      return `📧 Admission Approval Email sent to ${recipientName}${suffix}`;
+    }
+    return `📧 Admission Decision Email sent to ${recipientName}${suffix}`;
+  }
+  
+  // Exam schedule confirmation emails
+  if (subject.includes('examination schedule confirmation') || subject.includes('exam schedule')) {
+    return `📧 Schedule Confirmation Email sent to ${recipientName}${suffix}`;
+  }
+  
+  // Registration/verification emails
+  if (subject.includes('registration') || subject.includes('verification')) {
+    return `📧 Registration Email sent to ${recipientName}${suffix}`;
+  }
+  
+  // Generic email notification
+  if (subject.includes('email') || notification.subject?.includes('sent')) {
+    return `📧 Email sent to ${recipientName}${suffix}`;
+  }
+  
+  return `📧 Notification sent to ${recipientName}${suffix}`;
 }
 
 let transporter = null;
