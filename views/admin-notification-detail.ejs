@@ -7,50 +7,87 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
   <style>
+    body {
+      background: #f5f9ff;
+    }
     .detail-card {
-      max-width: 850px;
-      margin: 20px auto;
-      background: #fff;
-      border: 1px solid #e8eff6;
-      border-radius: 14px;
-      box-shadow: 0 10px 24px rgba(8, 20, 40, 0.08);
-      padding: 26px;
+      max-width: 880px;
+      margin: 24px auto 40px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      box-shadow: 0 18px 45px rgba(15, 41, 77, 0.08);
+      padding: 30px 32px;
     }
     .detail-card h2 {
-      margin: 0 0 14px;
-      color: #1e3452;
-      font-size: 24px;
-      font-weight: 700;
+      margin: 0 0 18px;
+      color: #1e3a5f;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
     }
     .detail-row {
       display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: 10px;
-      margin-bottom: 12px;
+      grid-template-columns: 150px 1fr;
+      gap: 12px 24px;
+      margin-bottom: 16px;
       align-items: start;
+    }
+    .detail-row:last-child {
+      margin-bottom: 0;
     }
     .detail-label {
       font-weight: 700;
-      color: #3e5671;
-      letter-spacing: 0.4px;
+      color: #334155;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 13px;
+      margin-top: 2px;
     }
     .detail-value {
-      color: #243646;
+      color: #1f2937;
+      line-height: 1.7;
       white-space: pre-wrap;
       word-break: break-word;
+      font-size: 15px;
+    }
+    .detail-body {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
     }
     .back-link {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       text-decoration: none;
-      color: #156597;
-      font-weight: 600;
+      color: #0f4a8a;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .back-link i {
+      width: 20px;
+      text-align: center;
     }
     .back-link:hover {
-      text-decoration: underline;
+      color: #0b3c72;
+      text-decoration: none;
     }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .status-sent { background: #d8f5e6; color: #1f5f3d; }
+    .status-failed { background: #ffe5e8; color: #7f1d1d; }
   </style>
 </head>
 <body>
@@ -66,8 +103,8 @@
         <div class="detail-row"><div class="detail-label">Recipient</div><div class="detail-value"><%= notification.recipientId ? (notification.recipientId.fullName || notification.recipientEmail) : notification.recipientEmail %></div></div>
         <div class="detail-row"><div class="detail-label">Action</div><div class="detail-value"><%= notification.actionDescription %></div></div>
         <div class="detail-row"><div class="detail-label">Subject</div><div class="detail-value"><%= notification.subject %></div></div>
-        <div class="detail-row"><div class="detail-label">Details</div><div class="detail-value"><%= notification.body %></div></div>
-        <div class="detail-row"><div class="detail-label">Status</div><div class="detail-value"><%= notification.status %></div></div>
+        <div class="detail-row detail-body-row"><div class="detail-label">Details</div><div class="detail-value detail-body"><%= notification.body %></div></div>
+        <div class="detail-row"><div class="detail-label">Status</div><div class="detail-value"><span class="status-pill status-<%= notification.status %>"><%= notification.status %></span></div></div>
         <div class="detail-row"><div class="detail-label">Sent At</div><div class="detail-value"><%= notification.createdAt.toLocaleString() %></div></div>
         <div class="detail-row"><div class="detail-label">Error</div><div class="detail-value"><%= notification.errorMessage || 'None' %></div></div>
       </div>

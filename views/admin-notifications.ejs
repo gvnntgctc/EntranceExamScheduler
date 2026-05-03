@@ -152,7 +152,6 @@
                   <td><%= notification.actionDescription %></td>
                   <td class="details-cell">
                     <span class="subject-line"><%= notification.subject %></span>
-                    <span><%= notification.body.length > 120 ? notification.body.slice(0, 120) + '...' : notification.body %></span>
                   </td>
                   <td><span class="status-pill status-<%= notification.status %>"><%= notification.status %></span></td>
                   <td><%= notification.createdAt.toLocaleString() %></td>
