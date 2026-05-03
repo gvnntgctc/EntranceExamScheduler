@@ -43,22 +43,22 @@
           </div>
         </div>
         <p class="review-tip">Please check each field for accuracy before confirming — this helps us process your application smoothly.</p>
-      </div>
 
-      <form class="review-form" action="/auth/apply-confirm" method="POST">
-        <input type="hidden" name="fullName" value="<%= fullName %>" />
-        <input type="hidden" name="phoneNumber" value="<%= phoneNumber %>" />
-        <input type="hidden" name="email" value="<%= email %>" />
+        <form class="review-form" action="/auth/apply-confirm" method="POST">
+          <input type="hidden" name="fullName" value="<%= fullName %>" />
+          <input type="hidden" name="phoneNumber" value="<%= phoneNumber %>" />
+          <input type="hidden" name="email" value="<%= email %>" />
 
-        <button class="btn-submit" type="submit">
-          <i class="fas fa-check-circle"></i> Confirm and Send Code
-        </button>
-      </form>
+          <button class="btn-submit" type="submit">
+            <i class="fas fa-check-circle"></i> Confirm and Send Code
+          </button>
+        </form>
 
-      <div class="review-actions">
-        <a class="btn-ghost" href="/auth/apply?fullName=<%= encodeURIComponent(fullName) %>&phoneNumber=<%= encodeURIComponent(phoneNumber) %>&email=<%= encodeURIComponent(email) %>">
-          <i class="fas fa-edit"></i> Edit information
-        </a>
+        <div class="review-actions">
+          <a class="btn-ghost" href="/auth/apply?fullName=<%= encodeURIComponent(fullName) %>&phoneNumber=<%= encodeURIComponent(phoneNumber) %>&email=<%= encodeURIComponent(email) %>">
+            <i class="fas fa-edit"></i> Edit information
+          </a>
+        </div>
       </div>
     </div>
   </div>
