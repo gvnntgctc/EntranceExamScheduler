@@ -38,24 +38,25 @@ body {
 }
 
 .page-logo {
-  position: absolute;
+  position: fixed;
   top: 18px;
   right: 18px;
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
   display: grid;
   place-items: center;
   overflow: hidden;
-  z-index: 5;
+  z-index: 999;
 }
 
 .page-logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  display: block;
 }
 
 .container.single-panel .form-container {
