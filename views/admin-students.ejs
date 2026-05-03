@@ -430,7 +430,7 @@
                     <% } %>
                   </td>
                   <td data-label="Actions" class="actions-column">
-                    <a href="/admin/students?studentId=<%= student._id.toString() %>" class="action-btn edit-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                    <a href="/admin/students/view/<%= student._id.toString() %>" class="action-btn edit-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
                       <i class="fas fa-eye"></i> View
                     </a>
                     <button type="button" class="action-btn delete-btn" onclick="openDeleteModal('<%= student._id %>', '<%= student.fullName %>')">
@@ -591,10 +591,6 @@
       form.action = `/admin/students/delete/${deleteStudentId}`;
       document.body.appendChild(form);
       form.submit();
-    }
-
-    function closeStudentModal() {
-      window.location.href = '/admin/students';
     }
 
     // Close modal when clicking outside

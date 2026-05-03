@@ -638,7 +638,7 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
       await student.save();
     }
 
-    return res.redirect(`/admin/students?studentId=${studentId}&success=Status updated successfully`);
+    return res.redirect(`/admin/students/view/${studentId}?success=Status updated successfully`);
   } catch (error) {
     console.error('Failed to update status:', error);
     return res.redirect('/admin/students?error=Failed to update status');
