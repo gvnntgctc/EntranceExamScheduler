@@ -430,9 +430,9 @@
                     <% } %>
                   </td>
                   <td data-label="Actions" class="actions-column">
-                    <a href="/admin/students/view/<%= student._id.toString() %>" class="action-btn edit-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                    <button type="button" class="action-btn edit-btn" onclick="viewStudent('<%= student._id.toString() %>')">
                       <i class="fas fa-eye"></i> View
-                    </a>
+                    </button>
                     <button type="button" class="action-btn delete-btn" onclick="openDeleteModal('<%= student._id %>', '<%= student.fullName %>')">
                       <i class="fas fa-trash"></i> Delete
                     </button>
@@ -446,105 +446,73 @@
       </div>
 
       <!-- STUDENT DETAILS MODAL -->
-      <% if (selectedStudent) { %>
-        <div class="student-modal-bg" onclick="closeStudentModal()" style="display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9998;"></div>
-        <div id="studentModal" class="student-modal" style="display: flex; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 650px; max-height: 90vh; background: white; border-radius: 16px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1); overflow: hidden; flex-direction: column; z-index: 9999;">
-          <div class="student-modal-content" style="display: flex; flex-direction: column; height: 100%; background: white;">
-            <div class="student-modal-header" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 30px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(17, 153, 142, 0.2);">
-              <div style="display: flex; align-items: center; gap: 15px;">
-                <div style="font-size: 32px; background: rgba(255, 255, 255, 0.2); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                  <i class="fas fa-user-circle"></i>
-                </div>
-                <div>
-                  <div style="font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Student Profile</div>
-                  <h2 style="margin: 0; font-size: 24px; font-weight: 700; color: white;"><%= selectedStudent.fullName %></h2>
-                </div>
+      <div id="studentModalBg" class="student-modal-bg" onclick="closeStudentModal()" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9998;"></div>
+      <div id="studentModal" class="student-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 650px; max-height: 90vh; background: white; border-radius: 16px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1); overflow: hidden; flex-direction: column; z-index: 9999;">
+        <div class="student-modal-content" style="display: flex; flex-direction: column; height: 100%; background: white;">
+          <div class="student-modal-header" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 30px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(17, 153, 142, 0.2);">
+            <div style="display: flex; align-items: center; gap: 15px;">
+              <div style="font-size: 32px; background: rgba(255, 255, 255, 0.2); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-user-circle"></i>
               </div>
-              <button class="student-modal-close" onclick="closeStudentModal()" style="background: rgba(255, 255, 255, 0.25); border: none; color: white; font-size: 24px; cursor: pointer; padding: 10px 14px; border-radius: 8px; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-times"></i>
-              </button>
+              <div>
+                <div style="font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Student Profile</div>
+                <h2 id="studentModalName" style="margin: 0; font-size: 24px; font-weight: 700; color: white;"></h2>
+              </div>
             </div>
-            
-            <div class="student-modal-body" style="padding: 30px; overflow-y: auto; flex: 1; background: #f8f9fa; max-height: calc(90vh - 150px);">
-              <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e0e0e0;">
-                <h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; text-decoration: none; border: none;">
-                  <i class="fas fa-id-card"></i> Registration Information
-                </h3>
-                <table style="width: 100%; border-collapse: collapse;">
-                  <tr>
-                    <td style="padding: 14px 0; font-weight: 600; color: #555; width: 35%;">Full Name</td>
-                    <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;"><%= selectedStudent.fullName %></td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 14px 0; font-weight: 600; color: #555;">Email</td>
-                    <td style="padding: 14px 0; padding-left: 15px; color: #11998e;"><a href="mailto:<%= selectedStudent.email %>" style="color: #11998e; text-decoration: none; font-weight: 500;"><%= selectedStudent.email %></a></td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 14px 0; font-weight: 600; color: #555;">Phone Number</td>
-                    <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;"><%= selectedStudent.phoneNumber || 'N/A' %></td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 14px 0; font-weight: 600; color: #555;">Registered Date</td>
-                    <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;"><%= selectedStudent.createdAt ? selectedStudent.createdAt.toDateString() : 'N/A' %></td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 14px 0; font-weight: 600; color: #555;">Application Status</td>
-                    <td style="padding: 14px 0; padding-left: 15px; font-weight: 700; color: #333;"><%= selectedStudent.status || 'pending' %></td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 14px 0; font-weight: 600; color: #555;">Status Notes</td>
-                    <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;"><%= selectedStudent.resultMessage || 'No notes yet.' %></td>
-                  </tr>
-                </table>
-              </div>
-              <div style="background: white; padding: 20px 25px 25px 25px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 20px;">
-                <h3 style="color: #11998e; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Update Result Status</h3>
-                <form method="POST" action="/admin/students/status/<%= selectedStudent._id %>">
-                  <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
-                    <label style="display: flex; align-items: center; gap: 6px;"><input type="radio" name="status" value="passed" <%= selectedStudent.status === 'passed' ? 'checked' : '' %> /> Passed</label>
-                    <label style="display: flex; align-items: center; gap: 6px;"><input type="radio" name="status" value="failed" <%= selectedStudent.status === 'failed' ? 'checked' : '' %> /> Failed</label>
-                  </div>
-                  <button type="submit" class="action-btn edit-btn" style="margin-top: 0;">Apply Status</button>
-                </form>
-              </div>
+            <button class="student-modal-close" onclick="closeStudentModal()" style="background: rgba(255, 255, 255, 0.25); border: none; color: white; font-size: 24px; cursor: pointer; padding: 10px 14px; border-radius: 8px; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="student-modal-body" style="padding: 30px; overflow-y: auto; flex: 1; background: #f8f9fa; max-height: calc(90vh - 150px);">
+            <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e0e0e0;">
+              <h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; text-decoration: none; border: none;">
+                <i class="fas fa-id-card"></i> Registration Information
+              </h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555; width: 35%;">Full Name</td>
+                  <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;" id="studentModalFullName"></td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555;">Email</td>
+                  <td style="padding: 14px 0; padding-left: 15px; color: #11998e;"><a id="studentModalEmail" href="" style="color: #11998e; text-decoration: none; font-weight: 500;"></a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555;">Phone Number</td>
+                  <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;" id="studentModalPhone"></td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555;">Registered Date</td>
+                  <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;" id="studentModalDate"></td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555;">Application Status</td>
+                  <td style="padding: 14px 0; padding-left: 15px; font-weight: 700; color: #333;" id="studentModalStatus"></td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 0; font-weight: 600; color: #555;">Status Notes</td>
+                  <td style="padding: 14px 0; padding-left: 15px; color: #333; font-weight: 500;" id="studentModalNotes"></td>
+                </tr>
+              </table>
+            </div>
+            <div style="background: white; padding: 20px 25px 25px 25px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 20px;">
+              <h3 style="color: #11998e; margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Update Result Status</h3>
+              <form id="studentStatusForm" method="POST" action="">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                  <label style="display: flex; align-items: center; gap: 6px;"><input type="radio" name="status" value="passed" /> Passed</label>
+                  <label style="display: flex; align-items: center; gap: 6px;"><input type="radio" name="status" value="failed" /> Failed</label>
+                </div>
+                <button type="submit" class="action-btn edit-btn" style="margin-top: 0;">Apply Status</button>
+              </form>
+            </div>
 
-              <% if (studentSchedules && studentSchedules.length > 0) { %>
-                <div style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0;">
-                  <h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; text-decoration: none; border: none;">
-                    <i class="fas fa-calendar-check"></i> Exam Schedules (<%= studentSchedules.length %>)
-                  </h3>
-                  <ul style="list-style: none; padding: 0; margin: 0;">
-                    <% studentSchedules.forEach((s, idx) => { %>
-                      <li <%= idx > 0 ? 'style="padding-top: 15px; margin-top: 15px;"' : '' %>>
-                        <div style="background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%); padding: 16px; border-radius: 10px; border-left: 4px solid #11998e;">
-                          <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div style="flex: 1;">
-                              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #11998e; font-weight: 600;">
-                                <i class="fas fa-calendar"></i> <%= new Date(s.examDate).toDateString() %>
-                              </div>
-                              <div style="display: flex; align-items: center; gap: 8px; color: #555; margin-bottom: 6px; font-size: 14px;">
-                                <i class="fas fa-clock"></i> <strong>Time:</strong> <%= s.examTime %>
-                              </div>
-                              <div style="display: flex; align-items: center; gap: 8px; color: #555; font-size: 14px;">
-                                <i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> <%= s.location %>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                    <% }) %>
-                  </ul>
-                </div>
-              <% } else { %>
-                <div style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 2px dashed #ddd;">
-                  <i class="fas fa-calendar-alt" style="font-size: 48px; color: #ccc; display: block; margin-bottom: 12px;"></i>
-                  <p style="color: #999; margin: 0; font-size: 16px; font-style: italic;">No exam schedules assigned yet</p>
-                </div>
-              <% } %>
+            <div id="studentSchedulesContainer" style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0;">
+              <!-- Schedules will be populated by JavaScript -->
             </div>
           </div>
         </div>
-      <% } %>
+      </div>
     </div>
   </div>
 
@@ -592,6 +560,109 @@
       document.body.appendChild(form);
       form.submit();
     }
+
+    // View student details in modal
+    async function viewStudent(studentId) {
+      try {
+        const response = await fetch(`/admin/students/api/${studentId}`);
+        if (!response.ok) {
+          alert('Failed to load student details');
+          return;
+        }
+        
+        const data = await response.json();
+        const student = data.student;
+        const schedules = data.studentSchedules || [];
+        
+        // Update modal content
+        document.getElementById('studentModalName').textContent = student.fullName;
+        document.getElementById('studentModalFullName').textContent = student.fullName;
+        document.getElementById('studentModalEmail').textContent = student.email;
+        document.getElementById('studentModalEmail').href = `mailto:${student.email}`;
+        document.getElementById('studentModalPhone').textContent = student.phoneNumber || 'N/A';
+        document.getElementById('studentModalDate').textContent = student.createdAt ? new Date(student.createdAt).toDateString() : 'N/A';
+        document.getElementById('studentModalStatus').textContent = student.status || 'pending';
+        document.getElementById('studentModalNotes').textContent = student.resultMessage || 'No notes yet.';
+        
+        // Update status form
+        document.getElementById('studentStatusForm').action = `/admin/students/status/${student._id}`;
+        const passedRadio = document.querySelector('input[name="status"][value="passed"]');
+        const failedRadio = document.querySelector('input[name="status"][value="failed"]');
+        if (passedRadio) passedRadio.checked = student.status === 'passed';
+        if (failedRadio) failedRadio.checked = student.status === 'failed';
+        
+        // Update schedules
+        const schedulesContainer = document.getElementById('studentSchedulesContainer');
+        if (schedules.length > 0) {
+          let schedulesHtml = `<h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-calendar-check"></i> Exam Schedules (${schedules.length})
+          </h3>
+          <ul style="list-style: none; padding: 0; margin: 0;">`;
+          
+          schedules.forEach((s, idx) => {
+            schedulesHtml += `<li ${idx > 0 ? 'style="padding-top: 15px; margin-top: 15px;"' : ''}>
+              <div style="background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%); padding: 16px; border-radius: 10px; border-left: 4px solid #11998e;">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                  <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #11998e; font-weight: 600;">
+                      <i class="fas fa-calendar"></i> ${new Date(s.examDate).toDateString()}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; color: #555; margin-bottom: 6px; font-size: 14px;">
+                      <i class="fas fa-clock"></i> <strong>Time:</strong> ${s.examTime}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; color: #555; font-size: 14px;">
+                      <i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> ${s.location}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>`;
+          });
+          
+          schedulesHtml += '</ul>';
+          schedulesContainer.innerHTML = schedulesHtml;
+        } else {
+          schedulesContainer.innerHTML = `<div style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 2px dashed #ddd;">
+            <i class="fas fa-calendar-alt" style="font-size: 48px; color: #ccc; display: block; margin-bottom: 12px;"></i>
+            <p style="color: #999; margin: 0; font-size: 16px; font-style: italic;">No exam schedules assigned yet</p>
+          </div>`;
+        }
+        
+        // Show modal
+        document.getElementById('studentModal').style.display = 'flex';
+        document.getElementById('studentModalBg').style.display = 'block';
+        
+      } catch (error) {
+        console.error('Error loading student details:', error);
+        alert('Failed to load student details');
+      }
+    }
+
+    // Handle status form submission
+    document.getElementById('studentStatusForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const studentId = this.action.split('/').pop();
+      
+      try {
+        const response = await fetch(`/admin/students/status/${studentId}`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          // Reload the student data to show updated status
+          await viewStudent(studentId);
+          alert('Status updated successfully!');
+        } else {
+          alert('Failed to update status');
+        }
+      } catch (error) {
+        console.error('Error updating status:', error);
+        alert('Failed to update status');
+      }
+    });
 
     // Close modal when clicking outside
     document.getElementById('deleteModal').addEventListener('click', function(e) {
@@ -649,7 +720,8 @@
     })();
 
     function closeStudentModal() {
-      window.location.href = '/admin/students';
+      document.getElementById('studentModal').style.display = 'none';
+      document.getElementById('studentModalBg').style.display = 'none';
     }
   </script>
 </body>
