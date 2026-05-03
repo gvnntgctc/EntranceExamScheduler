@@ -785,27 +785,40 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
 // Bulk status update route
 router.post('/students/bulk-status', isAdmin, async (req, res) => {
   try {
-    console.log('Bulk status update request body:', JSON.stringify(req.body, null, 2));
+    console.log('=== BULK STATUS ROUTE CALLED ===');
+    console.log('Request method:', req.method);
+    console.log('Request headers:', JSON.stringify(req.headers, null, 2));
+    console.log('Raw request body:', JSON.stringify(req.body, null, 2));
     console.log('Session role:', req.session.role);
-    console.log('Headers:', req.headers);
 
     let data;
+    let studentIds;
+    let status;
+
     if (req.body.data) {
+      console.log('Found data field, attempting JSON parse...');
       try {
         data = JSON.parse(req.body.data);
+        console.log('Successfully parsed JSON data:', data);
+        studentIds = data.studentIds;
+        status = data.status;
       } catch (e) {
-        console.log('Failed to parse JSON data, trying legacy format');
+        console.log('JSON parse failed:', e.message);
+        console.log('Falling back to direct body fields...');
         data = req.body;
+        studentIds = req.body.studentIds || req.body['studentIds[]'];
+        status = req.body.status;
       }
     } else {
+      console.log('No data field found, using direct body fields...');
       data = req.body;
+      studentIds = req.body.studentIds || req.body['studentIds[]'];
+      status = req.body.status;
     }
 
-    let studentIds = data.studentIds || req.body.studentIds || req.body['studentIds[]'];
-    const status = data.status || req.body.status;
-
-    console.log('Parsed data:', data);
-    console.log('Raw studentIds:', studentIds, 'status:', status, 'type:', typeof studentIds);
+    console.log('Final parsed data:', { studentIds, status });
+    console.log('Student IDs type:', typeof studentIds);
+    console.log('Student IDs length:', studentIds ? studentIds.length : 'undefined');
 
     if (Array.isArray(studentIds)) {
       studentIds = studentIds.map(id => String(id).trim()).filter(id => id);
@@ -895,26 +908,36 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
 // Bulk delete students and their schedules
 router.post('/students/bulk-delete', isAdmin, async (req, res) => {
   try {
-    console.log('Bulk delete request body:', JSON.stringify(req.body, null, 2));
+    console.log('=== BULK DELETE ROUTE CALLED ===');
+    console.log('Request method:', req.method);
+    console.log('Request headers:', JSON.stringify(req.headers, null, 2));
+    console.log('Raw request body:', JSON.stringify(req.body, null, 2));
     console.log('Session role:', req.session.role);
-    console.log('Headers:', req.headers);
 
     let data;
+    let studentIds;
+
     if (req.body.data) {
+      console.log('Found data field, attempting JSON parse...');
       try {
         data = JSON.parse(req.body.data);
+        console.log('Successfully parsed JSON data:', data);
+        studentIds = data.studentIds;
       } catch (e) {
-        console.log('Failed to parse JSON data, trying legacy format');
+        console.log('JSON parse failed:', e.message);
+        console.log('Falling back to direct body fields...');
         data = req.body;
+        studentIds = req.body.studentIds || req.body['studentIds[]'];
       }
     } else {
+      console.log('No data field found, using direct body fields...');
       data = req.body;
+      studentIds = req.body.studentIds || req.body['studentIds[]'];
     }
 
-    let studentIds = data.studentIds || req.body.studentIds || req.body['studentIds[]'];
-
-    console.log('Parsed data:', data);
-    console.log('Raw studentIds:', studentIds, 'type:', typeof studentIds);
+    console.log('Final parsed data:', { studentIds });
+    console.log('Student IDs type:', typeof studentIds);
+    console.log('Student IDs length:', studentIds ? studentIds.length : 'undefined');
 
     if (Array.isArray(studentIds)) {
       studentIds = studentIds.map(id => String(id).trim()).filter(id => id);
