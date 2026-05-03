@@ -227,10 +227,11 @@ body.review-screen .form-container {
 }
 
 body.review-screen .review-header {
-  text-align: left;
-  margin-bottom: 26px;
+  max-width: 420px;
+  margin: 0 auto 28px;
   padding-bottom: 14px;
   border-bottom: 1px solid rgba(17, 153, 142, 0.08);
+  text-align: center;
 }
 
 body.review-screen .review-header .eyebrow {
@@ -238,7 +239,7 @@ body.review-screen .review-header .eyebrow {
   align-items: center;
   justify-content: center;
   padding: 8px 14px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   background: rgba(17, 153, 142, 0.14);
   color: #0f5132;
   border-radius: 999px;
@@ -250,7 +251,7 @@ body.review-screen .review-header .eyebrow {
 
 body.review-screen .review-header h1 {
   font-size: 28px;
-  margin-bottom: 10px;
+  margin: 0 0 12px;
   color: #17392e;
 }
 
@@ -258,7 +259,8 @@ body.review-screen .review-header .subtitle {
   color: #4f6d61;
   font-size: 15px;
   line-height: 1.7;
-  max-width: 38rem;
+  max-width: 360px;
+  margin: 0 auto;
 }
 
 body.review-screen .btn-submit {
