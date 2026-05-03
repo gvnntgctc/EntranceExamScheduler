@@ -168,8 +168,6 @@
                     <span class="detail-label"><i class="fas fa-calendar"></i> Date</span>
                     <span class="detail-value"><%= new Date(s.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
                   </div>
-                </div>
-                <div class="schedule-card-row">
                   <div class="schedule-location">
                     <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Location</span>
                     <span class="detail-value"><%= s.location %></span>
@@ -214,8 +212,10 @@
     </div>
   </div>
 
+  <script id="scheduleData" type="application/json">{"scheduleCounts":<%- JSON.stringify(scheduleCounts || {}) %>,"students":<%- JSON.stringify(students || []) %>}</script>
   <script>
-    const scheduleCounts = <%- JSON.stringify(scheduleCounts || {}) %>;
+    const scheduleData = JSON.parse(document.getElementById('scheduleData').textContent || '{}');
+    const scheduleCounts = scheduleData.scheduleCounts || {};
     const toastMessage = document.getElementById('toastMessage');
     if (toastMessage) {
       toastMessage.classList.add('show');
@@ -263,7 +263,7 @@
     });
 
     // Live applicant search with hidden ID selection
-    const studentOptions = <%- JSON.stringify(students || []) %>;
+    const studentOptions = scheduleData.students || [];
     const studentSearchInput = document.getElementById('studentSearch');
     const studentIdInput = document.getElementById('studentId');
     const studentSuggestions = document.getElementById('studentSuggestions');

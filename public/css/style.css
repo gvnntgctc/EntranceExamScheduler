@@ -1144,9 +1144,9 @@ h2 i {
 
   .section-card .schedule-list .schedule-card-row {
     display: flex;
-    gap: 24px;
+    gap: 20px;
     flex-wrap: wrap;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
   .section-card .schedule-list .schedule-time,
@@ -1154,20 +1154,20 @@ h2 i {
   .section-card .schedule-list .schedule-location {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    flex: 1 1 180px;
-    min-width: 160px;
+    gap: 6px;
+    flex: 1 1 220px;
+    min-width: 180px;
   }
 
   .section-card .schedule-list .detail-label {
     font-size: 11px;
-    color: #71717a;
+    color: #555;
     letter-spacing: 0.35px;
     text-transform: uppercase;
     font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
 
   .section-card .schedule-list .detail-label i {
@@ -1177,12 +1177,8 @@ h2 i {
 
   .section-card .schedule-list .detail-value {
     font-size: 14px;
-    color: #262626;
-    font-weight: 500;
-  }
-
-  .section-card .schedule-list .schedule-location {
-    flex: 1 1 100%;
+    color: #222;
+    font-weight: 600;
   }
 
   .section-card .schedule-list .schedule-card-row + .schedule-card-row {
@@ -1217,7 +1213,6 @@ h2 i {
       justify-content: flex-start;
     }
   }
-}
 
 .form-buttons .btn-primary {
   min-width: 180px;
