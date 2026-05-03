@@ -545,6 +545,11 @@
     </div>
   </div>
 
+  <form id="bulkActionForm" method="POST" style="display:none;">
+    <input type="hidden" name="studentIds" id="bulkStudentIds" />
+    <input type="hidden" name="status" id="bulkStatus" />
+  </form>
+
   <!-- Bulk Status / Delete Confirmation Modal -->
   <div id="bulkConfirmModal" class="modal">
     <div class="modal-content">
@@ -905,48 +910,28 @@
         }
       });
 
-      async function submitBulkStatus(studentIds, status) {
+      function submitBulkStatus(studentIds, status) {
         console.log('Submitting bulk status update:', studentIds, status);
-        const response = await fetch('/admin/students/bulk-status', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'same-origin',
-          body: JSON.stringify({ studentIds, status })
-        });
+        const form = document.getElementById('bulkActionForm');
+        const studentIdsField = document.getElementById('bulkStudentIds');
+        const statusField = document.getElementById('bulkStatus');
 
-        console.log('Bulk status response status:', response.status);
-        if (response.redirected) {
-          window.location.href = response.url;
-          return;
-        }
-
-        const text = await response.text();
-        console.log('Bulk status response body:', text);
-        window.location.reload();
+        form.action = '/admin/students/bulk-status';
+        studentIdsField.value = studentIds.join(',');
+        statusField.value = status;
+        form.submit();
       }
 
-      async function submitBulkDelete(studentIds) {
+      function submitBulkDelete(studentIds) {
         console.log('Submitting bulk delete:', studentIds);
-        const response = await fetch('/admin/students/bulk-delete', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'same-origin',
-          body: JSON.stringify({ studentIds })
-        });
+        const form = document.getElementById('bulkActionForm');
+        const studentIdsField = document.getElementById('bulkStudentIds');
+        const statusField = document.getElementById('bulkStatus');
 
-        console.log('Bulk delete response status:', response.status);
-        if (response.redirected) {
-          window.location.href = response.url;
-          return;
-        }
-
-        const text = await response.text();
-        console.log('Bulk delete response body:', text);
-        window.location.reload();
+        form.action = '/admin/students/bulk-delete';
+        studentIdsField.value = studentIds.join(',');
+        statusField.value = '';
+        form.submit();
       }
 
       // Initial state
