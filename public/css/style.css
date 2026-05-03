@@ -3308,13 +3308,13 @@ button.btn-primary:hover {
   top: 20px;
   right: 20px;
   z-index: 10;
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   overflow: hidden;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(17, 153, 142, 0.3);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .page-logo img {
@@ -3322,9 +3322,8 @@ button.btn-primary:hover {
   height: 100%;
   object-fit: contain;
   display: block;
-  padding: 2px;
+  padding: 0;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .page-logo-img:hover {

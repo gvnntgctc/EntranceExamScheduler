@@ -41,11 +41,11 @@ body {
   position: fixed;
   top: 18px;
   right: 18px;
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  background: transparent;
+  box-shadow: none;
   display: grid;
   place-items: center;
   overflow: hidden;
