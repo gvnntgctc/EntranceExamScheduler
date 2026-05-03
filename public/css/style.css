@@ -870,90 +870,56 @@ h2 i {
 }
 
 .schedule-list li {
-  background: #f8f9fa;
-  padding: 16px;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  border-left: 4px solid #11998e;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  transition: all 0.3s ease;
+  padding: 0;
+  margin-bottom: 0;
+  border-radius: 0;
+  border-left: none;
+  display: block;
+  gap: 0;
+  transition: none;
 }
 
 .schedule-list li:hover {
-  transform: translateX(3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: none;
+  box-shadow: none;
 }
 
 .schedule-list .schedule-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  background: transparent;
-  color: inherit;
-  padding: 0;
+  display: none;
 }
 
 .schedule-list .schedule-applicant {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
+  display: none;
 }
 
 .schedule-list .schedule-applicant i {
-  font-size: 18px;
-  color: #11998e;
-  flex-shrink: 0;
+  display: none;
 }
 
 .schedule-list .schedule-applicant strong {
-  font-size: 15px;
-  color: #2c3e50;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: none;
 }
 
 .schedule-list .schedule-card-row {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
+  display: none;
 }
 
 .schedule-list .schedule-time,
 .schedule-list .schedule-date,
 .schedule-list .schedule-location {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 140px;
+  display: none;
 }
 
 .schedule-list .detail-label {
-  font-size: 12px;
-  color: #999;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: none;
 }
 
 .schedule-list .detail-label i {
-  color: #11998e;
-  font-size: 13px;
+  display: none;
 }
 
 .schedule-list .detail-value {
-  font-size: 14px;
-  color: #2c3e50;
-  font-weight: 500;
+  display: none;
 }
 
 .schedule-list .schedule-info {
@@ -965,23 +931,16 @@ h2 i {
 }
 
 .schedule-actions {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: nowrap;
+  display: none;
 }
 
 .schedule-actions form {
-  display: inline-flex;
-  align-items: center;
-  margin: 0;
+  display: none;
 }
 
 .schedule-actions a,
 .schedule-actions button {
-  min-width: 110px;
-  white-space: nowrap;
+  display: none;
 }
 
 /* ==================== */
