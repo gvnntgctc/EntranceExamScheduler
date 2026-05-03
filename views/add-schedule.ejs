@@ -198,7 +198,14 @@
         <button type="button" class="modal-back" id="examDateModalClose">Close</button>
       </div>
       <div class="modal-body">
-        <div class="month-tabs" id="monthTabs" role="tablist" aria-label="Exam month selection"></div>
+        <div class="calendar-banner">
+          <button type="button" id="prevMonth" aria-label="Previous month">‹</button>
+          <div class="calendar-title" id="calendarTitle">March 2026</div>
+          <button type="button" id="nextMonth" aria-label="Next month">›</button>
+        </div>
+        <div class="weekday-row" aria-hidden="true">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
         <div class="date-grid" id="dateGrid" aria-live="polite"></div>
       </div>
     </div>
@@ -478,7 +485,9 @@
     const examDateDisplay = document.getElementById('examDateDisplay');
     const examDateModal = document.getElementById('examDateModal');
     const examDateModalClose = document.getElementById('examDateModalClose');
-    const monthTabs = document.getElementById('monthTabs');
+    const prevMonthBtn = document.getElementById('prevMonth');
+    const nextMonthBtn = document.getElementById('nextMonth');
+    const calendarTitle = document.getElementById('calendarTitle');
     const dateGrid = document.getElementById('dateGrid');
     const scheduleForm = document.querySelector('.schedule-form');
     const holidayWarning = document.getElementById('holidayWarning');
@@ -578,21 +587,16 @@
       return new Date(year, month + 1, 0).getDate();
     }
 
-    function renderMonthTabs() {
-      if (!monthTabs) return;
-      monthTabs.innerHTML = '';
-      allowedMonths.forEach((month, index) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = index === activeMonthIndex ? 'active' : '';
-        button.textContent = month.label;
-        button.addEventListener('click', () => {
-          activeMonthIndex = index;
-          renderMonthTabs();
-          renderDateGrid();
-        });
-        monthTabs.appendChild(button);
-      });
+    function renderCalendarTitle() {
+      if (!calendarTitle) return;
+      const { label } = allowedMonths[activeMonthIndex];
+      calendarTitle.textContent = label;
+      if (prevMonthBtn) {
+        prevMonthBtn.disabled = activeMonthIndex === 0;
+      }
+      if (nextMonthBtn) {
+        nextMonthBtn.disabled = activeMonthIndex === allowedMonths.length - 1;
+      }
     }
 
     function isDatePast(dateValue) {
@@ -606,9 +610,19 @@
       if (!dateGrid) return;
       dateGrid.innerHTML = '';
       const { year, month } = allowedMonths[activeMonthIndex];
+      const firstDay = new Date(year, month, 1).getDay();
       const dayCount = getDayCount(year, month);
+
+      for (let i = 0; i < firstDay; i += 1) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'date-cell empty-cell';
+        dateGrid.appendChild(emptyCell);
+      }
+
       for (let day = 1; day <= dayCount; day += 1) {
         const dateValue = `${year}-${pad(month + 1)}-${pad(day)}`;
+        const cell = document.createElement('div');
+        cell.className = 'date-cell';
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'date-button';
@@ -638,7 +652,8 @@
           button.classList.add('active');
         }
 
-        dateGrid.appendChild(button);
+        cell.appendChild(button);
+        dateGrid.appendChild(cell);
       }
     }
 
@@ -676,8 +691,24 @@
       }
     });
 
-    if (monthTabs && dateGrid) {
-      renderMonthTabs();
+    prevMonthBtn?.addEventListener('click', function() {
+      if (activeMonthIndex > 0) {
+        activeMonthIndex -= 1;
+        renderCalendarTitle();
+        renderDateGrid();
+      }
+    });
+
+    nextMonthBtn?.addEventListener('click', function() {
+      if (activeMonthIndex < allowedMonths.length - 1) {
+        activeMonthIndex += 1;
+        renderCalendarTitle();
+        renderDateGrid();
+      }
+    });
+
+    if (dateGrid) {
+      renderCalendarTitle();
       renderDateGrid();
     }
 
