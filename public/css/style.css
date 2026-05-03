@@ -44,7 +44,7 @@ body {
 
 .sidebar {
   width: 250px;
-  background: linear-gradient(135deg, #23394d 0%, #1f2d3d 100%);
+  background: linear-gradient(135deg, #00c531 0%, #00c531 100%);
   color: white;
   height: 100vh;
   position: fixed;
