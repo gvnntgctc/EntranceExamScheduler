@@ -504,7 +504,8 @@ router.get('/students', isAdmin, async (req, res) => {
     
     // Filter by search term if provided
     if (req.query.search && req.query.search.trim()) {
-      const searchRegex = new RegExp(req.query.search.trim(), 'i');
+      const safeSearch = escapeRegExp(req.query.search.trim());
+      const searchRegex = new RegExp(safeSearch, 'i');
       query.$or = [
         { fullName: searchRegex },
         { email: searchRegex }
