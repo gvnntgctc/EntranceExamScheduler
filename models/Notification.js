@@ -10,11 +10,6 @@ const notificationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  recipientName: {
-    type: String,
-    required: false,
-    default: ''
-  },
   subject: {
     type: String,
     required: true

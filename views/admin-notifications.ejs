@@ -155,7 +155,7 @@
               <% notifications.forEach((notification, idx) => { %>
                 <tr>
                   <td><%= idx + 1 %></td>
-                  <td><strong><%= notification.recipientDisplayName || (notification.recipientId ? notification.recipientId.fullName || notification.recipientId.email : notification.recipientEmail) %></strong></td>
+                  <td><strong><%= notification.recipientId ? notification.recipientId.fullName || notification.recipientEmail : notification.recipientEmail %></strong></td>
                   <td><%= notification.actionDescription %></td>
                   <td class="details-cell">
                     <span class="subject-line"><%= notification.subject %></span>

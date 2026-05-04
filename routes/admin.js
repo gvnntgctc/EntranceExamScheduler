@@ -16,73 +16,8 @@ function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function getUserName(user) {
-  if (!user) return '';
-  if (user.fullName && user.fullName.trim()) {
-    return user.fullName.trim();
-  }
-  const nameParts = [user.firstName, user.middleName, user.surname]
-    .filter(Boolean)
-    .map(part => part.trim())
-    .filter(Boolean);
-  return nameParts.length ? nameParts.join(' ') : '';
-}
-
-function getUserDisplayName(user) {
-  if (!user) return '';
-  const name = getUserName(user);
-  return name || user.email || '';
-}
-
-function extractRecipientNameFromBody(body) {
-  if (!body || typeof body !== 'string') return '';
-  const patterns = [
-    /Admin deleted student account:\s*([^\(]+)\s*\(/i,
-    /Updated\s+(.+?)'s status/i,
-    /Applicant Name:\s*([^\n\r]+)/i,
-    /Dear\s+([^\n,]+)/i
-  ];
-
-  for (const pattern of patterns) {
-    const match = body.match(pattern);
-    if (match && match[1]) {
-      return match[1].trim();
-    }
-  }
-
-  return '';
-}
-
-async function resolveNotificationRecipient(notification) {
-  if (notification.recipientId) {
-    const recipientName = getUserName(notification.recipientId);
-    if (recipientName) {
-      return recipientName;
-    }
-  }
-
-  const bodyName = extractRecipientNameFromBody(notification.body);
-  if (bodyName) {
-    return bodyName;
-  }
-
-  if (notification.recipientEmail) {
-    const email = notification.recipientEmail.trim();
-    const user = await User.findOne({ email: new RegExp(`^${escapeRegExp(email)}$`, 'i') }).lean();
-    if (user) {
-      const recipientName = getUserName(user);
-      if (recipientName) {
-        return recipientName;
-      }
-    }
-    return notification.recipientEmail;
-  }
-
-  return 'recipient';
-}
-
-function buildNotificationAction(notification, recipientName) {
-  const resolvedRecipientName = recipientName || getUserDisplayName(notification.recipientId) || notification.recipientEmail || 'recipient';
+function buildNotificationAction(notification) {
+  const recipientName = notification.recipientId?.fullName || notification.recipientId?.name || notification.recipientEmail || 'recipient';
   const subject = (notification.subject || '').toLowerCase();
   const body = (notification.body || '').toLowerCase();
   const failed = notification.status === 'failed';
@@ -90,18 +25,18 @@ function buildNotificationAction(notification, recipientName) {
 
   // Schedule actions
   if (subject.includes('schedule added') || body.includes('created exam schedule')) {
-    return `✅ Schedule Created for ${resolvedRecipientName}`;
+    return `✅ Schedule Created for ${recipientName}`;
   }
   if (subject.includes('schedule updated') || body.includes('updated exam schedule')) {
-    return `📝 Schedule Updated for ${resolvedRecipientName}`;
+    return `📝 Schedule Updated for ${recipientName}`;
   }
   if (subject.includes('schedule deleted') || body.includes('deleted exam schedule')) {
-    return `🗑️ Schedule Deleted for ${resolvedRecipientName}`;
+    return `🗑️ Schedule Deleted for ${recipientName}`;
   }
   
   // Student deletion
   if (subject.includes('student account deleted') || body.includes('deleted student account')) {
-    return `❌ Student Account Deleted: ${resolvedRecipientName}`;
+    return `❌ Student Account Deleted: ${recipientName}`;
   }
   
   // Application status
@@ -109,35 +44,35 @@ function buildNotificationAction(notification, recipientName) {
     const statusMatch = body.match(/status to:\s*(passed|failed|pending|approved|not approved)/i);
     if (statusMatch) {
       const statusText = statusMatch[1].toUpperCase();
-      return `📋 Application Status Updated to ${statusText} for ${resolvedRecipientName}`;
+      return `📋 Application Status Updated to ${statusText} for ${recipientName}`;
     }
-    return `📋 Application Status Updated for ${resolvedRecipientName}${suffix}`;
+    return `📋 Application Status Updated for ${recipientName}${suffix}`;
   }
   
   // Admission decisions (emails)
   if (subject.includes('admission decision') || subject.includes('approved') || subject.includes('not approved')) {
     if (subject.includes('approved')) {
-      return `📧 Admission Approval Email sent to ${resolvedRecipientName}${suffix}`;
+      return `📧 Admission Approval Email sent to ${recipientName}${suffix}`;
     }
-    return `📧 Admission Decision Email sent to ${resolvedRecipientName}${suffix}`;
+    return `📧 Admission Decision Email sent to ${recipientName}${suffix}`;
   }
   
   // Exam schedule confirmation emails
   if (subject.includes('examination schedule confirmation') || subject.includes('exam schedule')) {
-    return `📧 Schedule Confirmation Email sent to ${resolvedRecipientName}${suffix}`;
+    return `📧 Schedule Confirmation Email sent to ${recipientName}${suffix}`;
   }
   
   // Registration/verification emails
   if (subject.includes('registration') || subject.includes('verification')) {
-    return `📧 Registration Email sent to ${resolvedRecipientName}${suffix}`;
+    return `📧 Registration Email sent to ${recipientName}${suffix}`;
   }
   
   // Generic email notification
   if (subject.includes('email') || notification.subject?.includes('sent')) {
-    return `📧 Email sent to ${resolvedRecipientName}${suffix}`;
+    return `📧 Email sent to ${recipientName}${suffix}`;
   }
   
-  return `📧 Notification sent to ${resolvedRecipientName}${suffix}`;
+  return `📧 Notification sent to ${recipientName}${suffix}`;
 }
 
 let transporter = null;
@@ -167,61 +102,32 @@ if (nodemailer && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
   console.log('Email transporter NOT initialized. nodemailer:', !!nodemailer, 'EMAIL_USER:', !!process.env.EMAIL_USER, 'EMAIL_PASS:', !!process.env.EMAIL_PASS);
 }
 
-async function sendEmail({ recipientId, recipientName: providedName, to, subject, text }) {
-  const normalizedEmail = (to || '').trim();
-  let recipientName = providedName || '';
-
-  if (!recipientName && recipientId) {
-    if (typeof recipientId === 'object') {
-      recipientName = getUserName(recipientId);
-    } else {
-      const user = await User.findById(recipientId).lean();
-      recipientName = getUserName(user);
-    }
-  }
-
-  if (!recipientName && normalizedEmail) {
-    const user = await User.findOne({ email: new RegExp(`^${escapeRegExp(normalizedEmail)}$`, 'i') }).lean();
-    recipientName = getUserName(user);
-  }
-
-  if (!recipientName) {
-    recipientName = normalizedEmail;
-  }
-
-  const baseNotification = {
-    recipientId,
-    recipientEmail: normalizedEmail,
-    recipientName,
-    subject,
-    body: text
-  };
-
+async function sendEmail({ recipientId, to, subject, text }) {
   if (!nodemailer) {
     console.warn('sendEmail skipped: nodemailer not available');
-    await Notification.create({ ...baseNotification, status: 'failed', errorMessage: 'nodemailer not available' });
+    await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'failed', errorMessage: 'nodemailer not available' });
     return false;
   }
 
   if (!transporter) {
     console.warn('sendEmail skipped: transporter not configured with Gmail credentials');
-    await Notification.create({ ...baseNotification, status: 'failed', errorMessage: 'transporter not configured' });
+    await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'failed', errorMessage: 'transporter not configured' });
     return false;
   }
 
   try {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: normalizedEmail,
+      to,
       subject,
       text
     });
 
-    await Notification.create({ ...baseNotification, status: 'sent' });
+    await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'sent' });
     return true;
   } catch (error) {
     console.error('Failed to send email:', error);
-    await Notification.create({ ...baseNotification, status: 'failed', errorMessage: error.message || String(error) });
+    await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'failed', errorMessage: error.message || String(error) });
     return false;
   }
 }
@@ -483,7 +389,6 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
     await Notification.create({
       recipientId: student._id,
       recipientEmail: student.email,
-      recipientName: getUserDisplayName(student),
       subject: 'Schedule Added',
       body: `Admin created exam schedule: ${new Date(examDate).toLocaleDateString()} at ${examTime} in ${location}`,
       status: 'sent'
@@ -709,14 +614,10 @@ router.get('/notifications', isAdmin, async (req, res) => {
       .sort({ createdAt: -1 })
       .populate('recipientId');
 
-    const notificationsWithActions = await Promise.all(notifications.map(async notification => {
-      notification.recipientDisplayName = notification.recipientName || (notification.recipientId ? getUserDisplayName(notification.recipientId) || notification.recipientEmail : notification.recipientEmail);
-      if (!notification.recipientDisplayName || notification.recipientDisplayName === notification.recipientEmail) {
-        notification.recipientDisplayName = await resolveNotificationRecipient(notification);
-      }
-      notification.actionDescription = buildNotificationAction(notification, notification.recipientDisplayName);
+    const notificationsWithActions = notifications.map(notification => {
+      notification.actionDescription = buildNotificationAction(notification);
       return notification;
-    }));
+    });
 
     res.render('admin-notifications', {
       notifications: notificationsWithActions,
@@ -747,11 +648,7 @@ router.get('/notifications/:id', isAdmin, async (req, res) => {
       return res.redirect('/admin/notifications?error=Notification not found');
     }
 
-    notification.recipientDisplayName = notification.recipientName || (notification.recipientId ? getUserDisplayName(notification.recipientId) || notification.recipientEmail : notification.recipientEmail);
-    if (!notification.recipientDisplayName || notification.recipientDisplayName === notification.recipientEmail) {
-      notification.recipientDisplayName = await resolveNotificationRecipient(notification);
-    }
-    notification.actionDescription = buildNotificationAction(notification, notification.recipientDisplayName);
+    notification.actionDescription = buildNotificationAction(notification);
 
     res.render('admin-notification-detail', {
       notification,
@@ -801,7 +698,6 @@ router.post('/students/delete/:id', isAdmin, async (req, res) => {
     await Notification.create({
       recipientId: student._id,
       recipientEmail: student.email,
-      recipientName: getUserDisplayName(student),
       subject: 'Student Account Deleted',
       body: `Admin deleted student account: ${student.fullName} (${student.email}). All associated schedules were also removed.`,
       status: 'sent'
@@ -869,7 +765,6 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
     await Notification.create({
       recipientId: student._id,
       recipientEmail: student.email,
-      recipientName: getUserDisplayName(student),
       subject: 'Application Status Updated',
       body: `Updated ${student.fullName}'s status to ${status.toUpperCase()}${status === 'passed' || status === 'failed' ? ' and removed exam schedules' : ''}`,
       status: 'sent'
@@ -1013,7 +908,6 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
           await Notification.create({
             recipientId: student._id,
             recipientEmail: student.email,
-            recipientName: getUserDisplayName(student),
             subject: 'Application Status Updated',
             body: `Updated ${student.fullName}'s status to ${status.toUpperCase()}${status === 'passed' || status === 'failed' ? ' and removed exam schedules' : ''}`,
             status: 'sent'
@@ -1133,7 +1027,6 @@ router.post('/students/bulk-delete', isAdmin, async (req, res) => {
         await Notification.create({
           recipientId: student._id,
           recipientEmail: student.email,
-          recipientName: getUserDisplayName(student),
           subject: 'Student Account Deleted',
           body: `Admin deleted student account: ${student.fullName} (${student.email}). All associated schedules were also removed.`,
           status: 'sent'
@@ -1277,7 +1170,6 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
     await Notification.create({
       recipientId: schedule.studentId,
       recipientEmail: student?.email,
-      recipientName: getUserDisplayName(student),
       subject: 'Schedule Updated',
       body: `Admin updated exam schedule from [${oldDate} at ${oldTime} in ${oldLocation}] to [${new Date(examDate).toLocaleDateString()} at ${examTime.trim()} in ${location.trim()}]`,
       status: 'sent'
@@ -1307,7 +1199,6 @@ router.post('/delete-schedule/:id', isAdmin, async (req, res) => {
     await Notification.create({
       recipientId: schedule.studentId,
       recipientEmail: student?.email,
-      recipientName: getUserDisplayName(student),
       subject: 'Schedule Deleted',
       body: `Admin deleted exam schedule: ${new Date(schedule.examDate).toLocaleDateString()} at ${schedule.examTime} in ${schedule.location}`,
       status: 'sent'
