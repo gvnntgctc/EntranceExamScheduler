@@ -31,8 +31,30 @@ function getUserDisplayName(user) {
   return user.email || '';
 }
 
-function buildNotificationAction(notification) {
-  const recipientName = getUserDisplayName(notification.recipientId) || notification.recipientEmail || 'recipient';
+async function resolveNotificationRecipient(notification) {
+  if (notification.recipientId) {
+    const recipientName = getUserDisplayName(notification.recipientId);
+    if (recipientName) {
+      return recipientName;
+    }
+  }
+
+  if (notification.recipientEmail) {
+    const user = await User.findOne({ email: notification.recipientEmail }).lean();
+    if (user) {
+      const recipientName = getUserDisplayName(user);
+      if (recipientName) {
+        return recipientName;
+      }
+    }
+    return notification.recipientEmail;
+  }
+
+  return 'recipient';
+}
+
+function buildNotificationAction(notification, recipientName) {
+  const resolvedRecipientName = recipientName || getUserDisplayName(notification.recipientId) || notification.recipientEmail || 'recipient';
   const subject = (notification.subject || '').toLowerCase();
   const body = (notification.body || '').toLowerCase();
   const failed = notification.status === 'failed';
@@ -40,18 +62,18 @@ function buildNotificationAction(notification) {
 
   // Schedule actions
   if (subject.includes('schedule added') || body.includes('created exam schedule')) {
-    return `✅ Schedule Created for ${recipientName}`;
+    return `✅ Schedule Created for ${resolvedRecipientName}`;
   }
   if (subject.includes('schedule updated') || body.includes('updated exam schedule')) {
-    return `📝 Schedule Updated for ${recipientName}`;
+    return `📝 Schedule Updated for ${resolvedRecipientName}`;
   }
   if (subject.includes('schedule deleted') || body.includes('deleted exam schedule')) {
-    return `🗑️ Schedule Deleted for ${recipientName}`;
+    return `🗑️ Schedule Deleted for ${resolvedRecipientName}`;
   }
   
   // Student deletion
   if (subject.includes('student account deleted') || body.includes('deleted student account')) {
-    return `❌ Student Account Deleted: ${recipientName}`;
+    return `❌ Student Account Deleted: ${resolvedRecipientName}`;
   }
   
   // Application status
@@ -629,11 +651,14 @@ router.get('/notifications', isAdmin, async (req, res) => {
       .sort({ createdAt: -1 })
       .populate('recipientId');
 
-    const notificationsWithActions = notifications.map(notification => {
-      notification.actionDescription = buildNotificationAction(notification);
+    const notificationsWithActions = await Promise.all(notifications.map(async notification => {
       notification.recipientDisplayName = notification.recipientId ? getUserDisplayName(notification.recipientId) || notification.recipientEmail : notification.recipientEmail;
+      if (!notification.recipientDisplayName || notification.recipientDisplayName === notification.recipientEmail) {
+        notification.recipientDisplayName = await resolveNotificationRecipient(notification);
+      }
+      notification.actionDescription = buildNotificationAction(notification, notification.recipientDisplayName);
       return notification;
-    });
+    }));
 
     res.render('admin-notifications', {
       notifications: notificationsWithActions,
@@ -664,8 +689,11 @@ router.get('/notifications/:id', isAdmin, async (req, res) => {
       return res.redirect('/admin/notifications?error=Notification not found');
     }
 
-    notification.actionDescription = buildNotificationAction(notification);
     notification.recipientDisplayName = notification.recipientId ? getUserDisplayName(notification.recipientId) || notification.recipientEmail : notification.recipientEmail;
+    if (!notification.recipientDisplayName || notification.recipientDisplayName === notification.recipientEmail) {
+      notification.recipientDisplayName = await resolveNotificationRecipient(notification);
+    }
+    notification.actionDescription = buildNotificationAction(notification, notification.recipientDisplayName);
 
     res.render('admin-notification-detail', {
       notification,
