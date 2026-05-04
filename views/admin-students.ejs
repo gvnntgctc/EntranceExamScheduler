@@ -932,13 +932,16 @@
           console.log('No pending bulk action, returning');
           return;
         }
+        // Save values before closing (which resets them)
+        const idsToSubmit = [...pendingBulkIds];
+        const statusToSubmit = pendingBulkStatus;
         closeBulkConfirm();
-        if (pendingBulkStatus === 'deleted') {
-          console.log('Calling submitBulkDelete with:', pendingBulkIds);
-          submitBulkDelete(pendingBulkIds);
+        if (statusToSubmit === 'deleted') {
+          console.log('Calling submitBulkDelete with:', idsToSubmit);
+          submitBulkDelete(idsToSubmit);
         } else {
-          console.log('Calling submitBulkStatus with:', pendingBulkIds, pendingBulkStatus);
-          submitBulkStatus(pendingBulkIds, pendingBulkStatus);
+          console.log('Calling submitBulkStatus with:', idsToSubmit, statusToSubmit);
+          submitBulkStatus(idsToSubmit, statusToSubmit);
         }
       });
 
