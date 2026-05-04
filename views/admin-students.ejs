@@ -1071,10 +1071,9 @@
         // Save values before closing (which resets them)
         const idsToSubmit = [...pendingBulkIds];
         const statusToSubmit = pendingBulkStatus;
-        const actionText = statusToSubmit === 'deleted' ? 'Deleting students...' : `Updating status to ${statusToSubmit}...`;
         
         closeBulkConfirm();
-        showBulkLoading(actionText);
+        showBulkLoading('Processing');
         
         try {
           if (statusToSubmit === 'deleted') {

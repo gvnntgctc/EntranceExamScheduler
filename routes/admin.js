@@ -17,7 +17,7 @@ function escapeRegExp(text) {
 }
 
 function buildNotificationAction(notification) {
-  const recipientName = notification.recipientId?.fullName || notification.recipientEmail || 'recipient';
+  const recipientName = notification.recipientId?.fullName || notification.recipientId?.name || notification.recipientEmail || 'recipient';
   const subject = (notification.subject || '').toLowerCase();
   const body = (notification.body || '').toLowerCase();
   const failed = notification.status === 'failed';
@@ -766,7 +766,7 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
       recipientId: student._id,
       recipientEmail: student.email,
       subject: 'Application Status Updated',
-      body: `Admin updated application status to: ${status.toUpperCase()}${status === 'passed' || status === 'failed' ? ' and removed exam schedules' : ''}`,
+      body: `Updated ${student.fullName}'s status to ${status.toUpperCase()}${status === 'passed' || status === 'failed' ? ' and removed exam schedules' : ''}`,
       status: 'sent'
     });
 
@@ -909,7 +909,7 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
             recipientId: student._id,
             recipientEmail: student.email,
             subject: 'Application Status Updated',
-            body: `Admin updated application status to: ${status.toUpperCase()}${status === 'passed' || status === 'failed' ? ' and removed exam schedules' : ''}`,
+            body: `Updated ${student.fullName}'s status to ${status.toUpperCase()}${status === 'passed' || status === 'failed' ? ' and removed exam schedules' : ''}`,
             status: 'sent'
           });
 
