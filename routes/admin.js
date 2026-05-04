@@ -16,8 +16,23 @@ function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function getUserDisplayName(user) {
+  if (!user) return '';
+  if (user.fullName && user.fullName.trim()) {
+    return user.fullName.trim();
+  }
+  const nameParts = [user.firstName, user.middleName, user.surname]
+    .filter(Boolean)
+    .map(part => part.trim())
+    .filter(Boolean);
+  if (nameParts.length) {
+    return nameParts.join(' ');
+  }
+  return user.email || '';
+}
+
 function buildNotificationAction(notification) {
-  const recipientName = notification.recipientId?.fullName || notification.recipientId?.name || notification.recipientEmail || 'recipient';
+  const recipientName = getUserDisplayName(notification.recipientId) || notification.recipientEmail || 'recipient';
   const subject = (notification.subject || '').toLowerCase();
   const body = (notification.body || '').toLowerCase();
   const failed = notification.status === 'failed';
@@ -616,6 +631,7 @@ router.get('/notifications', isAdmin, async (req, res) => {
 
     const notificationsWithActions = notifications.map(notification => {
       notification.actionDescription = buildNotificationAction(notification);
+      notification.recipientDisplayName = notification.recipientId ? getUserDisplayName(notification.recipientId) || notification.recipientEmail : notification.recipientEmail;
       return notification;
     });
 
@@ -649,6 +665,7 @@ router.get('/notifications/:id', isAdmin, async (req, res) => {
     }
 
     notification.actionDescription = buildNotificationAction(notification);
+    notification.recipientDisplayName = notification.recipientId ? getUserDisplayName(notification.recipientId) || notification.recipientEmail : notification.recipientEmail;
 
     res.render('admin-notification-detail', {
       notification,
