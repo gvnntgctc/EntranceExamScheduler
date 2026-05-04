@@ -750,6 +750,12 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
     }
 
     student.resultMessage = statusMessage;
+    
+    // Remove exam schedules for passed/failed students
+    if (status === 'passed' || status === 'failed') {
+      await Schedule.deleteMany({ studentId: student._id });
+      console.log(`Removed exam schedules for student ${student._id} (${student.fullName}) - status: ${status}`);
+    }
 
     await student.save();
 
@@ -760,7 +766,7 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
       recipientId: student._id,
       recipientEmail: student.email,
       subject: 'Application Status Updated',
-      body: `Admin updated application status to: ${status.toUpperCase()}`,
+      body: `Admin updated application status to: ${status.toUpperCase()}${status === 'passed' || status === 'failed' ? ' and removed exam schedules' : ''}`,
       status: 'sent'
     });
 
@@ -888,6 +894,13 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
           }
 
           student.resultMessage = statusMessage;
+          
+          // Remove exam schedules for passed/failed students
+          if (status === 'passed' || status === 'failed') {
+            await Schedule.deleteMany({ studentId: student._id });
+            console.log(`Removed exam schedules for student ${student._id} (${student.fullName}) - status: ${status}`);
+          }
+          
           await student.save();
           updatedCount++;
 
@@ -896,7 +909,7 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
             recipientId: student._id,
             recipientEmail: student.email,
             subject: 'Application Status Updated',
-            body: `Admin updated application status to: ${status.toUpperCase()}`,
+            body: `Admin updated application status to: ${status.toUpperCase()}${status === 'passed' || status === 'failed' ? ' and removed exam schedules' : ''}`,
             status: 'sent'
           });
 

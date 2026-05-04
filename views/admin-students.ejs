@@ -231,6 +231,80 @@
       background: #d0d0d0;
     }
     
+    /* Bulk Loading Overlay Styles */
+    .bulk-loading-overlay {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      animation: fadeIn 0.3s ease;
+    }
+    .bulk-loading-overlay.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .bulk-loading-content {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      width: 90%;
+    }
+    .bulk-loading-spinner {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+    }
+    .bulk-spinner-ring {
+      box-sizing: border-box;
+      display: block;
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      margin: 8px;
+      border: 8px solid #11998e;
+      border-radius: 50%;
+      animation: bulk-spinner-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      border-color: #11998e transparent transparent transparent;
+    }
+    .bulk-spinner-ring:nth-child(1) {
+      animation-delay: -0.45s;
+    }
+    .bulk-spinner-ring:nth-child(2) {
+      animation-delay: -0.3s;
+    }
+    .bulk-spinner-ring:nth-child(3) {
+      animation-delay: -0.15s;
+    }
+    @keyframes bulk-spinner-ring {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    .bulk-loading-text h3 {
+      color: #11998e;
+      margin: 0 0 10px 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .bulk-loading-text p {
+      color: #666;
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
     /* Loading Spinner Animation */
     @keyframes lds-ring {
       0% {
@@ -581,6 +655,22 @@
     </div>
   </div>
 
+  <!-- Bulk Processing Loading Overlay -->
+  <div id="bulkLoadingOverlay" class="bulk-loading-overlay">
+    <div class="bulk-loading-content">
+      <div class="bulk-loading-spinner">
+        <div class="bulk-spinner-ring"></div>
+        <div class="bulk-spinner-ring"></div>
+        <div class="bulk-spinner-ring"></div>
+        <div class="bulk-spinner-ring"></div>
+      </div>
+      <div class="bulk-loading-text">
+        <h3>Processing Bulk Operation</h3>
+        <p id="bulkLoadingMessage">Please wait while we process your request...</p>
+      </div>
+    </div>
+  </div>
+
   <% } %>
 
   <script src="/js/script.js"></script>
@@ -786,6 +876,8 @@
       const bulkSuccessModal = document.getElementById('bulkSuccessModal');
       const bulkSuccessMessage = document.getElementById('bulkSuccessMessage');
       const bulkSuccessOkBtn = document.getElementById('bulkSuccessOkBtn');
+      const bulkLoadingOverlay = document.getElementById('bulkLoadingOverlay');
+      const bulkLoadingMessage = document.getElementById('bulkLoadingMessage');
 
       let pendingBulkIds = [];
       let pendingBulkStatus = null;
@@ -793,7 +885,11 @@
       if (!bulkActionsBar) return; // No bulk actions bar if no students
 
       updateBulkButtons = function() {
-        const checkedBoxes = document.querySelectorAll('.student-checkbox:checked');
+        const visibleCheckboxes = Array.from(studentCheckboxes).filter(cb => {
+          const row = cb.closest('tr');
+          return row.style.display !== 'none';
+        });
+        const checkedBoxes = visibleCheckboxes.filter(cb => cb.checked);
         const hasSelection = checkedBoxes.length > 0;
         
         bulkPassBtn.disabled = !hasSelection;
@@ -859,6 +955,15 @@
         window.location.reload();
       }
 
+      function showBulkLoading(message = 'Please wait while we process your request...') {
+        bulkLoadingMessage.textContent = message;
+        bulkLoadingOverlay.classList.add('show');
+      }
+
+      function hideBulkLoading() {
+        bulkLoadingOverlay.classList.remove('show');
+      }
+
       // Select All functionality
       if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', function() {
@@ -902,10 +1007,14 @@
 
       // Bulk action handlers
       bulkPassBtn.addEventListener('click', function() {
-        const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+        const visibleCheckboxes = Array.from(document.querySelectorAll('.student-checkbox')).filter(cb => {
+          const row = cb.closest('tr');
+          return row.style.display !== 'none';
+        });
+        const selectedIds = visibleCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
         console.log('Bulk Pass clicked - Selected IDs:', selectedIds, 'Length:', selectedIds.length);
-        console.log('Checkboxes found:', document.querySelectorAll('.student-checkbox').length);
-        console.log('Checked checkboxes:', document.querySelectorAll('.student-checkbox:checked').length);
+        console.log('Visible checkboxes:', visibleCheckboxes.length);
+        console.log('Checked visible checkboxes:', visibleCheckboxes.filter(cb => cb.checked).length);
         if (selectedIds.length === 0) {
           console.log('No students selected, returning early');
           return;
@@ -914,10 +1023,14 @@
       });
 
       bulkFailBtn.addEventListener('click', function() {
-        const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+        const visibleCheckboxes = Array.from(document.querySelectorAll('.student-checkbox')).filter(cb => {
+          const row = cb.closest('tr');
+          return row.style.display !== 'none';
+        });
+        const selectedIds = visibleCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
         console.log('Bulk Fail clicked - Selected IDs:', selectedIds, 'Length:', selectedIds.length);
-        console.log('Checkboxes found:', document.querySelectorAll('.student-checkbox').length);
-        console.log('Checked checkboxes:', document.querySelectorAll('.student-checkbox:checked').length);
+        console.log('Visible checkboxes:', visibleCheckboxes.length);
+        console.log('Checked visible checkboxes:', visibleCheckboxes.filter(cb => cb.checked).length);
         if (selectedIds.length === 0) {
           console.log('No students selected, returning early');
           return;
@@ -926,10 +1039,14 @@
       });
 
       bulkDeleteBtn.addEventListener('click', function() {
-        const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+        const visibleCheckboxes = Array.from(document.querySelectorAll('.student-checkbox')).filter(cb => {
+          const row = cb.closest('tr');
+          return row.style.display !== 'none';
+        });
+        const selectedIds = visibleCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
         console.log('Bulk Delete clicked - Selected IDs:', selectedIds, 'Length:', selectedIds.length);
-        console.log('Checkboxes found:', document.querySelectorAll('.student-checkbox').length);
-        console.log('Checked checkboxes:', document.querySelectorAll('.student-checkbox:checked').length);
+        console.log('Visible checkboxes:', visibleCheckboxes.length);
+        console.log('Checked visible checkboxes:', visibleCheckboxes.filter(cb => cb.checked).length);
         if (selectedIds.length === 0) {
           console.log('No students selected, returning early');
           return;
@@ -954,29 +1071,27 @@
         // Save values before closing (which resets them)
         const idsToSubmit = [...pendingBulkIds];
         const statusToSubmit = pendingBulkStatus;
-        closeBulkConfirm();
+        const actionText = statusToSubmit === 'deleted' ? 'Deleting students...' : `Updating status to ${statusToSubmit}...`;
         
-        // Disable button and show loading
-        this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        closeBulkConfirm();
+        showBulkLoading(actionText);
         
         try {
           if (statusToSubmit === 'deleted') {
             console.log('Calling submitBulkDelete with:', idsToSubmit);
             const result = await submitBulkDelete(idsToSubmit);
+            hideBulkLoading();
             showBulkSuccess(result.message);
           } else {
             console.log('Calling submitBulkStatus with:', idsToSubmit, statusToSubmit);
             const result = await submitBulkStatus(idsToSubmit, statusToSubmit);
+            hideBulkLoading();
             showBulkSuccess(result.message);
           }
         } catch (error) {
           console.error('Bulk operation failed:', error);
+          hideBulkLoading();
           alert('Operation failed: ' + error.message);
-        } finally {
-          // Re-enable button
-          this.disabled = false;
-          this.innerHTML = '<i class="fas fa-check"></i> Confirm';
         }
       });
 
