@@ -609,8 +609,18 @@ router.get('/notifications', isAdmin, async (req, res) => {
       }
     }
 
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = 30;
+
+    const totalNotifications = await Notification.countDocuments(query);
+    const totalPages = Math.max(1, Math.ceil(totalNotifications / limit));
+    const currentPage = Math.min(page, totalPages);
+    const skip = (currentPage - 1) * limit;
+
     const notifications = await Notification.find(query)
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate('recipientId');
 
     const notificationsWithActions = notifications.map(notification => {
@@ -622,6 +632,9 @@ router.get('/notifications', isAdmin, async (req, res) => {
       notifications: notificationsWithActions,
       search: req.query.search || '',
       status: req.query.status || 'all',
+      currentPage,
+      totalPages,
+      totalNotifications,
       page: 'notifications',
       error: req.query.error || '',
       success: req.query.success || ''
