@@ -869,6 +869,7 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
     await Notification.create({
       recipientId: student._id,
       recipientEmail: student.email,
+      recipientName: getUserDisplayName(student),
       subject: 'Application Status Updated',
       body: `Updated ${student.fullName}'s status to ${status.toUpperCase()}${status === 'passed' || status === 'failed' ? ' and removed exam schedules' : ''}`,
       status: 'sent'
