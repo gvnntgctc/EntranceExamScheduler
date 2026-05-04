@@ -26,7 +26,7 @@
       width: 100%;
       border-collapse: collapse;
       background: white;
-      table-layout: fixed;
+      table-layout: auto;
       font-size: 14px;
     }
     .notifications-table th,
@@ -35,36 +35,37 @@
       border-bottom: 1px solid #edf2f7;
       vertical-align: top;
       color: #2a3f57;
+      white-space: normal;
       word-break: break-word;
       overflow-wrap: anywhere;
     }
     .notifications-table th:nth-child(1),
     .notifications-table td:nth-child(1) {
-      width: 5%;
+      width: 4%;
     }
     .notifications-table th:nth-child(2),
     .notifications-table td:nth-child(2) {
-      width: 22%;
+      width: 30%;
     }
     .notifications-table th:nth-child(3),
     .notifications-table td:nth-child(3) {
-      width: 28%;
+      width: 26%;
     }
     .notifications-table th:nth-child(4),
     .notifications-table td:nth-child(4) {
-      width: 25%;
+      width: 24%;
     }
     .notifications-table th:nth-child(5),
     .notifications-table td:nth-child(5) {
-      width: 8%;
+      width: 7%;
     }
     .notifications-table th:nth-child(6),
     .notifications-table td:nth-child(6) {
-      width: 7%;
+      width: 6%;
     }
     .notifications-table th:nth-child(7),
     .notifications-table td:nth-child(7) {
-      width: 5%;
+      width: 3%;
     }
     .notifications-table th {
       background: #f3f6fa;
@@ -193,7 +194,7 @@
                   <td><span class="status-pill status-<%= notification.status %>"><%= notification.status %></span></td>
                   <td class="sent-at" data-timestamp="<%= notification.createdAt.toISOString() %>"></td>
                   <td class="manage-actions">
-                    <a href="/admin/notifications/<%= notification._id %>" class="view-details-btn"><i class="fas fa-eye"></i> View</a>
+                    <a href="/admin/notifications/<%= notification._id %>" class="view-details-btn" aria-label="View notification details"><i class="fas fa-eye"></i></a>
                   </td>
                 </tr>
               <% }) %>
