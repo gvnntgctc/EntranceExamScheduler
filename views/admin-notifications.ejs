@@ -41,12 +41,13 @@
     }
     .notifications-table th:nth-child(1),
     .notifications-table td:nth-child(1) {
-      width: 4%;
-      min-width: 40px;
+      width: 6%;
+      min-width: 50px;
+      white-space: nowrap;
     }
     .notifications-table th:nth-child(2),
     .notifications-table td:nth-child(2) {
-      width: 32%;
+      width: 30%;
       min-width: 220px;
     }
     .notifications-table th:nth-child(3),
@@ -63,20 +64,35 @@
     .notifications-table td:nth-child(5) {
       width: 8%;
       min-width: 90px;
+      white-space: nowrap;
     }
     .notifications-table th:nth-child(6),
     .notifications-table td:nth-child(6) {
-      width: 10%;
+      width: 12%;
       min-width: 110px;
+      white-space: nowrap;
     }
     .notifications-table th:nth-child(7),
     .notifications-table td:nth-child(7) {
-      width: 5%;
-      min-width: 60px;
+      width: 8%;
+      min-width: 90px;
+      white-space: nowrap;
     }
     .sent-at {
       white-space: nowrap;
       overflow: visible;
+    }
+    .manage-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+    .view-details-btn {
+      padding: 9px;
+      min-width: 38px;
+      justify-content: center;
     }
     .notifications-table th {
       background: #f3f6fa;
