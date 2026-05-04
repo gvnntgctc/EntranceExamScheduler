@@ -103,7 +103,7 @@
       <a href="/admin/notifications" class="back-link"><i class="fas fa-arrow-left"></i> Back to Activity Log</a>
       <div class="detail-card">
         <h2>Activity Detail</h2>
-        <div class="detail-row"><div class="detail-label">Recipient</div><div class="detail-value"><%= notification.recipientId ? (notification.recipientId.fullName || notification.recipientEmail) : notification.recipientEmail %></div></div>
+        <div class="detail-row"><div class="detail-label">Recipient</div><div class="detail-value"><%= notification.recipientEmail %></div></div>
         <div class="detail-row"><div class="detail-label">Action</div><div class="detail-value"><%= notification.actionDescription %></div></div>
         <div class="detail-row"><div class="detail-label">Subject</div><div class="detail-value"><%= notification.subject %></div></div>
         <div class="detail-row detail-body-row"><div class="detail-label">Details</div><div class="detail-value detail-body"><%= notification.body %></div></div>
