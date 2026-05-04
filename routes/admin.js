@@ -999,9 +999,7 @@ router.get('/schedules/day/:day', isAdmin, async (req, res) => {
     res.render('day-schedule-detail', {
       schedules: filteredSchedules,
       day,
-      monthName: month.toLocaleString
-        ? month.toLocaleString('default', { month: 'long' }) 
-        : now.toLocaleString('default', { month: 'long' }), // fallback
+      monthName: now.toLocaleString('default', { month: 'long' }),
       year,
       page: 'daily',
       error: '',
