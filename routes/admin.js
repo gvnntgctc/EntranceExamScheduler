@@ -40,7 +40,8 @@ async function resolveNotificationRecipient(notification) {
   }
 
   if (notification.recipientEmail) {
-    const user = await User.findOne({ email: notification.recipientEmail }).lean();
+    const email = notification.recipientEmail.trim();
+    const user = await User.findOne({ email: new RegExp(`^${escapeRegExp(email)}$`, 'i') }).lean();
     if (user) {
       const recipientName = getUserDisplayName(user);
       if (recipientName) {
@@ -81,35 +82,35 @@ function buildNotificationAction(notification, recipientName) {
     const statusMatch = body.match(/status to:\s*(passed|failed|pending|approved|not approved)/i);
     if (statusMatch) {
       const statusText = statusMatch[1].toUpperCase();
-      return `📋 Application Status Updated to ${statusText} for ${recipientName}`;
+      return `📋 Application Status Updated to ${statusText} for ${resolvedRecipientName}`;
     }
-    return `📋 Application Status Updated for ${recipientName}${suffix}`;
+    return `📋 Application Status Updated for ${resolvedRecipientName}${suffix}`;
   }
   
   // Admission decisions (emails)
   if (subject.includes('admission decision') || subject.includes('approved') || subject.includes('not approved')) {
     if (subject.includes('approved')) {
-      return `📧 Admission Approval Email sent to ${recipientName}${suffix}`;
+      return `📧 Admission Approval Email sent to ${resolvedRecipientName}${suffix}`;
     }
-    return `📧 Admission Decision Email sent to ${recipientName}${suffix}`;
+    return `📧 Admission Decision Email sent to ${resolvedRecipientName}${suffix}`;
   }
   
   // Exam schedule confirmation emails
   if (subject.includes('examination schedule confirmation') || subject.includes('exam schedule')) {
-    return `📧 Schedule Confirmation Email sent to ${recipientName}${suffix}`;
+    return `📧 Schedule Confirmation Email sent to ${resolvedRecipientName}${suffix}`;
   }
   
   // Registration/verification emails
   if (subject.includes('registration') || subject.includes('verification')) {
-    return `📧 Registration Email sent to ${recipientName}${suffix}`;
+    return `📧 Registration Email sent to ${resolvedRecipientName}${suffix}`;
   }
   
   // Generic email notification
   if (subject.includes('email') || notification.subject?.includes('sent')) {
-    return `📧 Email sent to ${recipientName}${suffix}`;
+    return `📧 Email sent to ${resolvedRecipientName}${suffix}`;
   }
   
-  return `📧 Notification sent to ${recipientName}${suffix}`;
+  return `📧 Notification sent to ${resolvedRecipientName}${suffix}`;
 }
 
 let transporter = null;
