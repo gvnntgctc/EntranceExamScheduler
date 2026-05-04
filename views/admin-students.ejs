@@ -470,12 +470,6 @@
             </tbody>
           </table>
 
-          <!-- Debug Panel (remove in production) -->
-          <div id="debugPanel" style="margin-top: 20px; padding: 15px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 8px; font-family: monospace; font-size: 12px; display: none;">
-            <h4 style="margin: 0 0 10px 0; color: #333;">Debug Info</h4>
-            <div id="debugContent">Loading...</div>
-          </div>
-
       <!-- STUDENT DETAILS MODAL -->
       <div id="studentModalBg" class="student-modal-bg" onclick="closeStudentModal()" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9998;"></div>
       <div id="studentModal" class="student-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 650px; max-height: 90vh; background: white; border-radius: 16px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1); overflow: hidden; flex-direction: column; z-index: 9999;">
@@ -548,14 +542,6 @@
     </div>
   </div>
 
-  <form id="bulkStatusForm" method="POST" action="/admin/students/bulk-status" style="display:none;">
-    <input type="hidden" name="data" id="bulkStatusData" />
-  </form>
-
-  <form id="bulkDeleteForm" method="POST" action="/admin/students/bulk-delete" style="display:none;">
-    <input type="hidden" name="data" id="bulkDeleteData" />
-  </form>
-
   <!-- Bulk Status / Delete Confirmation Modal -->
   <div id="bulkConfirmModal" class="modal">
     <div class="modal-content">
@@ -572,6 +558,24 @@
         </button>
         <button type="button" id="bulkCancelBtn" class="cancel-delete" style="background: #f3f4f6; color: #111;">
           <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Action Success Modal -->
+  <div id="bulkSuccessModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <i class="fas fa-check-circle"></i>
+        Action Completed
+      </div>
+      <div class="modal-body">
+        <p id="bulkSuccessMessage" style="margin: 0; color: #334155; line-height: 1.6;"></p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="bulkSuccessOkBtn" class="confirm-delete" style="background: #28a745; border-color: #28a745;">
+          <i class="fas fa-check"></i> OK
         </button>
       </div>
     </div>
@@ -779,6 +783,9 @@
       const bulkConfirmMessage = document.getElementById('bulkConfirmMessage');
       const bulkConfirmBtn = document.getElementById('bulkConfirmBtn');
       const bulkCancelBtn = document.getElementById('bulkCancelBtn');
+      const bulkSuccessModal = document.getElementById('bulkSuccessModal');
+      const bulkSuccessMessage = document.getElementById('bulkSuccessMessage');
+      const bulkSuccessOkBtn = document.getElementById('bulkSuccessOkBtn');
 
       let pendingBulkIds = [];
       let pendingBulkStatus = null;
@@ -839,6 +846,17 @@
         pendingBulkIds = [];
         pendingBulkStatus = null;
         bulkConfirmModal.classList.remove('show');
+      }
+
+      function showBulkSuccess(message) {
+        bulkSuccessMessage.textContent = message;
+        bulkSuccessModal.classList.add('show');
+      }
+
+      function closeBulkSuccess() {
+        bulkSuccessModal.classList.remove('show');
+        // Reload the page to show updated data
+        window.location.reload();
       }
 
       // Select All functionality
@@ -923,7 +941,11 @@
         closeBulkConfirm();
       });
 
-      bulkConfirmBtn.addEventListener('click', function() {
+      bulkSuccessOkBtn.addEventListener('click', function() {
+        closeBulkSuccess();
+      });
+
+      bulkConfirmBtn.addEventListener('click', async function() {
         console.log('Confirm button clicked, pendingBulkIds:', pendingBulkIds, 'pendingBulkStatus:', pendingBulkStatus);
         if (!pendingBulkIds.length || !pendingBulkStatus) {
           console.log('No pending bulk action, returning');
@@ -933,12 +955,28 @@
         const idsToSubmit = [...pendingBulkIds];
         const statusToSubmit = pendingBulkStatus;
         closeBulkConfirm();
-        if (statusToSubmit === 'deleted') {
-          console.log('Calling submitBulkDelete with:', idsToSubmit);
-          submitBulkDelete(idsToSubmit);
-        } else {
-          console.log('Calling submitBulkStatus with:', idsToSubmit, statusToSubmit);
-          submitBulkStatus(idsToSubmit, statusToSubmit);
+        
+        // Disable button and show loading
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        
+        try {
+          if (statusToSubmit === 'deleted') {
+            console.log('Calling submitBulkDelete with:', idsToSubmit);
+            const result = await submitBulkDelete(idsToSubmit);
+            showBulkSuccess(result.message);
+          } else {
+            console.log('Calling submitBulkStatus with:', idsToSubmit, statusToSubmit);
+            const result = await submitBulkStatus(idsToSubmit, statusToSubmit);
+            showBulkSuccess(result.message);
+          }
+        } catch (error) {
+          console.error('Bulk operation failed:', error);
+          alert('Operation failed: ' + error.message);
+        } finally {
+          // Re-enable button
+          this.disabled = false;
+          this.innerHTML = '<i class="fas fa-check"></i> Confirm';
         }
       });
 
@@ -955,124 +993,72 @@
         });
       }
 
-      function submitBulkStatus(studentIds, status) {
+      async function submitBulkStatus(studentIds, status) {
         console.log('=== SUBMIT BULK STATUS START ===');
         console.log('Student IDs:', studentIds);
         console.log('Status:', status);
         console.log('IDs length:', studentIds.length);
 
         if (!studentIds || studentIds.length === 0) {
-          console.error('ERROR: No student IDs provided!');
-          alert('No students selected!');
-          return;
+          throw new Error('No students selected!');
         }
 
-        const form = document.getElementById('bulkStatusForm');
-        const dataField = document.getElementById('bulkStatusData');
+        const response = await fetch('/admin/students/bulk-status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ studentIds, status })
+        });
 
-        if (!form) {
-          console.error('ERROR: bulkStatusForm not found!');
-          return;
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server error: ${response.status} - ${errorText}`);
         }
 
-        if (!dataField) {
-          console.error('ERROR: bulkStatusData field not found!');
-          return;
-        }
-
-        const data = JSON.stringify({ studentIds, status });
-        console.log('JSON data to send:', data);
-
-        dataField.value = data;
-        console.log('Set data field value to:', dataField.value);
-
-        console.log('Form action:', form.action);
-        console.log('Form method:', form.method);
-
-        // Add visual feedback
-        const submitBtn = document.querySelector('#bulkConfirmBtn');
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = 'Processing...';
-        }
-
-        console.log('=== FORM SUBMIT ===');
-        form.submit();
+        const result = await response.json();
+        console.log('Bulk status update result:', result);
+        
+        return {
+          success: true,
+          message: result.message || `Successfully updated ${studentIds.length} student(s) to ${status}.`
+        };
       }
 
-      function submitBulkDelete(studentIds) {
+      async function submitBulkDelete(studentIds) {
         console.log('=== SUBMIT BULK DELETE START ===');
         console.log('Student IDs:', studentIds);
         console.log('IDs length:', studentIds.length);
 
         if (!studentIds || studentIds.length === 0) {
-          console.error('ERROR: No student IDs provided!');
-          alert('No students selected!');
-          return;
+          throw new Error('No students selected!');
         }
 
-        const form = document.getElementById('bulkDeleteForm');
-        const dataField = document.getElementById('bulkDeleteData');
+        const response = await fetch('/admin/students/bulk-delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ studentIds })
+        });
 
-        if (!form) {
-          console.error('ERROR: bulkDeleteForm not found!');
-          return;
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server error: ${response.status} - ${errorText}`);
         }
 
-        if (!dataField) {
-          console.error('ERROR: bulkDeleteData field not found!');
-          return;
-        }
-
-        const data = JSON.stringify({ studentIds });
-        console.log('JSON data to send:', data);
-
-        dataField.value = data;
-        console.log('Set data field value to:', dataField.value);
-        console.log('Field value after setting:', document.getElementById('bulkDeleteData').value);
-
-        console.log('Form action:', form.action);
-        console.log('Form method:', form.method);
-
-        // Add visual feedback
-        const submitBtn = document.querySelector('#bulkConfirmBtn');
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = 'Processing...';
-        }
-
-        console.log('=== FORM SUBMIT ===');
-        form.submit();
+        const result = await response.json();
+        console.log('Bulk delete result:', result);
+        
+        return {
+          success: true,
+          message: result.message || `Successfully deleted ${studentIds.length} student(s).`
+        };
       }
 
-      // Debug panel updates
-      function updateDebugPanel() {
-        const debugContent = document.getElementById('debugContent');
-        if (!debugContent) return;
-
-        const checkboxes = document.querySelectorAll('.student-checkbox');
-        const checkedBoxes = document.querySelectorAll('.student-checkbox:checked');
-        const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
-
-        debugContent.innerHTML = `
-          <div>Total checkboxes: ${checkboxes.length}</div>
-          <div>Checked checkboxes: ${checkedBoxes.length}</div>
-          <div>Selected IDs: [${selectedIds.join(', ')}]</div>
-          <div>Form exists: ${!!document.getElementById('bulkStatusForm')}</div>
-          <div>Data field exists: ${!!document.getElementById('bulkStatusData')}</div>
-        `;
-      }
-
-      // Show debug panel and update periodically
-      document.addEventListener('DOMContentLoaded', function() {
-        const debugPanel = document.getElementById('debugPanel');
-        if (debugPanel) {
-          debugPanel.style.display = 'block';
-          updateDebugPanel();
-          // Update every 2 seconds
-          setInterval(updateDebugPanel, 2000);
-        }
-      });
+      // Initialize bulk operations
+      updateBulkButtons();
+      updateSelectAllState();
     })();
 
     function closeStudentModal() {
