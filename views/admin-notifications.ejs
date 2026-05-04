@@ -128,7 +128,6 @@
       <div class="section-card">
         <div class="search-bar">
           <input id="notificationSearch" type="search" placeholder="Search recipient or action..." aria-label="Search notifications" value="<%= search %>" autocomplete="off" />
-          <button id="notificationSearchBtn" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
           <select id="notificationStatus" aria-label="Filter status">
             <option value="all" <%= status==='all' ? 'selected' : '' %>>All Status</option>
             <option value="sent" <%= status==='sent' ? 'selected' : '' %>>Sent</option>
@@ -179,29 +178,7 @@
   <script>
     const searchInput = document.getElementById('notificationSearch');
     const statusSelect = document.getElementById('notificationStatus');
-    let notificationSearchTimer = null;
-
-    function applyFilters() {
-      const params = new URLSearchParams();
-      if (searchInput.value.trim()) params.set('search', searchInput.value.trim());
-      if (statusSelect.value !== 'all') params.set('status', statusSelect.value);
-      window.location = '/admin/notifications' + (params.toString() ? '?' + params.toString() : '');
-    }
-
-    function debounceApplyFilters() {
-      if (notificationSearchTimer) {
-        clearTimeout(notificationSearchTimer);
-      }
-      notificationSearchTimer = setTimeout(applyFilters, 300);
-    }
-
-    searchInput.addEventListener('input', debounceApplyFilters);
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        applyFilters();
-      }
-    });
+    const tableBody = document.querySelector('.notifications-table tbody');
 
     function formatLocalTimestamp(isoString) {
       if (!isoString) return '';
@@ -218,13 +195,55 @@
       return `${month}/${day}/${year} ${displayHours}:${minutes} ${ampm}`;
     }
 
+    // Format all timestamps on page load
     document.querySelectorAll('.sent-at').forEach(cell => {
       const timestamp = cell.getAttribute('data-timestamp');
       cell.textContent = formatLocalTimestamp(timestamp);
     });
 
-    statusSelect.addEventListener('change', applyFilters);
-    document.getElementById('notificationSearchBtn').addEventListener('click', applyFilters);
+    function applyLiveFilters() {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      const selectedStatus = statusSelect.value;
+      
+      const rows = tableBody.querySelectorAll('tr');
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        // Skip the "no data" row
+        if (row.cells.length < 7) {
+          row.style.display = '';
+          return;
+        }
+
+        const recipient = row.cells[1]?.textContent.toLowerCase() || '';
+        const action = row.cells[2]?.textContent.toLowerCase() || '';
+        const status = row.cells[4]?.textContent.trim().toLowerCase() || '';
+        
+        const matchesSearch = searchTerm === '' || 
+          recipient.includes(searchTerm) || 
+          action.includes(searchTerm);
+        
+        const matchesStatus = selectedStatus === 'all' || status === selectedStatus.toLowerCase();
+        
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // Update row numbers
+      let rowIndex = 1;
+      rows.forEach(row => {
+        if (row.style.display !== 'none' && row.cells.length >= 7) {
+          row.cells[0].textContent = rowIndex++;
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', applyLiveFilters);
+    statusSelect.addEventListener('change', applyLiveFilters);
   </script>
 </body>
 </html>
