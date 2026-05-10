@@ -261,6 +261,10 @@ html {
   gap: 24px;
   margin-top: 20px;
   width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  justify-items: center;
 }
 
 .day-card {
@@ -372,12 +376,15 @@ html {
   .main-content {
     margin-left: 0;
     width: 100%;
-    padding: 30px 15px;
+    padding: 40px 20px;
     padding-top: 80px;
+    justify-content: center;
+    align-items: flex-start;
   }
 
   .container {
-    padding: 0 10px;
+    padding: 0;
+    max-width: 100%;
   }
 
   .section-card {
@@ -493,24 +500,25 @@ html {
 
 .main-content {
   margin-left: 250px;
-  padding: 30px 20px;
+  padding: 40px 30px;
   padding-top: 80px;
   background: #f5f6fa;
   min-height: 100vh;
   position: relative;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   width: calc(100% - 250px);
   min-width: 0;
   overflow-x: hidden;
 }
 
 .container {
-  max-width: 1100px;
+  max-width: 1200px;
   width: 100%;
   min-width: 0;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0;
   position: relative;
 }
 
@@ -520,10 +528,15 @@ html {
   flex-direction: column;
   gap: 30px;
   width: 100%;
+  max-width: 1200px;
+  align-items: stretch;
+  margin: 0 auto;
 }
 
 .add-schedule-shell .section-card {
   width: 100%;
+  max-width: 100%;
+  flex: 0 0 auto;
 }
 
 h1 {
@@ -563,7 +576,9 @@ h2 i {
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
   animation: fadeInUp 0.5s ease-out;
   width: 100%;
+  max-width: 100%;
 }
+
 
 .page-subtitle {
   color: #556;
@@ -571,7 +586,7 @@ h2 i {
   margin-top: 10px;
   margin-bottom: 24px;
   line-height: 1.65;
-  max-width: 780px;
+  max-width: 900px;
   text-align: center;
   margin-left: auto;
   margin-right: auto;
@@ -584,6 +599,7 @@ h2 i {
   gap: 16px;
   margin-bottom: 24px;
   width: 100%;
+  justify-items: center;
 }
 
 .stat-card {
@@ -2005,16 +2021,22 @@ h2 i {
 
 @media (max-width: 768px) {
   .main-content {
-    padding: 15px;
+    padding: 40px 20px;
     padding-top: 80px;
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
   }
   
   .container {
-    padding: 10px;
+    padding: 0;
+    max-width: 100%;
   }
   
   h1 {
     font-size: 22px;
+    margin-bottom: 20px;
   }
   
   .section-card {
@@ -2704,14 +2726,29 @@ label {
   color: #333;
 }
 
+@media (max-width: 900px) {
+  .schedule-form .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+}
+
 @media (max-width: 768px) {
   .schedule-form .form-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .schedule-form .suggestions-list {
     position: relative;
     top: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .schedule-form .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 
@@ -3719,16 +3756,21 @@ table {
   .main-content {
     margin-left: 250px;
     width: calc(100% - 250px);
-    padding: 30px 15px;
+    padding: 40px 25px;
+    padding-top: 80px;
+    justify-content: center;
+    align-items: flex-start;
   }
 
   .main-content .container {
-    padding: 0 15px;
-    max-width: 100%;
+    padding: 0;
+    max-width: 1200px;
+    margin: 0 auto;
   }
 
   .form-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
   }
 
   .schedule-hero {
@@ -3740,24 +3782,27 @@ table {
   .main-content {
     margin-left: 0;
     width: 100%;
-    padding: 20px 15px;
+    padding: 40px 20px;
     padding-top: 80px;
+    justify-content: center;
+    align-items: flex-start;
   }
 
   .main-content .container {
-    padding: 0 10px;
+    padding: 0;
     margin: 0 auto;
     max-width: 100%;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: 14px;
   }
 
   .section-card {
-    padding: 15px;
-    margin-bottom: 20px;
+    padding: 20px;
+    margin-bottom: 0;
+    border-radius: 12px;
   }
 
   .weekly-grid {
@@ -3788,18 +3833,24 @@ table {
 
 @media (max-width: 480px) {
   .main-content {
-    padding: 15px 10px;
+    padding: 30px 15px;
     padding-top: 70px;
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
   }
 
   .main-content .container {
-    padding: 0 5px;
+    padding: 0;
     margin: 0 auto;
+    max-width: 100%;
   }
 
   .section-card {
-    padding: 10px;
+    padding: 15px;
     border-radius: 10px;
+    margin-bottom: 0;
   }
 
   .form-group {
@@ -3817,6 +3868,7 @@ table {
 
   .form-buttons {
     flex-direction: column;
+    gap: 10px;
   }
 
   .form-buttons .btn-primary,
@@ -3831,12 +3883,18 @@ table {
 
   .day-card {
     min-width: auto;
+    width: 100%;
   }
 
   .notifications-table th:nth-child(2),
   .notifications-table td:nth-child(2) {
     min-width: 150px;
     width: 100%;
+  }
+
+  h1 {
+    font-size: 20px;
+    margin-bottom: 15px;
   }
 }
 
