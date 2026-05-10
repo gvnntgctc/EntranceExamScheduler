@@ -305,6 +305,35 @@
       padding: 24px;
     }
 
+    .modal-search {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f5f5f5;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid #e6ecee;
+      margin-bottom: 16px;
+    }
+
+    .modal-search i {
+      color: #11998e;
+      font-size: 16px;
+    }
+
+    .modal-search .search-input {
+      border: none;
+      background: transparent;
+      outline: none;
+      width: 100%;
+      font-size: 15px;
+      color: #333;
+    }
+
+    .modal-search .search-input::placeholder {
+      color: #95a5a6;
+    }
+
     .modal-filters {
       display: flex;
       flex-wrap: wrap;
@@ -633,6 +662,10 @@
         </button>
       </div>
       <div class="modal-body">
+        <div class="modal-search">
+          <i class="fas fa-search"></i>
+          <input type="search" id="applicantSearchInput" placeholder="Search applicants by name or time..." class="search-input" aria-label="Search applicants by name or time" oninput="updateApplicantSearch()" />
+        </div>
         <div class="modal-filters">
           <button class="filter-btn active" id="filterAllBtn" onclick="setApplicantFilter('all')">All</button>
           <button class="filter-btn" id="filterAmBtn" onclick="setApplicantFilter('am')">AM</button>
@@ -651,6 +684,7 @@
     const applicantsData = <%- JSON.stringify(schedulesMap) %>;
     let currentApplicantDate = null;
     let currentApplicantFilter = 'all';
+    let currentApplicantSearch = '';
 
     function getTimePeriod(examTime) {
       if (typeof examTime !== 'string') return 'all';
@@ -674,9 +708,15 @@
 
       const applicants = applicantsData[currentApplicantDate] || [];
       const filteredApplicants = applicants.filter(applicant => {
-        if (currentApplicantFilter === 'am') return getTimePeriod(applicant.examTime) === 'am';
-        if (currentApplicantFilter === 'pm') return getTimePeriod(applicant.examTime) === 'pm';
-        return true;
+        if (currentApplicantFilter === 'am' && getTimePeriod(applicant.examTime) !== 'am') return false;
+        if (currentApplicantFilter === 'pm' && getTimePeriod(applicant.examTime) !== 'pm') return false;
+
+        const searchValue = currentApplicantSearch.trim().toLowerCase();
+        if (!searchValue) return true;
+
+        const nameMatches = applicant.fullName.toLowerCase().includes(searchValue);
+        const timeMatches = applicant.examTime.toLowerCase().includes(searchValue);
+        return nameMatches || timeMatches;
       });
 
       const filteredCount = filteredApplicants.length;
@@ -722,7 +762,22 @@
       renderApplicantList();
     }
 
+    function updateApplicantSearch() {
+      const searchInput = document.getElementById('applicantSearchInput');
+      currentApplicantSearch = searchInput ? searchInput.value : '';
+      renderApplicantList();
+    }
+
     function openApplicantModal(dateStr) {
+      currentApplicantDate = dateStr;
+      currentApplicantFilter = 'all';
+      currentApplicantSearch = '';
+      const searchInput = document.getElementById('applicantSearchInput');
+      if (searchInput) {
+        searchInput.value = '';
+      }
+      updateFilterButtons('all');
+      renderApplicantList();
       currentApplicantDate = dateStr;
       currentApplicantFilter = 'all';
       updateFilterButtons('all');
