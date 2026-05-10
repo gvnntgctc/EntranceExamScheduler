@@ -249,18 +249,16 @@ body {
 
 /* Weekly Grid */
 .weekly-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
   margin-top: 20px;
-  justify-content: center;
   width: 100%;
 }
 
 .day-card {
   background: white;
   border-radius: 18px;
-  width: 280px;
   box-shadow: 0 6px 16px rgba(0,0,0,0.1);
   cursor: pointer;
   display: flex;
@@ -366,16 +364,25 @@ body {
 
   .main-content {
     margin-left: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
+    width: 100%;
+    padding: 30px 15px;
+    padding-top: 80px;
   }
 
   .container {
-    padding: 10px;
+    padding: 0 10px;
   }
 
   .section-card {
+    padding: 15px;
+  }
+
+  .weekly-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .day-card {
     padding: 15px;
   }
 }
@@ -479,25 +486,22 @@ body {
 
 .main-content {
   margin-left: 250px;
-  padding: 20px;
+  padding: 30px 20px;
   padding-top: 80px;
-  padding-left: 20px;
   background: #f5f6fa;
   min-height: 100vh;
   position: relative;
   display: flex;
   justify-content: center;
+  width: calc(100% - 250px);
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1100px;
   width: 100%;
   margin: 0 auto;
-  padding: 20px;
+  padding: 0 20px;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 h1 {
@@ -505,16 +509,12 @@ h1 {
   color: #2c3e50;
   font-weight: 700;
   font-size: 28px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
   text-align: center;
-  width: 100%;
-  justify-content: center;
 }
 
 h1 i {
   color: #11998e;
+  margin-right: 10px;
 }
 
 h2 {
@@ -522,11 +522,7 @@ h2 {
   color: #333;
   font-weight: 600;
   font-size: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  justify-content: center;
+  text-align: center;
 }
 
 h2 i {
@@ -545,10 +541,6 @@ h2 i {
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
   animation: fadeInUp 0.5s ease-out;
   width: 100%;
-  max-width: 1100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .page-subtitle {
@@ -561,14 +553,14 @@ h2 i {
   text-align: center;
   margin-left: auto;
   margin-right: auto;
+  display: block;
 }
 
 .stats-grid {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
-  flex-wrap: wrap;
   margin-bottom: 24px;
-  justify-content: center;
   width: 100%;
 }
 
@@ -599,9 +591,6 @@ h2 i {
 .search-bar-container {
   margin-bottom: 24px;
   width: 100%;
-  max-width: 1100px;
-  display: flex;
-  justify-content: center;
 }
 
 .search-container {
@@ -708,7 +697,6 @@ h2 i {
   padding-top: 20px;
   border-top: 1px solid #eee;
   flex-wrap: wrap;
-  width: 100%;
 }
 
 .pagination-btn {
