@@ -921,6 +921,78 @@ h2 i {
   gap: 18px;
 }
 
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+  background: #ffffff;
+}
+
+.schedule-table thead {
+  background: #f5f6fa;
+}
+
+.schedule-table th,
+.schedule-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e7edf2;
+  vertical-align: middle;
+  color: #344054;
+  font-size: 14px;
+}
+
+.schedule-table th {
+  text-align: left;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.schedule-table tbody tr:hover {
+  background: #f8fbf9;
+}
+
+.schedule-applicant-cell {
+  display: grid;
+  gap: 4px;
+}
+
+.schedule-applicant-cell strong {
+  font-size: 15px;
+  color: #12263f;
+  font-weight: 700;
+}
+
+.applicant-email {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.schedule-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.schedule-table .row-index {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+@media (max-width: 900px) {
+  .schedule-table {
+    min-width: auto;
+  }
+}
+
 .schedule-item-card {
   display: block;
   background: #ffffff;
@@ -1393,24 +1465,26 @@ h2 i {
 
 .form-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
-  justify-content: center;
-  margin-top: 20px;
+  justify-content: flex-end;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.form-buttons .btn-primary,
+.form-buttons .btn-secondary {
+    min-width: 140px;
+    width: auto;
+    flex: 0 0 auto;
 }
 
 .form-buttons .btn-primary {
-  min-width: 160px;
-  flex: 0 1 auto;
-  justify-content: center;
-  padding: 14px 28px;
+  padding: 12px 24px;
 }
 
 .form-buttons .btn-secondary {
-  min-width: 160px;
-  flex: 0 1 auto;
-  justify-content: center;
-  padding: 14px 28px;
+  padding: 12px 24px;
 }
 
 .btn-secondary {

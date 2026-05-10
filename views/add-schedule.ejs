@@ -140,41 +140,40 @@
             </div>
           </div>
 
-          <ul class="schedule-list" id="schedulesList">
-            <% schedules.forEach((s, index) => { %>
-              <li class="schedule-item-card">
-                <div class="schedule-item-top">
-                  <div>
-                    <div class="schedule-item-applicant">
-                      <div class="schedule-item-avatar"><%= s.studentId && s.studentId.fullName ? s.studentId.fullName.charAt(0).toUpperCase() : '?' %></div>
-                      <div>
+          <div class="table-responsive">
+            <table class="schedule-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Applicant</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Location</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="schedulesList">
+                <% schedules.forEach((s, index) => { %>
+                  <tr class="schedule-row">
+                    <td class="row-index"><%= index + 1 %></td>
+                    <td>
+                      <div class="schedule-applicant-cell">
                         <strong><%= s.studentId ? s.studentId.fullName : 'Unknown Applicant' %></strong>
-                        <span class="schedule-item-subtitle"><%= s.studentId ? s.studentId.email : 'No email available' %></span>
+                        <span class="applicant-email"><%= s.studentId ? s.studentId.email : 'No email available' %></span>
                       </div>
-                    </div>
-                    <div class="schedule-item-meta">
-                      <div class="schedule-detail-box">
-                        <span class="detail-label"><i class="fas fa-calendar"></i> Date</span>
-                        <span class="detail-value"><%= new Date(s.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
-                      </div>
-                      <div class="schedule-detail-box">
-                        <span class="detail-label"><i class="fas fa-clock"></i> Time</span>
-                        <span class="detail-value"><%= s.examTime %></span>
-                      </div>
-                      <div class="schedule-detail-box">
-                        <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Location</span>
-                        <span class="detail-value"><%= s.location %></span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="schedule-item-actions">
-                    <a href="/admin/edit-schedule/<%= s._id %>" class="edit-btn circle-btn" title="Edit schedule"><i class="fas fa-edit"></i></a>
-                    <button type="button" class="delete-btn circle-btn delete-trigger" title="Delete schedule" data-delete-url="/admin/delete-schedule/<%= s._id %>" data-schedule-title="<%= s.studentId ? s.studentId.fullName : 'Unknown' %>" data-schedule-date="<%= new Date(s.examDate).toDateString() %>"><i class="fas fa-trash"></i></button>
-                  </div>
-                </div>
-              </li>
-            <% }) %>
-          </ul>
+                    </td>
+                    <td><%= new Date(s.examDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+                    <td><%= s.examTime %></td>
+                    <td><%= s.location %></td>
+                    <td class="schedule-actions">
+                      <a href="/admin/edit-schedule/<%= s._id %>" class="edit-btn circle-btn" title="Edit schedule"><i class="fas fa-edit"></i></a>
+                      <button type="button" class="delete-btn circle-btn delete-trigger" title="Delete schedule" data-delete-url="/admin/delete-schedule/<%= s._id %>" data-schedule-title="<%= s.studentId ? s.studentId.fullName : 'Unknown' %>" data-schedule-date="<%= new Date(s.examDate).toDateString() %>"><i class="fas fa-trash"></i></button>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
           
           <!-- Pagination Controls -->
           <div class="pagination-controls">
@@ -375,7 +374,7 @@
     let originalScheduleOrder = [];
 
     if (schedulesList) {
-      allSchedules = Array.from(schedulesList.querySelectorAll('li'));
+      allSchedules = Array.from(schedulesList.querySelectorAll('tr.schedule-row'));
       originalScheduleOrder = [...allSchedules];
       
       // Initialize all schedules with dataset.hidden = 'false'
@@ -396,7 +395,7 @@
         });
         
         visibleSchedules.slice(startIndex, endIndex).forEach(item => {
-          item.style.display = 'flex';
+          item.style.display = 'table-row';
         });
 
         const totalPages = Math.max(1, Math.ceil(visibleSchedules.length / ITEMS_PER_PAGE));
