@@ -330,6 +330,7 @@
       studentSearchInput.value = `${student.fullName} (${student.email || 'no-email'})`;
       studentIdInput.value = student._id;
       studentSuggestions.innerHTML = '';
+      studentSuggestions.parentElement?.classList.remove('has-suggestions');
       studentSearchInput.setAttribute('aria-expanded', 'false');
     }
 
@@ -355,14 +356,13 @@
           });
         });
 
-        studentSearchInput.addEventListener('blur', () => {
-          setTimeout(() => {
-            if (studentSuggestions) {
-              studentSuggestions.innerHTML = '';
-              studentSuggestions.parentElement?.classList.remove('has-suggestions');
-              studentSearchInput.setAttribute('aria-expanded', 'false');
-            }
-          }, 150);
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (event) => {
+          if (!studentSearchInput.contains(event.target) && !studentSuggestions.contains(event.target)) {
+            studentSuggestions.innerHTML = '';
+            studentSuggestions.parentElement?.classList.remove('has-suggestions');
+            studentSearchInput.setAttribute('aria-expanded', 'false');
+          }
         });
     }
   </script>

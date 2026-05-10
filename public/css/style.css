@@ -2774,8 +2774,9 @@ form.schedule-form {
   box-shadow: 0 8px 24px rgba(17, 153, 142, 0.15);
   max-height: 280px;
   overflow-y: auto;
-  z-index: 100;
+  z-index: 1000;
   display: none;
+  pointer-events: auto;
 }
 
 .schedule-form .suggestions-container.has-suggestions .suggestions-list {
@@ -2793,6 +2794,7 @@ form.schedule-form {
 .schedule-form .suggestion-item {
   cursor: pointer;
   transition: background 0.2s ease;
+  pointer-events: auto;
 }
 
 .schedule-form .suggestion-item:last-child,
