@@ -293,6 +293,9 @@
       item.dataset.id = student._id;
       item.dataset.name = student.fullName;
       item.dataset.email = student.email;
+      item.addEventListener('click', () => {
+        selectStudent(student);
+      });
       return item;
     }
 
@@ -344,7 +347,7 @@
         });
 
         studentIdInput.value = '';
-        updateSuggestions(event.target.value);
+        updateSuggestions('');
 
         studentSuggestions.addEventListener('click', (event) => {
           const target = event.target.closest('.suggestion-item');
