@@ -6,11 +6,7 @@
 
 body {
   font-family: 'Roboto', sans-serif;
-  background: url('/images/ptc.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background: url('/images/ptc.png') center center / cover no-repeat fixed !important;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -23,7 +19,7 @@ body {
   width: 850px;
   max-width: 100%;
   min-height: 650px;
-  background: white;
+  background: rgba(255, 255, 255, 0.94);
   border-radius: 20px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
   overflow: hidden;
@@ -260,10 +256,14 @@ body.review-screen .form-container {
 }
 
 body.review-screen .review-header {
-  max-width: 420px;
+  max-width: 520px;
   margin: 0 auto 28px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(17, 153, 142, 0.08);
+  padding: 26px 28px 20px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(17, 153, 142, 0.16);
+  box-shadow: 0 18px 40px rgba(17, 153, 142, 0.12);
+  backdrop-filter: blur(18px);
   text-align: center;
 }
 
@@ -273,7 +273,7 @@ body.review-screen .review-header .eyebrow {
   justify-content: center;
   padding: 8px 14px;
   margin-bottom: 10px;
-  background: rgba(17, 153, 142, 0.14);
+  background: rgba(17, 153, 142, 0.18);
   color: #0f5132;
   border-radius: 999px;
   font-size: 12px;
@@ -310,7 +310,8 @@ body.review-screen .review-card {
   padding: 24px 22px 18px;
   box-shadow: 0 24px 65px rgba(17, 153, 142, 0.10);
   overflow: hidden;
-  margin-bottom: 0;
+  margin: 0 auto;
+  max-width: 520px;
 }
 
 body.review-screen .review-form {
@@ -437,6 +438,12 @@ body.review-screen .review-form {
 
   body.review-screen .form-container {
     padding: 24px 18px;
+    border-radius: 24px;
+  }
+
+  body.review-screen .review-header {
+    margin-bottom: 22px;
+    padding: 22px 20px 18px;
     border-radius: 24px;
   }
 

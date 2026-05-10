@@ -14,8 +14,8 @@
       margin-bottom: 20px; 
       align-items: center; 
       flex-wrap: wrap;
-      background: #ffffff;
-      border: 1px solid #dce3eb;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(220, 227, 235, 0.65);
       border-radius: 12px;
       padding: 10px 12px;
       box-shadow: 0 8px 18px rgba(14, 30, 37, 0.08);
@@ -54,7 +54,7 @@
       border: 1px solid #c3cdd9; 
       border-radius: 8px; 
       font-size: 14px; 
-      background: white;
+      background: rgba(255, 255, 255, 0.80);
       min-width: 140px;
       color: #2f3b4a;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -180,13 +180,14 @@
       to { opacity: 1; }
     }
     .modal-content {
-      background-color: white;
+      background-color: rgba(255, 255, 255, 0.88);
       margin: auto;
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 5px 30px rgba(0, 0, 0, 0.22);
       max-width: 400px;
       text-align: center;
+      border: 1px solid rgba(226, 232, 240, 0.75);
     }
     .modal-header {
       font-size: 20px;
@@ -249,11 +250,12 @@
       justify-content: center;
     }
     .bulk-loading-content {
-      background: white;
+      background: rgba(255, 255, 255, 0.82);
       border-radius: 16px;
       padding: 40px;
       text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.26);
+      border: 1px solid rgba(255, 255, 255, 0.65);
       max-width: 400px;
       width: 90%;
     }
@@ -513,8 +515,8 @@
 
       <!-- STUDENT DETAILS MODAL -->
       <div id="studentModalBg" class="student-modal-bg" onclick="closeStudentModal()" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9998;"></div>
-      <div id="studentModal" class="student-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 650px; max-height: 90vh; background: white; border-radius: 16px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1); overflow: hidden; flex-direction: column; z-index: 9999;">
-        <div class="student-modal-content" style="display: flex; flex-direction: column; height: 100%; background: white;">
+      <div id="studentModal" class="student-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 650px; max-height: 90vh; background: rgba(255, 255, 255, 0.88); border-radius: 16px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.35); overflow: hidden; flex-direction: column; z-index: 9999;">
+        <div class="student-modal-content" style="display: flex; flex-direction: column; height: 100%; background: rgba(255, 255, 255, 0.90);">
           <div class="student-modal-header" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 30px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(17, 153, 142, 0.2);">
             <div style="display: flex; align-items: center; gap: 15px;">
               <div style="font-size: 32px; background: rgba(255, 255, 255, 0.2); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
@@ -542,7 +544,7 @@
             </div>
             <!-- Content Container -->
             <div id="studentModalContent" style="display: none;">
-            <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e0e0e0;">
+            <div style="background: rgba(255, 255, 255, 0.86); padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(224, 224, 224, 0.8);">
               <h3 style="color: #11998e; margin: 0 0 20px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; text-decoration: none; border: none;">
                 <i class="fas fa-id-card"></i> Registration Information
               </h3>
@@ -573,7 +575,7 @@
                 </tr>
               </table>
             </div>
-            <div id="studentSchedulesContainer" style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0;">
+            <div id="studentSchedulesContainer" style="background: rgba(255, 255, 255, 0.86); padding: 25px; border-radius: 12px; border: 1px solid rgba(224, 224, 224, 0.8);">
               <!-- Schedules will be populated by JavaScript -->
             </div>
             </div>
@@ -741,7 +743,7 @@
         schedulesHtml += '</ul>';
         schedulesContainer.innerHTML = schedulesHtml;
       } else {
-        schedulesContainer.innerHTML = `<div style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 2px dashed #ddd;">
+        schedulesContainer.innerHTML = `<div style="background: rgba(255, 255, 255, 0.86); padding: 40px; border-radius: 12px; text-align: center; border: 2px dashed rgba(221, 221, 221, 0.9);">
           <i class="fas fa-calendar-alt" style="font-size: 48px; color: #ccc; display: block; margin-bottom: 12px;"></i>
           <p style="color: #999; margin: 0; font-size: 16px; font-style: italic;">No exam schedules assigned yet</p>
         </div>`;

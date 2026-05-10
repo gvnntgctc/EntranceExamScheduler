@@ -247,10 +247,12 @@
       background: white;
       border-radius: 16px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      max-width: 500px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
+      max-width: 520px;
+      width: min(520px, 90%);
+      height: 80vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
       animation: slideUp 0.3s ease;
     }
 
@@ -273,6 +275,7 @@
       justify-content: space-between;
       align-items: center;
       border-radius: 16px 16px 0 0;
+      flex: 0 0 auto;
     }
 
     .modal-header h3 {
@@ -303,6 +306,22 @@
 
     .modal-body {
       padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    #modalBody {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-right: 4px;
     }
 
     .modal-search {
@@ -314,6 +333,7 @@
       border-radius: 12px;
       border: 1px solid #e6ecee;
       margin-bottom: 16px;
+      flex: 0 0 auto;
     }
 
     .modal-search i {
@@ -728,11 +748,8 @@
         year: 'numeric'
       });
 
-      const titlePrefix = currentApplicantFilter === 'all'
-        ? `${filteredCount} Applicant${filteredCount !== 1 ? 's' : ''}`
-        : `${filteredCount} ${currentApplicantFilter.toUpperCase()} Applicant${filteredCount !== 1 ? 's' : ''}`;
-
-      document.getElementById('modalDateTitle').textContent = `${titlePrefix} - ${formattedDate}`;
+      const titleText = 'Applicants';
+      document.getElementById('modalDateTitle').textContent = `${titleText} - ${formattedDate}`;
 
       let modalBodyHTML = '';
       if (filteredApplicants.length > 0) {
