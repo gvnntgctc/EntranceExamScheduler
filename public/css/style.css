@@ -4175,6 +4175,14 @@ table {
   color: #07c160;
 }
 
+.student-list .empty-message {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  padding: 40px 20px;
+  border-bottom: none;
+}
+
 /* STUDENT MODAL STYLES */
 .student-modal-bg {
   display: none;

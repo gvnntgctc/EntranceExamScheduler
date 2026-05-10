@@ -31,7 +31,8 @@
         <% } else { %>
           <% schedules.forEach(({ studentId, examTime, location }) => { %>
             <li class="student-item" data-student-id="<%= studentId ? studentId._id : '' %>">
-              <strong><%= studentId ? studentId.username : 'Unknown' %></strong>
+              <strong><%= studentId ? studentId.fullName : 'Unknown' %></strong>
+              <span>ID: <%= studentId ? studentId._id : 'N/A' %></span>
               <span>Time: <%= examTime %></span>
               <span>Location: <%= location %></span>
               <a href="/admin/edit-schedule/<%= studentId._id %>" class="btn-icon edit" title="Edit Schedule">
@@ -48,11 +49,32 @@
     function filterStudents() {
       const query = document.getElementById('searchInput').value.toLowerCase();
       const students = document.querySelectorAll('.student-item');
+      const studentList = document.getElementById('studentList');
+      let visibleCount = 0;
+
       students.forEach(student => {
         const text = student.textContent.toLowerCase();
         const studentId = student.dataset.studentId ? student.dataset.studentId.toLowerCase() : '';
-        student.style.display = (text.includes(query) || studentId.includes(query)) ? '' : 'none';
+        const isVisible = text.includes(query) || studentId.includes(query);
+        student.style.display = isVisible ? '' : 'none';
+        if (isVisible) visibleCount++;
       });
+
+      // Handle empty results message
+      let emptyMessage = studentList.querySelector('.empty-message');
+      if (visibleCount === 0 && query.trim() !== '') {
+        if (!emptyMessage) {
+          emptyMessage = document.createElement('li');
+          emptyMessage.className = 'empty-message';
+          emptyMessage.textContent = 'No applicants found matching your search.';
+          studentList.appendChild(emptyMessage);
+        }
+        emptyMessage.style.display = '';
+      } else {
+        if (emptyMessage) {
+          emptyMessage.style.display = 'none';
+        }
+      }
     }
   </script>
 
