@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
+<body class="admin-page-bg">
   <style>
     .search-bar { 
       display: flex; 
@@ -258,51 +258,18 @@
       width: 90%;
     }
     .bulk-loading-spinner {
-      position: relative;
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 20px;
+      display: none;
     }
-    .bulk-spinner-ring {
-      box-sizing: border-box;
-      display: block;
-      position: absolute;
-      width: 64px;
-      height: 64px;
-      margin: 8px;
-      border: 8px solid #11998e;
-      border-radius: 50%;
-      animation: bulk-spinner-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-      border-color: #11998e transparent transparent transparent;
+    .bulk-loading-text {
+      padding: 0;
     }
-    .bulk-spinner-ring:nth-child(1) {
-      animation-delay: -0.45s;
-    }
-    .bulk-spinner-ring:nth-child(2) {
-      animation-delay: -0.3s;
-    }
-    .bulk-spinner-ring:nth-child(3) {
-      animation-delay: -0.15s;
-    }
-    @keyframes bulk-spinner-ring {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-    .bulk-loading-text h3 {
+    .bulk-loading-text.simple-processing p {
       color: #11998e;
-      margin: 0 0 10px 0;
-      font-size: 18px;
-      font-weight: 600;
-    }
-    .bulk-loading-text p {
-      color: #666;
       margin: 0;
-      font-size: 14px;
-      line-height: 1.5;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.4;
     }
     
     /* Loading Spinner Animation */
@@ -658,15 +625,8 @@
   <!-- Bulk Processing Loading Overlay -->
   <div id="bulkLoadingOverlay" class="bulk-loading-overlay">
     <div class="bulk-loading-content">
-      <div class="bulk-loading-spinner">
-        <div class="bulk-spinner-ring"></div>
-        <div class="bulk-spinner-ring"></div>
-        <div class="bulk-spinner-ring"></div>
-        <div class="bulk-spinner-ring"></div>
-      </div>
-      <div class="bulk-loading-text">
-        <h3>Processing Bulk Operation</h3>
-        <p id="bulkLoadingMessage">Please wait while we process your request...</p>
+      <div class="bulk-loading-text simple-processing">
+        <p id="bulkLoadingMessage">Processing...</p>
       </div>
     </div>
   </div>
@@ -955,7 +915,7 @@
         window.location.reload();
       }
 
-      function showBulkLoading(message = 'Please wait while we process your request...') {
+      function showBulkLoading(message = 'Processing...') {
         bulkLoadingMessage.textContent = message;
         bulkLoadingOverlay.classList.add('show');
       }

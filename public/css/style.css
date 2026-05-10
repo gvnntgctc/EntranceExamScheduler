@@ -17,6 +17,19 @@ body {
   background: #f5f6fa;
 }
 
+body.admin-page-bg {
+  background: url('/images/ptc.png') center center / cover no-repeat fixed;
+}
+
+body.admin-page-bg .main-content {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+body.admin-page-bg .main-content .container {
+  position: relative;
+  z-index: 1;
+}
+
 html {
   width: 100%;
   overflow-x: hidden;
@@ -702,12 +715,17 @@ h2 i {
 }
 
 .holiday-warning {
+  display: none;
   margin-top: 4px;
   color: #c0392b;
   font-size: 12px;
   font-weight: 600;
   min-height: 18px;
   line-height: 1.2;
+}
+
+.holiday-warning:not(:empty) {
+  display: block;
 }
 
 .pagination-controls {
@@ -1468,7 +1486,7 @@ h2 i {
   gap: 10px;
   align-items: center;
   justify-content: flex-end;
-  margin-top: 18px;
+  margin-top: 8px;
   flex-wrap: wrap;
 }
 

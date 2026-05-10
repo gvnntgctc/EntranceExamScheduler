@@ -8,32 +8,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-   <%- include('partials/sidebar') %>
+<body class="admin-page-bg">
+  <%- include('partials/sidebar', { page: 'editSchedule' }) %>
 
-  <!-- Overlay -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  
-  <!-- Hamburger Button -->
   <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
-  
-  <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
-    <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
-    
-    <div class="sidebar-header">
-      <h2><i class="fas fa-cogs"></i> Admin Panel</h2>
-    </div>
-    <ul class="sidebar-menu">
-      <li><a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-      <li><a href="/admin#add-schedule"><i class="fas fa-plus-circle"></i> Add Schedule</a></li>
-      <li><a href="/admin#schedules"><i class="fas fa-calendar-alt"></i> View Schedules</a></li>
-      <li><a href="/admin/students"><i class="fas fa-users"></i> Students</a></li>
-      <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-    </ul>
-  </div>
-  
-  <!-- Main Content -->
+
   <div class="main-content">
     <div class="page-logo">
       <img src="/images/logo.png" alt="PTC Logo" />
@@ -87,10 +67,9 @@
           </div>
 
           <div class="holiday-panel"></div>
-            <p id="holidayWarning" class="holiday-warning" aria-live="polite"></p>
-            <p id="capacityWarning" class="holiday-warning" aria-live="polite"></p>
-          </div>
-          
+          <p id="holidayWarning" class="holiday-warning" aria-live="polite"></p>
+          <p id="capacityWarning" class="holiday-warning" aria-live="polite"></p>
+
           <div class="form-buttons">
             <button type="submit" class="btn btn-primary">
               <i class="fas fa-save"></i> Update Schedule
