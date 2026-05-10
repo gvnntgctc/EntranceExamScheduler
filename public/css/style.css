@@ -991,9 +991,24 @@ h2 i {
 .schedule-actions {
   display: flex;
   gap: 10px;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.schedule-table td.schedule-actions {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.students-table td.actions-column,
+.notifications-table td.manage-actions {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.admin-notifications-page .manage-actions {
+  justify-content: center;
 }
 
 .schedule-table .row-index {

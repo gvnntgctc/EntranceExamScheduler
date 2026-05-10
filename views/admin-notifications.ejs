@@ -269,11 +269,6 @@
       <div class="section-card">
         <div class="search-bar">
           <input id="notificationSearch" type="search" placeholder="Search recipient or action..." aria-label="Search notifications" value="<%= search %>" autocomplete="off" />
-          <select id="notificationStatus" aria-label="Filter status">
-            <option value="all" <%= status==='all' ? 'selected' : '' %>>All Status</option>
-            <option value="sent" <%= status==='sent' ? 'selected' : '' %>>Sent</option>
-            <option value="failed" <%= status==='failed' ? 'selected' : '' %>>Failed</option>
-          </select>
         </div>
 
         <div class="table-responsive">
@@ -331,7 +326,6 @@
   <script src="/js/script.js"></script>
   <script>
     const searchInput = document.getElementById('notificationSearch');
-    const statusSelect = document.getElementById('notificationStatus');
     const tableBody = document.querySelector('.notifications-table tbody');
 
     function formatLocalTimestamp(isoString) {
@@ -357,8 +351,6 @@
 
     function applyLiveFilters() {
       const searchTerm = searchInput.value.trim().toLowerCase();
-      const selectedStatus = statusSelect.value;
-      
       const rows = tableBody.querySelectorAll('tr');
       let visibleCount = 0;
 
@@ -377,9 +369,7 @@
           recipient.includes(searchTerm) || 
           action.includes(searchTerm);
         
-        const matchesStatus = selectedStatus === 'all' || status === selectedStatus.toLowerCase();
-        
-        if (matchesSearch && matchesStatus) {
+        if (matchesSearch) {
           row.style.display = '';
           visibleCount++;
         } else {
@@ -397,7 +387,6 @@
     }
 
     searchInput.addEventListener('input', applyLiveFilters);
-    statusSelect.addEventListener('change', applyLiveFilters);
   </script>
 </body>
 </html>

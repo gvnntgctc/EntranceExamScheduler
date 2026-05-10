@@ -72,6 +72,7 @@
                   <input type="hidden" id="studentId" name="studentId" required />
                   <div class="suggestions-list" id="studentSuggestions" role="listbox" aria-label="Applicant suggestions"></div>
                 </div>
+                <small class="sub-text">Only applicants without an existing schedule will appear here.</small>
               <% } else { %>
                 <input type="text" id="studentId" name="studentId" placeholder="Enter applicant name or email" required aria-label="Applicant name or email" autocomplete="off" />
               <% } %>
@@ -133,9 +134,6 @@
                 class="search-input" 
                 placeholder="Search by applicant name, email, date, or location..."
               />
-              <button type="button" id="clearBtn" class="clear-btn">
-                <i class="fas fa-times"></i> Clear
-              </button>
             </div>
           </div>
 
@@ -303,29 +301,28 @@
       studentSuggestions.innerHTML = '';
 
       const normalized = query.trim().toLowerCase();
-      if (!normalized) {
-        studentSuggestions.parentElement?.classList.remove('has-suggestions');
-        studentSearchInput.setAttribute('aria-expanded', 'false');
-        studentIdInput.value = '';
-        return;
-      }
+      const candidates = studentOptions
+        .filter(student => {
+          const label = `${student.fullName} ${student.email || ''}`.toLowerCase();
+          return normalized === '' ? true : label.includes(normalized);
+        })
+        .slice(0, 8);
 
-      const matches = studentOptions.filter(student => {
-        const label = `${student.fullName} ${student.email || ''}`.toLowerCase();
-        return label.includes(normalized);
-      }).slice(0, 8);
-
-      if (matches.length === 0) {
+      if (candidates.length === 0) {
         const empty = document.createElement('div');
         empty.className = 'suggestion-empty';
-        empty.textContent = 'No applicants match your search.';
+        empty.textContent = normalized ? 'No applicants match your search.' : 'No applicants available.';
         studentSuggestions.appendChild(empty);
       } else {
-        matches.forEach(student => studentSuggestions.appendChild(buildSuggestionItem(student)));
+        candidates.forEach(student => studentSuggestions.appendChild(buildSuggestionItem(student)));
       }
 
       studentSuggestions.parentElement?.classList.add('has-suggestions');
       studentSearchInput.setAttribute('aria-expanded', 'true');
+
+      if (normalized === '') {
+        studentIdInput.value = '';
+      }
     }
 
     function selectStudent(student) {
@@ -337,7 +334,10 @@
     }
 
     if (studentSearchInput) {
-      studentSearchInput.addEventListener('input', (event) => {
+        studentSearchInput.addEventListener('focus', (event) => {
+          updateSuggestions(event.target.value);
+        });
+
         studentIdInput.value = '';
         updateSuggestions(event.target.value);
       });
@@ -427,7 +427,6 @@
       };
 
       const searchInput = document.getElementById('scheduleSearch');
-      const clearBtn = document.getElementById('clearBtn');
 
       function restoreOriginalOrder() {
         originalScheduleOrder.forEach(item => schedulesList.appendChild(item));
@@ -470,17 +469,6 @@
         searchInput.addEventListener('input', performSearch);
       }
 
-      if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-          searchInput.value = '';
-          currentPage = 1;
-          allSchedules.forEach(item => {
-            item.dataset.hidden = 'false';
-          });
-          restoreOriginalOrder();
-          displayPage(currentPage);
-        });
-      }
     }
 
     const examDateInput = document.getElementById('examDate');

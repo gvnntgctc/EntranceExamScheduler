@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body>
+<body class="admin-page-bg">
 
   <%- include('partials/sidebar') %>
 
@@ -20,14 +20,17 @@
       <button onclick="history.back()" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Back</button>
       <h1>Students Scheduled on <%= day %>, <%= monthName %> <%= year %></h1>
 
-      <input type="search" id="searchInput" placeholder="Search students..." oninput="filterStudents()" class="search-input"/>
+      <div class="search-container" style="margin-bottom:18px;">
+        <i class="fas fa-search"></i>
+        <input type="search" id="searchInput" placeholder="Search students by name or ID..." oninput="filterStudents()" class="search-input" aria-label="Search students by name or ID" />
+      </div>
 
       <ul id="studentList" class="student-list">
         <% if(schedules.length === 0) { %>
           <li>No students scheduled on this day.</li>
         <% } else { %>
           <% schedules.forEach(({ studentId, examTime, location }) => { %>
-            <li class="student-item">
+            <li class="student-item" data-student-id="<%= studentId ? studentId._id : '' %>">
               <strong><%= studentId ? studentId.username : 'Unknown' %></strong>
               <span>Time: <%= examTime %></span>
               <span>Location: <%= location %></span>
@@ -47,7 +50,8 @@
       const students = document.querySelectorAll('.student-item');
       students.forEach(student => {
         const text = student.textContent.toLowerCase();
-        student.style.display = text.includes(query) ? '' : 'none';
+        const studentId = student.dataset.studentId ? student.dataset.studentId.toLowerCase() : '';
+        student.style.display = (text.includes(query) || studentId.includes(query)) ? '' : 'none';
       });
     }
   </script>
