@@ -253,6 +253,8 @@ body {
   flex-wrap: wrap;
   gap: 24px;
   margin-top: 20px;
+  justify-content: center;
+  width: 100%;
 }
 
 .day-card {
@@ -365,6 +367,16 @@ body {
   .main-content {
     margin-left: 0;
     padding: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .container {
+    padding: 10px;
+  }
+
+  .section-card {
+    padding: 15px;
   }
 }
 
@@ -473,13 +485,19 @@ body {
   background: #f5f6fa;
   min-height: 100vh;
   position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .container {
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 20px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 h1 {
@@ -490,6 +508,9 @@ h1 {
   display: flex;
   align-items: center;
   gap: 12px;
+  text-align: center;
+  width: 100%;
+  justify-content: center;
 }
 
 h1 i {
@@ -504,6 +525,8 @@ h2 {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
+  justify-content: center;
 }
 
 h2 i {
@@ -521,6 +544,11 @@ h2 i {
   margin-bottom: 30px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
   animation: fadeInUp 0.5s ease-out;
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .page-subtitle {
@@ -530,6 +558,9 @@ h2 i {
   margin-bottom: 24px;
   line-height: 1.65;
   max-width: 780px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .stats-grid {
@@ -537,6 +568,8 @@ h2 i {
   gap: 16px;
   flex-wrap: wrap;
   margin-bottom: 24px;
+  justify-content: center;
+  width: 100%;
 }
 
 .stat-card {
@@ -565,6 +598,10 @@ h2 i {
 
 .search-bar-container {
   margin-bottom: 24px;
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  justify-content: center;
 }
 
 .search-container {
@@ -576,6 +613,7 @@ h2 i {
   border-radius: 12px;
   border: 1px solid #e6ecee;
   transition: all 0.3s ease;
+  width: 100%;
 }
 
 .search-container:focus-within {
@@ -670,6 +708,7 @@ h2 i {
   padding-top: 20px;
   border-top: 1px solid #eee;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .pagination-btn {
