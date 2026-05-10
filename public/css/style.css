@@ -3581,6 +3581,244 @@ button.btn-primary:hover {
   color: #11998e;
 }
 
+/* ==================== */
+/* LAYOUT ALIGNMENT FIXES - ALL PAGES */
+/* ==================== */
+
+/* Override main-content to properly account for sidebar */
+.main-content {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  padding: 30px 20px;
+  padding-top: 80px;
+  background: #f5f6fa;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Container inside main-content */
+.main-content .container {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+}
+
+/* Ensure schedule form is full width */
+.schedule-form {
+  width: 100%;
+  display: block;
+  margin-bottom: 0;
+}
+
+/* Grid layout for form fields */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+/* Section cards should stack vertically */
+.section-card {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 30px;
+}
+
+/* Existing schedules should be full width below form */
+.schedule-form + .section-card {
+  margin-top: 40px;
+}
+
+/* Table Overflow and Responsive Fix */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.notifications-table,
+.students-table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: visible;
+}
+
+/* Wrapper for tables to handle overflow */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.table-responsive table {
+  min-width: 100%;
+}
+
+/* Exam Schedules Page Fixes */
+.schedule-hero {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 32px;
+}
+
+.page-header {
+  text-align: center;
+  width: 100%;
+}
+
+/* Fix for Weekly/Month Grid */
+.weekly-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+  width: 100%;
+  justify-content: center;
+}
+
+.day-card {
+  flex: 1;
+  min-width: 280px;
+  max-width: 100%;
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    padding: 30px 15px;
+  }
+
+  .main-content .container {
+    padding: 0 15px;
+    max-width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .schedule-hero {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 20px 15px;
+    padding-top: 80px;
+  }
+
+  .main-content .container {
+    padding: 0 10px;
+    margin: 0 auto;
+    max-width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .section-card {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  .weekly-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  table th,
+  table td {
+    padding: 10px 8px;
+  }
+
+  .notifications-table th:nth-child(2),
+  .notifications-table td:nth-child(2) {
+    width: 50%;
+    min-width: 180px;
+  }
+
+  .manage-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 15px 10px;
+    padding-top: 70px;
+  }
+
+  .main-content .container {
+    padding: 0 5px;
+    margin: 0 auto;
+  }
+
+  .section-card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  table {
+    font-size: 11px;
+  }
+
+  table th,
+  table td {
+    padding: 8px 5px;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+  }
+
+  .form-buttons .btn-primary,
+  .form-buttons .btn-secondary {
+    width: 100%;
+  }
+
+  .weekly-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .day-card {
+    min-width: auto;
+  }
+
+  .notifications-table th:nth-child(2),
+  .notifications-table td:nth-child(2) {
+    min-width: 150px;
+    width: 100%;
+  }
+}
+
+
 .weekly-grid {
   display: flex;
   flex-wrap: wrap;
