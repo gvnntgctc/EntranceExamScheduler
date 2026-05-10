@@ -338,28 +338,32 @@
           updateSuggestions(event.target.value);
         });
 
+        studentSearchInput.addEventListener('input', (event) => {
+          updateSuggestions(event.target.value);
+        });
+
         studentIdInput.value = '';
         updateSuggestions(event.target.value);
-      });
 
-      studentSuggestions.addEventListener('click', (event) => {
-        const target = event.target.closest('.suggestion-item');
-        if (!target) return;
-        selectStudent({
-          _id: target.dataset.id,
-          fullName: target.dataset.name,
-          email: target.dataset.email
+        studentSuggestions.addEventListener('click', (event) => {
+          const target = event.target.closest('.suggestion-item');
+          if (!target) return;
+          selectStudent({
+            _id: target.dataset.id,
+            fullName: target.dataset.name,
+            email: target.dataset.email
+          });
         });
-      });
 
-      studentSearchInput.addEventListener('blur', () => {
-        setTimeout(() => {
-          if (studentSuggestions) {
-            studentSuggestions.innerHTML = '';
-            studentSearchInput.setAttribute('aria-expanded', 'false');
-          }
-        }, 150);
-      });
+        studentSearchInput.addEventListener('blur', () => {
+          setTimeout(() => {
+            if (studentSuggestions) {
+              studentSuggestions.innerHTML = '';
+              studentSuggestions.parentElement?.classList.remove('has-suggestions');
+              studentSearchInput.setAttribute('aria-expanded', 'false');
+            }
+          }, 150);
+        });
     }
   </script>
   <script src="/js/script.js"></script>
