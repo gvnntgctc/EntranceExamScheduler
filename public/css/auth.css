@@ -1,3 +1,17 @@
+:root {
+  --font-family: 'Roboto', sans-serif;
+  --font-size-base: 1rem;
+  --line-height-base: 1.65;
+  --color-text: #333;
+  --color-muted: #6b7280;
+  --color-heading: #1f2937;
+  --color-border: #e0e0e0;
+  --type-h1: 1.8rem;
+  --type-copy: 1rem;
+  --type-button: 0.95rem;
+  --type-small: 0.875rem;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -5,13 +19,24 @@
 }
 
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-family);
+  color: var(--color-text);
+  font-size: var(--type-copy);
+  line-height: var(--line-height-base);
   background: url('/images/ptc.png') center center / cover no-repeat fixed !important;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
+}
+
+body, button, input, select, textarea {
+  font-family: inherit;
+}
+
+p, label, button, input, select, textarea {
+  line-height: var(--line-height-base);
 }
 
 .container {
@@ -128,20 +153,21 @@ body {
 /* ==================== */
 
 h1 {
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 10px;
+  font-size: var(--type-h1);
+  color: var(--color-heading);
+  margin-bottom: 0.75rem;
 }
 
 .subtitle {
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 30px;
+  color: var(--color-muted);
+  font-size: var(--type-copy);
+  margin-bottom: 1.75rem;
+  line-height: var(--line-height-base);
 }
 
 .input-group {
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .input-group i {
@@ -150,15 +176,15 @@ h1 {
   top: 50%;
   transform: translateY(-50%);
   color: #11998e;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .input-group input {
   width: 100%;
   padding: 15px 15px 15px 45px;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  font-size: var(--type-copy);
   transition: all 0.3s ease;
   background: #f8f9fa;
 }
@@ -185,7 +211,7 @@ h1 {
   color: white;
   border: none;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: var(--type-button);
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -218,7 +244,7 @@ button:disabled {
   border: 2px solid white;
   color: white;
   border-radius: 25px;
-  font-size: 14px;
+  font-size: var(--type-button);
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -283,15 +309,15 @@ body.review-screen .review-header .eyebrow {
 }
 
 body.review-screen .review-header h1 {
-  font-size: 28px;
-  margin: 0 0 12px;
+  font-size: var(--type-h1);
+  margin: 0 0 0.75rem;
   color: #17392e;
 }
 
 body.review-screen .review-header .subtitle {
   color: #4f6d61;
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: var(--type-copy);
+  line-height: var(--line-height-base);
   max-width: 360px;
   margin: 0 auto;
 }

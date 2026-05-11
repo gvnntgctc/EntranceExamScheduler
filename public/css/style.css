@@ -2,6 +2,30 @@
 /* Global Styles */
 /* ==================== */
 
+:root {
+  --font-family: 'Roboto', sans-serif;
+  --font-size-base: 1rem;
+  --line-height-base: 1.65;
+  --color-text: #2f3e4d;
+  --color-muted: #5f6c7a;
+  --color-heading: #1f2937;
+  --color-border: #e0e0e0;
+  --radius-default: 12px;
+  --space-xxs: 0.35rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 2.5rem;
+  --type-h1: 1.8rem;
+  --type-h2: 1.35rem;
+  --type-h3: 1.125rem;
+  --type-copy: 1rem;
+  --type-label: 0.95rem;
+  --type-button: 0.95rem;
+  --type-small: 0.875rem;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -13,14 +37,30 @@ html, body {
   height: 100%;
 }
 
+html {
+  font-size: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
 body {
-  font-family: 'Roboto', sans-serif;
-  color: #333;
+  font-family: var(--font-family);
+  color: var(--color-text);
+  font-size: var(--type-copy);
+  line-height: var(--line-height-base);
   min-height: 100vh;
   width: 100%;
   overflow-x: hidden;
   background: url('/images/ptc.png') center center / cover no-repeat fixed !important;
   background-color: #f5f6fa;
+}
+
+body, button, input, select, textarea {
+  font-family: inherit;
+}
+
+p, li, label, button, input, select, textarea {
+  line-height: var(--line-height-base);
 }
 
 body.admin-page-bg .main-content {
@@ -198,7 +238,7 @@ html {
   align-items: center;
   gap: 12px;
   border-radius: 6px;
-  font-size: 15px;
+  font-size: var(--type-button);
   font-weight: 600;
   transition: background-color 0.25s, color 0.25s, transform 0.2s ease;
   text-decoration: none;
@@ -573,11 +613,11 @@ html {
 }
 
 h1 {
-  margin-bottom: 30px;
-  color: #2c3e50;
+  margin-bottom: var(--space-md);
+  color: var(--color-heading);
   font-weight: 700;
-  font-size: 28px;
-  text-align: center;
+  font-size: var(--type-h1);
+  line-height: 1.2;
 }
 
 h1 i {
@@ -586,11 +626,11 @@ h1 i {
 }
 
 h2 {
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: var(--space-sm);
+  color: var(--color-heading);
   font-weight: 600;
-  font-size: 20px;
-  text-align: center;
+  font-size: var(--type-h2);
+  line-height: 1.25;
 }
 
 h2 i {
@@ -615,11 +655,11 @@ h2 i {
 
 
 .page-subtitle {
-  color: #556;
-  font-size: 16px;
-  margin-top: 10px;
-  margin-bottom: 24px;
-  line-height: 1.65;
+  color: var(--color-muted);
+  font-size: var(--type-copy);
+  margin-top: 0.75rem;
+  margin-bottom: 1.5rem;
+  line-height: var(--line-height-base);
   max-width: 900px;
   text-align: center;
   margin-left: auto;
@@ -692,8 +732,8 @@ h2 i {
   border: none;
   background: transparent;
   flex: 1;
-  font-size: 15px;
-  color: #333;
+  font-size: var(--type-copy);
+  color: var(--color-text);
   min-width: 0;
   outline: none;
 }
@@ -709,7 +749,7 @@ h2 i {
   padding: 10px 16px;
   border-radius: 10px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--type-button);
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -783,7 +823,7 @@ h2 i {
   padding: 10px 16px;
   border-radius: 10px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--type-button);
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -825,15 +865,16 @@ h2 i {
 /* ==================== */
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: #555;
-  font-size: 14px;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  font-size: var(--type-label);
+  letter-spacing: 0.01em;
 }
 
 .form-group label i {
@@ -844,10 +885,10 @@ h2 i {
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 14px;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 16px;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  font-size: var(--type-copy);
   transition: all 0.3s ease;
 }
 
@@ -864,9 +905,10 @@ h2 i {
 
 .btn {
   padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
+  border-radius: 10px;
+  font-size: var(--type-button);
+  font-weight: 600;
+  letter-spacing: 0.015em;
   cursor: pointer;
   transition: all 0.3s ease;
   display: inline-flex;
@@ -891,7 +933,7 @@ h2 i {
 .delete-btn {
   color: white;
   padding: 10px 16px;
-  font-size: 14px;
+  font-size: var(--type-button);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -925,6 +967,15 @@ h2 i {
 .cancel-btn {
   background: #95a5a6;
   color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: var(--type-button);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
 }
 
 .cancel-btn:hover {
@@ -993,16 +1044,17 @@ h2 i {
   border-bottom: 1px solid #e7edf2;
   vertical-align: middle;
   color: #344054;
-  font-size: 14px;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .schedule-table th {
   text-align: left;
   font-weight: 700;
   color: #475569;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: 0.85rem;
 }
 
 .schedule-table tbody tr:hover {
@@ -1563,6 +1615,7 @@ h2 i {
   padding: 12px 25px;
   border-radius: 10px;
   text-decoration: none;
+  font-size: var(--type-button);
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -3039,13 +3092,24 @@ button.btn-primary:hover {
   margin: 0;
 }
 
+.month-badge,
+.status-pill,
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: var(--type-small);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
 .month-badge {
   background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   color: white;
-  padding: 8px 20px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 14px;
 }
 
 .weekly-grid {
@@ -4234,7 +4298,7 @@ table {
   z-index: 9998 !important;
 }
 
-..student-modal {
+.student-modal {
   display: none;
   position: fixed !important;
   top: 50% !important;
