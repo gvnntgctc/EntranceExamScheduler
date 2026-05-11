@@ -1,3 +1,59 @@
+/* ==================== */
+/* ICON SYSTEM STANDARDIZATION */
+/* ==================== */
+
+/* Base icon styles for consistency */
+.icon {
+  font-size: 16px;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.icon-sm { font-size: 14px; }
+.icon-md { font-size: 16px; }
+.icon-lg { font-size: 18px; }
+.icon-xl { font-size: 20px; }
+
+/* Input group icons */
+.input-group i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #11998e;
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+/* Button icons */
+.btn-submit i,
+.btn-ghost i {
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+/* Message icons */
+.message i {
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.message.error i { color: #e74c3c; }
+.message.success i { color: #27ae60; }
+
+/* Review icons */
+.review-icon {
+  display: grid;
+  place-items: center;
+  min-width: 54px;
+  min-height: 54px;
+  border-radius: 18px;
+  background: rgba(17, 153, 142, 0.18);
+  color: #0f5132;
+  font-size: 24px;
+}
+
 :root {
   --font-family: 'Roboto', sans-serif;
   --font-size-base: 1rem;
@@ -790,4 +846,18 @@ body.review-screen .review-form {
   .container {
     margin: 10px;
   }
+}
+
+/* ==================== */
+/* HIDE SCROLLBAR VISUALS */
+/* ==================== */
+
+/* Hide scrollbars for all elements while preserving scroll functionality */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }

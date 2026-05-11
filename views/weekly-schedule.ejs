@@ -500,10 +500,12 @@
          ];
          const displayMonthNumbers = [3, 4, 5, 6, 7, 8];
          const totalApplicants = displayMonthNumbers.reduce((sum, num) => sum + (monthCounts[num] || 0), 0);
-         const busiestMonth = displayMonthNumbers.reduce((best, num) => {
-           const current = monthCounts[num] || 0;
-           return current > best.count ? { month: months[num - 1], count: current } : best;
-         }, { month: 'TBD', count: 0 });
+         const busiestMonth = totalApplicants > 0
+           ? displayMonthNumbers.reduce((best, num) => {
+               const current = monthCounts[num] || 0;
+               return current > best.count ? { month: months[num - 1], count: current } : best;
+             }, { month: 'NONE', count: 0 })
+           : { month: 'NONE', count: 0 };
       %>
 
       <div class="schedule-hero">

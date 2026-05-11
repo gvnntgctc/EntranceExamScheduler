@@ -281,7 +281,7 @@
     });
 
     // Live applicant search with hidden ID selection
-    const studentOptions = scheduleData.students || [];
+    const studentOptions = (scheduleData.students || []).filter(student => student.status === 'pending');
     const studentSearchInput = document.getElementById('studentSearch');
     const studentIdInput = document.getElementById('studentId');
     const studentSuggestions = document.getElementById('studentSuggestions');

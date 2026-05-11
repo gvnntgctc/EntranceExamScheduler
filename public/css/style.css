@@ -112,6 +112,86 @@ html {
 }
 
 /* ==================== */
+/* ICON SYSTEM STANDARDIZATION */
+/* ==================== */
+
+/* Base icon styles for consistency */
+.icon {
+  font-size: 16px;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.icon-sm { font-size: 14px; }
+.icon-md { font-size: 16px; }
+.icon-lg { font-size: 18px; }
+.icon-xl { font-size: 20px; }
+
+/* Form label icons */
+.form-group label i,
+.input-group label i {
+  color: #11998e;
+  margin-right: 8px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Button icons */
+.btn i,
+.btn-icon i {
+  font-size: 14px;
+}
+
+/* Message icons */
+.message i {
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.message.error i { color: #c0392b; }
+.message.success i { color: #27ae60; }
+
+/* Table action icons */
+.table-responsive i,
+.circle-btn i {
+  font-size: 14px;
+}
+
+/* Modal icons */
+.modal-header i,
+.modal-search i {
+  font-size: 16px;
+  color: #11998e;
+}
+
+/* Pagination icons */
+.pagination-btn i {
+  font-size: 14px;
+}
+
+/* Toast icons */
+.toast-icon i {
+  font-size: 16px;
+}
+
+/* Detail icons */
+.detail-icon i {
+  font-size: 20px;
+}
+
+/* Day icons */
+.day-icon {
+  font-size: 22px;
+  color: #555;
+  transition: color 0.3s ease;
+}
+
+.day-icon:hover {
+  color: #11998e;
+}
+
+/* ==================== */
 /* Sidebar Styles */
 /* ==================== */
 
@@ -258,6 +338,31 @@ html {
   background: rgba(76, 175, 80, 0.2);
   color: #81C784;
   border-left: 3px solid #4CAF50;
+}
+
+/* Sidebar Icon Styles */
+.sidebar-icon {
+  font-size: 18px;
+  width: 20px;
+  text-align: center;
+  opacity: 0.9;
+  transition: opacity 0.25s ease, transform 0.2s ease;
+}
+
+.sidebar-menu a:hover .sidebar-icon {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.sidebar-icon.weekly-icon { color: #4CAF50; }
+.sidebar-icon.add-icon { color: #8BC34A; }
+.sidebar-icon.students-icon { color: #CDDC39; }
+.sidebar-icon.notifications-icon { color: #FF9800; }
+.sidebar-icon.logout-icon { color: #F44336; }
+
+.sidebar-menu a.active .sidebar-icon {
+  opacity: 1;
+  color: #81C784;
 }
 
 .sidebar-close {
@@ -1348,6 +1453,7 @@ h2 i {
   align-items: center;
   color: white;
   font-size: 20px;
+}
 }
 
 .detail-info {
@@ -3824,16 +3930,6 @@ button.btn-primary:hover {
   gap: 18px;
 }
 
-.day-icon {
-  font-size: 22px;
-  color: #555;
-  transition: color 0.3s ease;
-}
-
-.day-icon:hover {
-  color: #11998e;
-}
-
 /* ==================== */
 /* LAYOUT ALIGNMENT FIXES - ALL PAGES */
 /* ==================== */
@@ -4296,6 +4392,8 @@ table {
   height: 100% !important;
   background: rgba(0, 0, 0, 0.6) !important;
   z-index: 9998 !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 
 .student-modal {
@@ -4640,4 +4738,238 @@ table {
     padding: 12px;
     font-size: 16px;
   }
+}
+
+/* ==================== */
+/* ACTIVITY DETAIL PAGE STYLES */
+/* ==================== */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  text-decoration: none;
+  color: #0f4a8a;
+  font-weight: 600;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.back-link i {
+  font-size: 14px;
+}
+
+.back-link:hover {
+  color: #0b3c72;
+  text-decoration: none;
+}
+
+.activity-detail-card {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  gap: 20px;
+}
+
+.activity-header h1 {
+  margin: 0;
+  color: var(--color-heading);
+  font-size: var(--type-h1);
+  font-weight: 700;
+}
+
+.activity-header h1 i {
+  color: #11998e;
+  margin-right: 12px;
+}
+
+.activity-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: 80px;
+}
+
+.status-badge.status-sent {
+  background: linear-gradient(135deg, #d8f5e6 0%, #c7f3d9 100%);
+  color: #1f5f3d;
+  border: 1px solid #a7f3c4;
+}
+
+.status-badge.status-failed {
+  background: linear-gradient(135deg, #ffe5e8 0%, #ffd7dc 100%);
+  color: #7f1d1d;
+  border: 1px solid #f5c2c7;
+}
+
+.timestamp {
+  font-size: 14px;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+.activity-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.activity-section {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.activity-section h2 {
+  margin: 0 0 20px 0;
+  color: var(--color-heading);
+  font-size: var(--type-h2);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.activity-section h2 i {
+  color: #11998e;
+  font-size: 18px;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: var(--color-muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.detail-value {
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.message-body {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--color-text);
+}
+
+.error-section {
+  background: rgba(255, 235, 238, 0.8);
+  border-color: rgba(244, 67, 54, 0.2);
+}
+
+.error-section h2 {
+  color: #c62828;
+}
+
+.error-section h2 i {
+  color: #c62828;
+}
+
+.error-message {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 8px;
+  padding: 16px;
+  color: #c62828;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Responsive adjustments for activity detail */
+@media (max-width: 768px) {
+  .activity-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .activity-meta {
+    align-items: flex-start;
+    min-width: auto;
+  }
+
+  .activity-section {
+    padding: 20px;
+  }
+
+  .detail-grid {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .activity-detail-card {
+    padding: 20px;
+  }
+
+  .activity-header h1 {
+    font-size: 24px;
+  }
+
+  .activity-section {
+    padding: 16px;
+  }
+
+  .message-body {
+    padding: 16px;
+    font-size: 14px;
+  }
+}
+
+/* ==================== */
+/* HIDE SCROLLBAR VISUALS */
+/* ==================== */
+
+/* Hide scrollbars for all elements while preserving scroll functionality */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }

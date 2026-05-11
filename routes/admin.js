@@ -272,13 +272,13 @@ router.get('/month/:month', isAdmin, async (req, res) => {
 router.get('/add-schedule', isAdmin, async (req, res) => {
   try {
     const schedules = await Schedule.find().populate('studentId');
-    const allStudents = await User.find({ role: 'student' }).sort({ fullName: 1 });
+    const pendingStudents = await User.find({ role: 'student', status: 'pending' }).sort({ fullName: 1 });
     
     // Get IDs of students who already have a schedule
     const scheduledStudentIds = new Set(schedules.map(s => s.studentId._id.toString()));
     
-    // Filter out students who already have a schedule
-    const students = allStudents.filter(student => !scheduledStudentIds.has(student._id.toString()));
+    // Filter out students who already have a schedule and only include pending applicants
+    const students = pendingStudents.filter(student => !scheduledStudentIds.has(student._id.toString()));
 
     const scheduleCounts = schedules.reduce((acc, schedule) => {
       const dateKey = new Date(schedule.examDate).toISOString().split('T')[0];
@@ -358,6 +358,15 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
     }
     if (!student) {
       return res.redirect('/admin/add-schedule?error=Student not found');
+    }
+
+    if (student.status === 'passed' || student.status === 'failed') {
+      return res.redirect('/admin/add-schedule?error=Cannot schedule an applicant with a finalized status');
+    }
+
+    const existingStudentSchedule = await Schedule.findOne({ studentId: student._id });
+    if (existingStudentSchedule) {
+      return res.redirect('/admin/add-schedule?error=This student already has an existing schedule');
     }
 
     // Prevent duplicate schedules for the same student on the same day
