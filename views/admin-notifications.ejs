@@ -250,15 +250,27 @@
     }
 
     @media (max-width: 900px) {
+      .section-card {
+        padding: 16px 14px;
+      }
+
       .search-bar {
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
         align-items: stretch;
+        margin-bottom: 12px;
+        padding: 8px 10px;
       }
 
       .search-input-wrapper {
         width: 100%;
         min-width: 0;
+      }
+
+      .search-bar input,
+      .search-bar select {
+        padding: 10px 12px;
+        font-size: 13px;
       }
 
       .notifications-table {
@@ -285,19 +297,19 @@
           "action action action"
           "details details details"
           "status sent sent";
-        gap: 8px 12px;
-        margin-bottom: 12px;
+        gap: 6px 10px;
+        margin-bottom: 10px;
         border: 1px solid #e5e7eb;
-        border-radius: 18px;
-        padding: 12px 14px;
+        border-radius: 16px;
+        padding: 10px 12px;
         background: #ffffff;
-        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
       }
 
       .notifications-table td {
         display: block;
         width: 100%;
-        padding: 4px 0;
+        padding: 3px 0;
         border: none;
         box-sizing: border-box;
         line-height: 1.35;
@@ -307,41 +319,41 @@
       .notifications-table td:first-child {
         grid-area: index;
         align-self: center;
-        padding-top: 4px;
+        padding-top: 3px;
       }
 
       .notifications-table td:nth-child(2) {
         grid-area: recipient;
-        padding-top: 4px;
+        padding-top: 3px;
       }
 
       .notifications-table td:nth-child(3) {
         grid-area: action;
-        padding-top: 4px;
+        padding-top: 3px;
       }
 
       .notifications-table td:nth-child(4) {
         grid-area: details;
-        padding-top: 4px;
+        padding-top: 3px;
       }
 
       .notifications-table td:nth-child(5) {
         grid-area: status;
-        padding-top: 6px;
+        padding-top: 4px;
       }
 
       .notifications-table td:nth-child(6) {
         grid-area: sent;
         color: #64748b;
         font-size: 13px;
-        padding-top: 6px;
+        padding-top: 4px;
       }
 
       .notifications-table td:last-child {
         grid-area: manage;
         justify-self: end;
         align-self: center;
-        padding-top: 6px;
+        padding-top: 4px;
       }
 
       .notifications-table td:before {
@@ -349,7 +361,7 @@
       }
 
       .details-cell {
-        padding-top: 3px;
+        padding-top: 2px;
         color: #475569;
         font-size: 13px;
         line-height: 1.45;
@@ -361,18 +373,18 @@
       }
 
       .status-pill {
-        padding: 5px 10px;
+        padding: 4px 8px;
         font-size: 12px;
         min-width: auto;
       }
 
       .view-details-btn {
-        padding: 8px 10px;
+        padding: 7px 10px;
         font-size: 12px;
         border-radius: 10px;
         min-width: auto;
         width: auto;
-        box-shadow: 0 10px 20px rgba(17, 153, 142, 0.12);
+        box-shadow: 0 8px 16px rgba(17, 153, 142, 0.10);
       }
 
       .sent-at {
@@ -389,15 +401,17 @@
           "action action"
           "details details"
           "status sent";
+        padding: 9px 10px;
+        gap: 5px 8px;
       }
 
       .notifications-table td {
-        padding: 4px 0;
+        padding: 3px 0;
       }
 
       .view-details-btn {
         width: auto;
-        padding: 8px 10px;
+        padding: 7px 10px;
         font-size: 12px;
       }
 
