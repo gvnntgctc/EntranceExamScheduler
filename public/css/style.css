@@ -1056,7 +1056,7 @@ h2 i {
 }
 
 .pagination-btn {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: #42b72a;
   color: white;
   border: none;
   padding: 10px 16px;
@@ -1161,11 +1161,13 @@ h2 i {
   background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   color: white;
   min-height: 48px;
+  transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(17, 153, 142, 0.4);
+  background: linear-gradient(135deg, #0e7a70 0%, #2dd66f 100%);
+  box-shadow: 0 12px 20px rgba(14, 122, 112, 0.25);
 }
 
 .edit-btn,
@@ -2334,7 +2336,7 @@ h2 i {
 .btn-secondary:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 20px rgba(66, 183, 42, 0.4);
-  background: #36a420;
+  background: linear-gradient(135deg, #0e7a70 0%, #2dd66f 100%);
 }
 
 .auth-divider {
@@ -3194,7 +3196,7 @@ input:focus, select:focus {
 button.btn-primary {
   width: 100%;
   padding: 14px 0;
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: #42b72a;
   color: white;
   font-weight: 700;
   border: none;
