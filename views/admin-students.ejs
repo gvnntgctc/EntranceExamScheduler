@@ -10,10 +10,11 @@
   <style>
     .search-bar { 
       display: flex; 
-      gap: 10px; 
+      gap: 12px; 
       margin-bottom: 20px; 
       align-items: center; 
-      flex-wrap: wrap;
+      /* keep items on the same row until small screens */
+      flex-wrap: nowrap;
       background: rgba(255, 255, 255, 0.76);
       border: 1px solid rgba(220, 227, 235, 0.65);
       border-radius: 12px;
@@ -22,9 +23,13 @@
     }
     .search-input-wrapper {
       position: relative;
-      flex: 1;
+      /* slightly increase base width so dropdown has more room beside it */
+      flex: 1 1 320px;
       min-width: 240px;
-      max-width: 520px;
+      max-width: 950px;
+    }
+    .search-input-wrapper .search-input {
+      min-width: 0; /* allow the input to shrink within flex container */
     }
     .search-input-wrapper i {
       position: absolute;
@@ -50,14 +55,22 @@
       box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.2);
     }
     .search-bar select { 
-      padding: 12px 14px; 
+      padding: 10px 12px; 
       border: 1px solid #c3cdd9; 
       border-radius: 8px; 
       font-size: 14px; 
       background: rgba(255, 255, 255, 0.80);
-      min-width: 140px;
       color: #2f3b4a;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      flex: 0 0 auto;
+      margin-left: 8px;
+      width: auto; /* fit content */
+      min-width: 110px; /* sensible minimum */
+      max-width: 180px; /* prevent overly long dropdown */
+      box-sizing: border-box;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
     .search-bar select:focus {
       outline: none;
@@ -165,12 +178,11 @@
       display: none;
       position: fixed;
       z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.55);
       animation: fadeIn 0.3s ease;
+      backdrop-filter: blur(4px);
+      padding: 16px;
     }
     .modal.show {
       display: flex;
@@ -182,45 +194,108 @@
       to { opacity: 1; }
     }
     .modal-content {
-      background-color: rgba(255, 255, 255, 0.88);
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 5px 30px rgba(0, 0, 0, 0.22);
-      max-width: 400px;
-      text-align: center;
-      border: 1px solid rgba(226, 232, 240, 0.75);
-      position: relative;
+      background-color: rgba(255, 255, 255, 0.96);
+      color: #0f172a;
+      padding: 0;
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+      width: min(92vw, 520px);
+      max-height: 90vh;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      text-align: left;
     }
     .modal-header {
-      font-size: 20px;
+      background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+      color: #ffffff;
+      padding: 22px 24px;
+      font-size: 1.1rem;
       font-weight: 700;
-      color: #f44336;
-      margin-bottom: 15px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
+      text-align: center;
+    }
+    .modal-header i {
+      color: #f8fafc;
+      font-size: 1.25rem;
     }
     .modal-body {
-      color: #666;
-      margin-bottom: 20px;
-      font-size: 15px;
+      color: #334155;
+      padding: 24px;
+      font-size: 0.96rem;
+      line-height: 1.75;
+      overflow-y: auto;
+      max-height: calc(90vh - 160px);
+    }
+    .modal-body p {
+      margin: 0 0 18px;
+      color: inherit;
+    }
+    .modal-summary-card {
+      background: rgba(56, 189, 248, 0.08);
+      border-left: 4px solid #2563eb;
+      padding: 18px;
+      border-radius: 14px;
+      margin-bottom: 18px;
+    }
+    .modal-summary-card .summary-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #0f172a;
+    }
+    .modal-summary-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+    .modal-summary-card li {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid rgba(203, 213, 225, 0.75);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.93rem;
+    }
+    .modal-summary-card li i {
+      color: #2563eb;
+      min-width: 16px;
+      text-align: center;
     }
     .modal-actions {
       display: flex;
       gap: 12px;
-      justify-content: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      padding: 0 24px 20px;
     }
     .modal-actions button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
+      min-width: 120px;
+      padding: 12px 18px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
+    }
+    .modal-actions button:hover:not(:disabled) {
+      transform: translateY(-1px);
     }
     .modal-actions button.loading {
       opacity: 0.7;
@@ -234,18 +309,77 @@
       to { transform: rotate(360deg); }
     }
     .confirm-delete {
-      background: #f44336;
-      color: white;
+      color: #ffffff;
     }
     .confirm-delete:hover {
-      background: #da190b;
+      filter: brightness(0.96);
     }
     .cancel-delete {
-      background: #e0e0e0;
-      color: #333;
+      background: #f8fafc;
+      color: #111827;
+      border-color: #cbd5e1;
     }
     .cancel-delete:hover {
-      background: #d0d0d0;
+      background: #e2e8f0;
+    }
+    @media (max-width: 520px) {
+      .modal {
+        padding: 10px;
+      }
+      .modal-content {
+        width: 100%;
+        border-radius: 16px;
+      }
+      .modal-header {
+        padding: 18px 18px;
+        font-size: 1rem;
+      }
+      .modal-body {
+        padding: 18px;
+      }
+      .modal-actions {
+        justify-content: stretch;
+      }
+      .modal-actions button {
+        width: 100%;
+      }
+    }
+    body.dark .modal-content,
+    .dark-mode .modal-content {
+      background-color: rgba(15, 23, 42, 0.96);
+      color: #f8fafc;
+      border-color: rgba(148, 163, 184, 0.24);
+    }
+    body.dark .modal-header,
+    .dark-mode .modal-header {
+      background: #0f172a;
+    }
+    body.dark .modal-body,
+    .dark-mode .modal-body {
+      color: #e2e8f0;
+    }
+    body.dark .modal-summary-card,
+    .dark-mode .modal-summary-card {
+      background: rgba(96, 165, 250, 0.1);
+    }
+    body.dark .modal-summary-card li,
+    .dark-mode .modal-summary-card li {
+      background: rgba(15, 23, 42, 0.9);
+      color: #e2e8f0;
+      border-color: rgba(71, 85, 105, 0.35);
+    }
+    body.dark .cancel-delete,
+    .dark-mode .cancel-delete {
+      background: #1f2937;
+      color: #f8fafc;
+      border-color: #374151;
+    }
+    body.dark .cancel-delete:hover,
+    .dark-mode .cancel-delete:hover {
+      background: #111827;
+    }
+    body.dark .modal {
+      background-color: rgba(0, 0, 0, 0.65);
     }
     
     /* Bulk Loading Overlay Styles */
@@ -434,10 +568,16 @@
       .search-bar {
         flex-direction: column;
         gap: 10px;
+        flex-wrap: wrap;
       }
 
       .search-bar input {
         width: 100%;
+      }
+      .search-bar select {
+        width: 100%;
+        min-width: 0;
+        margin-left: 0;
       }
     }
   </style>
@@ -480,9 +620,10 @@
         <% if (students.length > 0) { %>
           <div class="search-bar">
             <div class="search-input-wrapper">
-              <i class="fas fa-search"></i>
+              <i class="fas fa-search search-icon"></i>
               <input 
                 id="studentSearch" 
+                class="search-input"
                 type="search" 
                 placeholder="Search by name or email..." 
                 aria-label="Search students"
@@ -496,7 +637,6 @@
               <option value="passed" <%= typeof status !== 'undefined' && status === 'passed' ? 'selected' : '' %>>Passed</option>
               <option value="failed" <%= typeof status !== 'undefined' && status === 'failed' ? 'selected' : '' %>>Failed</option>
             </select>
-           
           </div>
 
           <!-- Bulk Actions Bar -->
@@ -640,24 +780,23 @@
 
   <!-- Bulk Status / Delete Confirmation Modal -->
   <div id="bulkConfirmModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-content" style="max-width: 520px;">
       <div class="modal-header">
         <i class="fas fa-check-circle"></i>
         Confirm Action
       </div>
-      <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
-        <p id="bulkConfirmMessage" style="margin: 0 0 20px 0; color: #334155; line-height: 1.6;"></p>
-        <div id="bulkApplicantsList" style="background: rgba(51, 65, 85, 0.05); border-left: 4px solid #2563eb; padding: 16px; border-radius: 8px; margin-bottom: 16px; display: none;">
-          <div style="font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;"><i class="fas fa-users" style="margin-right: 6px;"></i>Selected Applicants</div>
-          <ul id="bulkApplicantsListItems" style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
-          </ul>
+      <div class="modal-body">
+        <p id="bulkConfirmMessage" class="modal-message"></p>
+        <div id="bulkApplicantsList" class="modal-summary-card" style="display: none;">
+          <div class="summary-title"><i class="fas fa-users"></i> Selected Applicants</div>
+          <ul id="bulkApplicantsListItems"></ul>
         </div>
       </div>
       <div class="modal-actions">
         <button type="button" id="bulkConfirmBtn" class="confirm-delete" style="background: #28a745; border-color: #28a745;">
           <i class="fas fa-check"></i> Confirm
         </button>
-        <button type="button" id="bulkCancelBtn" class="cancel-delete" style="background: #f3f4f6; color: #111;">
+        <button type="button" id="bulkCancelBtn" class="cancel-delete">
           <i class="fas fa-times"></i> Cancel
         </button>
       </div>
@@ -666,13 +805,13 @@
 
   <!-- Bulk Action Success Modal -->
   <div id="bulkSuccessModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 520px;">
       <div class="modal-header">
         <i class="fas fa-check-circle"></i>
         Action Completed
       </div>
       <div class="modal-body">
-        <p id="bulkSuccessMessage" style="margin: 0; color: #334155; line-height: 1.6;"></p>
+        <p id="bulkSuccessMessage" class="modal-message"></p>
       </div>
       <div class="modal-actions">
         <button type="button" id="bulkSuccessOkBtn" class="confirm-delete" style="background: #28a745; border-color: #28a745;">
@@ -988,7 +1127,7 @@
         // Build applicants list HTML
         if (applicantNames.length > 0) {
           bulkApplicantsListItems.innerHTML = applicantNames
-            .map(name => `<li style="background: white; padding: 8px 12px; border-radius: 6px; font-size: 14px; color: #334155; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(226, 232, 240, 0.5);"><i class="fas fa-user-check" style="color: #2563eb; font-size: 12px;"></i> ${name}</li>`)
+            .map(name => `<li class="summary-list-item"><i class="fas fa-user-check"></i> ${name}</li>`)
             .join('');
           bulkApplicantsList.style.display = 'block';
         } else {

@@ -24,7 +24,7 @@
     </div>
     <div class="container add-schedule-shell">
       <h1><i class="fas fa-plus-circle"></i> Add New Schedule</h1>
-      <p class="page-subtitle">Create new exam schedules with holiday-aware validation and manage existing bookings from one centralized page.</p>
+      
       
       <% if (error && error.length > 0) { %>
         <div class="message error">
@@ -60,7 +60,7 @@
               <label for="studentSearch"><i class="fas fa-user"></i> Applicant</label>
               <% if (students && students.length > 0) { %>
                 <div class="suggestions-container">
-                  <input type="text" id="studentSearch" name="studentSearch" placeholder="Search applicant by name or email" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="studentSuggestions" aria-label="Search applicant" required />
+                  <input type="text" id="studentSearch" name="studentSearch" class="search-input" placeholder="Search applicant by name or email" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="studentSuggestions" aria-label="Search applicant" required />
                   <input type="hidden" id="studentId" name="studentId" required />
                   <div class="suggestions-list" id="studentSuggestions" role="listbox" aria-label="Applicant suggestions"></div>
                 </div>
@@ -176,7 +176,7 @@
         <% } else { %>
           <div class="no-data">
             <i class="fas fa-calendar-times"></i>
-            <p>No schedules yet. Use the form above to create your first schedule.</p>
+            
           </div>
         <% } %>
       </div>

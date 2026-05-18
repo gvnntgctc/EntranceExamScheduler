@@ -268,7 +268,10 @@
       <% } %>
       <div class="section-card">
         <div class="search-bar">
-          <input id="notificationSearch" type="search" placeholder="Search recipient or action..." aria-label="Search notifications" value="<%= search %>" autocomplete="off" />
+          <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input id="notificationSearch" class="search-input" type="search" placeholder="Search recipient or action..." aria-label="Search notifications" value="<%= search %>" autocomplete="off" />
+          </div>
         </div>
 
         <div class="table-responsive">

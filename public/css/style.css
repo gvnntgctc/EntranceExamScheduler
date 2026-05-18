@@ -195,6 +195,133 @@ html {
 /* Sidebar Styles */
 /* ==================== */
 
+/* ==================== */
+/* Global Search Input Styles */
+/* Applies modern styling to all search bars across the app */
+/* Keeps existing markup and JS behavior intact while improving UX */
+.search-bar,
+.search-container,
+.modal-search,
+.table-search,
+.header-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 180px;
+}
+
+.search-input-wrapper .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(47,62,77,0.45);
+  pointer-events: none;
+  font-size: 14px;
+}
+
+.search-input,
+input[type="search"].search-input,
+.search-bar input,
+.search-container input,
+input[type="text"].search-input {
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  border-radius: calc(var(--radius-default) - 4px);
+  border: 1px solid var(--color-border);
+  background: rgba(255,255,255,0.9);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.06s ease;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-input::placeholder,
+.search-bar input::placeholder {
+  color: rgba(79, 89, 102, 0.55);
+  font-weight: 500;
+}
+
+.search-input:focus,
+.search-bar input:focus,
+.search-container input:focus {
+  box-shadow: 0 6px 24px rgba(17,153,142,0.12), 0 0 0 4px rgba(17,153,142,0.06);
+  border-color: #11998e;
+}
+
+.search-input:focus + .clear-btn,
+.search-bar input:focus + .clear-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.clear-btn {
+  background: transparent;
+  border: none;
+  color: rgba(47,62,77,0.6);
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.85;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.clear-btn:hover { filter: brightness(0.95); }
+
+/* small screens: stack controls nicely */
+@media (max-width: 720px) {
+  .search-bar,
+  .search-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-input {
+    padding-left: 12px;
+  }
+}
+
+/* dark mode compatibility */
+body.dark .search-input,
+.dark-mode .search-input,
+body.dark .search-bar input,
+.dark-mode .search-bar input {
+  background: rgba(15,23,42,0.85);
+  color: #e6eef6;
+  border-color: rgba(71,85,105,0.3);
+}
+body.dark .search-input::placeholder,
+.dark-mode .search-input::placeholder {
+  color: rgba(226,232,240,0.36);
+}
+
+/* Generic selectors to ensure any search input receives the modern styling */
+input[type="search"],
+input[aria-label*="search" i],
+input[placeholder*="search" i],
+input[placeholder*="Search" i],
+input.search-input {
+  -webkit-appearance: none;
+  appearance: none;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+  caret-color: #11998e;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+/* Prevent layout shift when focusing (preserve padding and width) */
+input[type="search"], .search-input { box-sizing: border-box; }
+
+
 @keyframes slideInSidebar {
   from {
     transform: translateX(-100%);
@@ -1461,7 +1588,7 @@ h2 i {
   color: white;
   font-size: 20px;
 }
-}
+
 
 .detail-info {
   display: flex;
@@ -3375,7 +3502,7 @@ button.btn-primary:hover {
 /* ==================== */
 
 .modal-header {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: linear-gradient(135deg,#1B5E20 0%, #2E7D32 100%);
   color: white;
   padding: 20px 25px;
   display: flex;
@@ -3746,7 +3873,7 @@ button.btn-primary:hover {
 /* ==================== */
 
 .student-count-badge {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   color: white;
   padding: 8px 20px;
   border-radius: 20px;

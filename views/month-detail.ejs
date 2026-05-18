@@ -328,30 +328,43 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      background: #f5f5f5;
-      padding: 14px 16px;
+      padding: 10px;
       border-radius: 12px;
-      border: 1px solid #e6ecee;
       margin-bottom: 16px;
       flex: 0 0 auto;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid #e6ecee;
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
     }
 
     .modal-search i {
-      color: #11998e;
+      color: rgba(17,153,142,0.95);
       font-size: 16px;
+      margin-left: 6px;
     }
 
     .modal-search .search-input {
-      border: none;
-      background: transparent;
+      border: 1px solid #e0e0e0;
+      background: rgba(255,255,255,0.98);
       outline: none;
       width: 100%;
       font-size: 15px;
       color: #333;
+      padding: 10px 12px;
+      border-radius: 10px;
+      transition: box-shadow 0.16s ease, border-color 0.16s ease;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .modal-search .search-input::placeholder {
       color: #95a5a6;
+      font-weight: 500;
+    }
+
+    .modal-search .search-input:focus {
+      box-shadow: 0 8px 28px rgba(17,153,142,0.12);
+      border-color: #11998e;
     }
 
     .modal-filters {
