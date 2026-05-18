@@ -278,14 +278,34 @@ input[type="text"].search-input {
 /* small screens: stack controls nicely and tighten mobile spacing */
 @media (max-width: 720px) {
   .search-bar,
-  .search-container {
+  .search-container,
+  .modal-search {
     flex-direction: column;
     align-items: stretch;
+    justify-content: flex-start;
     gap: 10px;
+    min-height: auto;
+    height: auto;
+  }
+
+  .search-bar .search-input-wrapper,
+  .search-container .search-input-wrapper {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .search-bar select,
+  .search-container select,
+  .search-bar .search-input,
+  .search-container .search-input {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .search-bar-container {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 
   .search-container {
@@ -295,9 +315,14 @@ input[type="text"].search-input {
   }
 
   .search-input {
-    padding: 10px 12px;
+    padding: 10px 12px 10px 40px;
     font-size: 0.95rem;
     line-height: 1.4;
+    min-height: 42px;
+  }
+
+  .search-input-wrapper .search-icon {
+    left: 12px;
   }
 
   .clear-btn {
@@ -5413,10 +5438,31 @@ input, textarea, select, button {
     padding: 30px 12px 20px;
   }
 
+  .search-bar,
   .search-container,
   .modal-search {
     flex-direction: column;
     align-items: stretch;
+    justify-content: flex-start;
+    min-height: auto;
+    height: auto;
+    gap: 10px;
+  }
+
+  .search-bar .search-input-wrapper,
+  .search-container .search-input-wrapper {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .search-bar select,
+  .search-container select,
+  .search-bar .search-input,
+  .search-container .search-input {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .search-container input,
