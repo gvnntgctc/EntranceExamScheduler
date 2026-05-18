@@ -5109,3 +5109,218 @@ table {
 *::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
 }
+
+/* ==================== */
+/* FINAL RESPONSIVE ENHANCEMENTS */
+/* ==================== */
+
+html, body {
+  min-width: 0;
+}
+
+img, svg, video {
+  max-width: 100%;
+  height: auto;
+}
+
+input, textarea, select, button {
+  max-width: 100%;
+}
+
+.modal-search, .search-container, .search-bar {
+  min-width: 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+  width: 100%;
+  min-width: 0;
+  table-layout: auto;
+}
+
+.schedule-table th, .schedule-table td,
+.notifications-table th, .notifications-table td,
+.students-table th, .students-table td {
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.modal-footer {
+  flex-wrap: wrap;
+}
+
+.modal-footer .btn {
+  flex: 1 1 100%;
+  min-width: auto;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100%;
+  }
+
+  .sidebar-close,
+  .hamburger {
+    top: 12px;
+    left: 12px;
+  }
+
+  .auth-right,
+  .container,
+  .section-card,
+  .modal-content,
+  .student-modal,
+  .schedule-card,
+  .student-card {
+    max-width: 100%;
+  }
+
+  .day-card,
+  .stat-card,
+  .student-item,
+  .schedule-item-card,
+  .modal-student-card {
+    width: 100%;
+  }
+
+  .weekly-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .day-card {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 40px 16px 24px;
+  }
+
+  .container {
+    padding: 0 12px;
+  }
+
+  .section-card {
+    padding: 18px;
+  }
+
+  .container.single-panel {
+    width: 100%;
+    padding: 0;
+  }
+
+  .form-group label {
+    font-size: 0.95rem;
+  }
+
+  .schedule-form .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+  }
+
+  .time-input-wrapper {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .time-field,
+  .ampm-select {
+    width: 100%;
+  }
+
+  .modal-body,
+  .student-modal-body {
+    padding: 16px 18px;
+  }
+
+  .modal-footer {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-content {
+    padding: 30px 12px 20px;
+  }
+
+  .search-container,
+  .modal-search {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-container input,
+  .modal-search input,
+  .input-group input,
+  .input-group select {
+    font-size: 15px;
+  }
+
+  .section-header,
+  .section-header .student-count {
+    width: 100%;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-card {
+    padding: 16px;
+  }
+
+  .btn,
+  .btn-secondary,
+  .btn-primary,
+  .btn-submit {
+    width: 100%;
+  }
+
+  .weekly-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .day-card {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .schedule-table {
+    min-width: 0;
+  }
+
+  .schedule-item-top,
+  .schedule-item-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-item-actions,
+  .schedule-actions,
+  .student-actions {
+    flex-wrap: wrap;
+  }
+
+  .modal-content,
+  .student-modal {
+    margin: 0 10px;
+  }
+
+  .page-logo {
+    width: 80px;
+    height: 80px;
+  }
+
+  .page-logo img {
+    object-fit: contain;
+  }
+}

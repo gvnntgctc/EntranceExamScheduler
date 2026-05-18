@@ -498,6 +498,86 @@ body.review-screen .container.single-panel {
   overflow: visible;
 }
 
+/* ==================== */
+/* AUTH PAGE RESPONSIVE IMPROVEMENTS */
+/* ==================== */
+
+@media (max-width: 900px) {
+  .container.single-panel {
+    width: 100%;
+    max-width: 420px;
+    padding: 0 20px;
+  }
+
+  .form-container {
+    width: 100%;
+    padding: 0;
+  }
+
+  .form-container form {
+    padding: 0 18px;
+  }
+
+  .page-logo {
+    top: 12px;
+    right: 12px;
+    width: 90px;
+    height: 90px;
+  }
+
+  .page-logo img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  .container.single-panel {
+    min-height: auto;
+    padding: 0 14px 20px;
+  }
+
+  .form-container {
+    padding: 0;
+  }
+
+  .form-container form {
+    padding: 0 14px;
+  }
+
+  .input-group {
+    margin-bottom: 1rem;
+  }
+
+  .input-group input {
+    padding: 14px 14px 14px 45px;
+  }
+
+  .subtitle {
+    font-size: 0.98rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .btn-submit,
+  .btn-ghost {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .page-logo {
+    width: 78px;
+    height: 78px;
+  }
+
+  .page-logo img {
+    object-fit: contain;
+  }
+}
+
 /* Ensure review card doesn't clip content */
 body.review-screen .review-card {
   overflow: visible;
