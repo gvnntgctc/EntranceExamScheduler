@@ -275,15 +275,35 @@ input[type="text"].search-input {
 
 .clear-btn:hover { filter: brightness(0.95); }
 
-/* small screens: stack controls nicely */
+/* small screens: stack controls nicely and tighten mobile spacing */
 @media (max-width: 720px) {
   .search-bar,
   .search-container {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
+
+  .search-bar-container {
+    margin-bottom: 16px;
+  }
+
+  .search-container {
+    padding: 10px 12px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+
   .search-input {
-    padding-left: 12px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .clear-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    border-radius: 10px;
   }
 }
 
@@ -687,8 +707,8 @@ input[type="search"], .search-input { box-sizing: border-box; }
   .main-content {
     margin-left: 0;
     width: 100%;
-    padding: 40px 20px;
-    padding-top: 80px;
+    padding: 24px 16px;
+    padding-top: 64px;
     justify-content: center;
     align-items: flex-start;
   }
@@ -699,16 +719,77 @@ input[type="search"], .search-input { box-sizing: border-box; }
   }
 
   .section-card {
-    padding: 15px;
+    padding: 14px;
+    gap: 12px;
+    margin-bottom: 18px;
   }
 
   .weekly-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
   }
 
   .day-card {
-    padding: 15px;
+    padding: 14px;
+  }
+
+  .stats-grid {
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .stat-card {
+    padding: 14px 16px;
+    min-width: 150px;
+  }
+
+  .page-subtitle {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .button-group {
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .pagination-controls {
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 14px;
+  }
+
+  .pagination-btn {
+    padding: 9px 14px;
+  }
+
+  .btn,
+  .edit-btn,
+  .delete-btn,
+  .cancel-btn {
+    padding: 10px 16px;
+    min-height: auto;
+  }
+
+  .btn-primary {
+    min-height: 40px;
+  }
+
+  .edit-btn,
+  .delete-btn,
+  .cancel-btn {
+    min-height: 38px;
+  }
+
+  .card-header {
+    padding: 10px 12px;
+    min-height: 90px;
+  }
+
+  .card-footer {
+    padding-top: 8px;
+    gap: 14px;
   }
 }
 
@@ -1370,6 +1451,65 @@ h2 i {
   transform: translateY(-3px);
   box-shadow: 0 22px 40px rgba(17, 95, 41, 0.12);
   border-color: rgba(17, 95, 41, 0.18);
+}
+
+@media (max-width: 720px) {
+  .schedule-list {
+    gap: 12px;
+  }
+
+  .schedule-table th,
+  .schedule-table td {
+    padding: 10px 12px;
+  }
+
+  .schedule-item-card {
+    padding: 14px 16px;
+    border-radius: 16px;
+  }
+
+  .schedule-item-top {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .schedule-item-applicant {
+    gap: 10px;
+  }
+
+  .schedule-item-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .schedule-item-applicant strong {
+    font-size: 15px;
+  }
+
+  .schedule-item-subtitle {
+    margin-top: 2px;
+    font-size: 12px;
+  }
+
+  .schedule-item-meta {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .schedule-detail-box {
+    padding: 12px 14px;
+  }
+
+  .schedule-detail-box .detail-label {
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .schedule-detail-box .detail-value {
+    font-size: 13px;
+  }
 }
 
 .schedule-item-top {
