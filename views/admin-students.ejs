@@ -508,9 +508,16 @@
       }
 
       .students-table tr {
-        display: block;
-        border: 1px solid #e5e7eb;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas:
+          "checkbox index actions"
+          "fullname fullname fullname"
+          "email email email"
+          "status registered registered";
+        gap: 8px 12px;
         margin-bottom: 12px;
+        border: 1px solid #e5e7eb;
         border-radius: 18px;
         padding: 12px 14px;
         background: #ffffff;
@@ -520,62 +527,130 @@
       .students-table td {
         display: block;
         width: 100%;
-        padding: 8px 0;
+        padding: 4px 0;
         border: none;
-        position: relative;
         box-sizing: border-box;
         white-space: normal;
         overflow-wrap: anywhere;
         word-break: break-word;
+        line-height: 1.35;
+      }
+
+      .students-table td:first-child {
+        grid-area: checkbox;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .students-table td:nth-child(2) {
+        grid-area: index;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .students-table td:nth-child(3) {
+        grid-area: fullname;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .students-table td:nth-child(4) {
+        grid-area: email;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .students-table td:nth-child(5) {
+        grid-area: status;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .students-table td:nth-child(6) {
+        grid-area: registered;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .students-table td:last-child {
+        grid-area: actions;
+        justify-self: end;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .students-table td:first-child:before,
+      .students-table td:nth-child(2):before,
+      .students-table td:last-child:before {
+        display: none;
       }
 
       .students-table td:before {
         content: attr(data-label);
         display: block;
-        margin-bottom: 4px;
-        font-size: 12px;
+        margin-bottom: 3px;
+        font-size: 11px;
         font-weight: 700;
         color: #526075;
         letter-spacing: 0.02em;
       }
 
-      .students-table td.actions-column:before {
-        display: none;
-      }
-
-      .students-table td:last-child {
-        padding-top: 10px;
-      }
-
       .student-name {
         font-size: 15px;
-        line-height: 1.4;
+        line-height: 1.35;
       }
 
-      .student-email {
-        font-size: 13px;
-        color: #5d6c7e;
-      }
-
+      .student-email,
       .student-date {
         font-size: 13px;
-        color: #7a8696;
+        line-height: 1.35;
+        color: #5d6c7e;
       }
 
       .status-badge {
         font-size: 12px;
-        padding: 5px 10px;
+        padding: 4px 10px;
       }
 
       .action-btn {
         display: inline-flex;
         width: auto;
-        max-width: 180px;
-        padding: 10px 14px;
+        max-width: 140px;
+        padding: 9px 12px;
         font-size: 13px;
+        line-height: 1.2;
         justify-content: center;
         border-radius: 10px;
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+      }
+
+      .actions-column {
+        text-align: right;
+      }
+
+      .bulk-actions-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      .bulk-actions-bar > div {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+        width: auto;
+      }
+
+      .bulk-actions-bar > div > button {
+        width: auto;
+        min-width: 120px;
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+
+      .students-table td:nth-child(2) strong {
+        font-size: 13px;
       }
     }
 
@@ -595,7 +670,7 @@
       .main-content {
         margin-left: 0 !important;
         width: 100% !important;
-        padding: 22px 14px 28px !important;
+        padding: 18px 12px 26px !important;
       }
 
       .container {
@@ -624,92 +699,40 @@
         margin-left: 0 !important;
       }
 
-      .search-bar button, .search-bar a {
+      .search-bar button,
+      .search-bar a {
         width: 100%;
         justify-content: center;
-      }
-
-      .students-table {
-        display: block;
-        width: 100%;
-        min-width: 0;
-        table-layout: auto;
-        white-space: normal;
-        overflow: visible;
-      }
-
-      .students-table thead {
-        display: none;
-      }
-
-      .students-table tbody {
-        display: block;
       }
 
       .students-table tr {
-        display: block;
-        border: 1px solid #e5e7eb;
-        margin-bottom: 12px;
-        border-radius: 18px;
-        padding: 12px 14px;
-        background: #ffffff;
-        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-      }
-
-      .students-table td {
-        display: block;
-        width: 100%;
-        padding: 7px 0;
-        border: none;
-        position: relative;
-        box-sizing: border-box;
-        white-space: normal;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-      }
-
-      .students-table td:before {
-        content: attr(data-label);
-        display: block;
-        margin-bottom: 4px;
-        font-size: 12px;
-        font-weight: 700;
-        color: #4b5d70;
-      }
-
-      .students-table td.actions-column:before {
-        display: none;
+        grid-template-columns: auto 1fr;
+        grid-template-areas:
+          "checkbox index"
+          "fullname fullname"
+          "email email"
+          "status registered"
+          "actions actions";
       }
 
       .students-table td:last-child {
-        padding-top: 10px;
+        justify-self: start;
       }
 
-      .student-name,
-      .student-email,
-      .student-date,
-      .status-badge {
-        white-space: normal;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-        max-width: 100%;
+      .students-table td {
+        padding: 5px 0;
+        line-height: 1.35;
       }
 
-      .status-badge {
-        display: inline-flex;
-        flex-wrap: wrap;
-        justify-content: flex-start;
+      .students-table td:before {
+        margin-bottom: 2px;
+        font-size: 11px;
       }
 
       .action-btn {
-        display: inline-flex;
-        margin: 8px 0 0;
-        min-width: 0;
-        width: auto;
-        max-width: 100%;
-        padding: 10px 14px;
-        font-size: 13px;
-        justify-content: center;
+        max-width: 120px;
+        padding: 9px 12px;
+        line-height: 1.2;
       }
 
       .actions-column {
@@ -717,16 +740,25 @@
       }
 
       .bulk-actions-bar {
-        flex-direction: column;
-        align-items: stretch;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
       }
 
       .bulk-actions-bar > div {
-        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+        width: auto;
       }
 
       .bulk-actions-bar > div > button {
-        width: 100%;
+        width: auto;
+        min-width: 110px;
+        padding: 10px 12px;
+        font-size: 13px;
       }
     }
 
