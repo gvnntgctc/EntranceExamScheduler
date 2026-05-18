@@ -3171,6 +3171,21 @@ label {
 }
 
 @media (max-width: 600px) {
+  /* Remove desktop left offset so content fills viewport on small screens */
+  .main-content {
+    margin-left: 0 !important;
+  }
+
+  /* Ensure sidebar overlays instead of shrinking content */
+  .sidebar {
+    position: fixed !important;
+    left: 8px !important;
+    top: 8px !important;
+    width: 56px !important;
+    height: auto !important;
+    z-index: 1400 !important;
+  }
+
   .schedule-form .form-grid {
     grid-template-columns: 1fr;
     gap: 12px;
