@@ -248,6 +248,163 @@
       color: #fff;
       border-color: #0f766e;
     }
+
+    @media (max-width: 900px) {
+      .search-bar {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+      }
+
+      .search-input-wrapper {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .notifications-table {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        table-layout: auto;
+      }
+
+      .notifications-table thead {
+        display: none;
+      }
+
+      .notifications-table tbody {
+        display: block;
+      }
+
+      .notifications-table tr {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas:
+          "index recipient manage"
+          "action action action"
+          "details details details"
+          "status sent sent";
+        gap: 8px 12px;
+        margin-bottom: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 12px 14px;
+        background: #ffffff;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+      }
+
+      .notifications-table td {
+        display: block;
+        width: 100%;
+        padding: 4px 0;
+        border: none;
+        box-sizing: border-box;
+        line-height: 1.35;
+        color: #334155;
+      }
+
+      .notifications-table td:first-child {
+        grid-area: index;
+        align-self: center;
+        padding-top: 4px;
+      }
+
+      .notifications-table td:nth-child(2) {
+        grid-area: recipient;
+        padding-top: 4px;
+      }
+
+      .notifications-table td:nth-child(3) {
+        grid-area: action;
+        padding-top: 4px;
+      }
+
+      .notifications-table td:nth-child(4) {
+        grid-area: details;
+        padding-top: 4px;
+      }
+
+      .notifications-table td:nth-child(5) {
+        grid-area: status;
+        padding-top: 6px;
+      }
+
+      .notifications-table td:nth-child(6) {
+        grid-area: sent;
+        color: #64748b;
+        font-size: 13px;
+        padding-top: 6px;
+      }
+
+      .notifications-table td:last-child {
+        grid-area: manage;
+        justify-self: end;
+        align-self: center;
+        padding-top: 6px;
+      }
+
+      .notifications-table td:before {
+        display: none;
+      }
+
+      .details-cell {
+        padding-top: 3px;
+        color: #475569;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .details-cell .subject-line {
+        margin-bottom: 4px;
+        font-size: 14px;
+      }
+
+      .status-pill {
+        padding: 5px 10px;
+        font-size: 12px;
+        min-width: auto;
+      }
+
+      .view-details-btn {
+        padding: 8px 10px;
+        font-size: 12px;
+        border-radius: 10px;
+        min-width: auto;
+        width: auto;
+        box-shadow: 0 10px 20px rgba(17, 153, 142, 0.12);
+      }
+
+      .sent-at {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .notifications-table tr {
+        grid-template-columns: auto 1fr;
+        grid-template-areas:
+          "index manage"
+          "recipient recipient"
+          "action action"
+          "details details"
+          "status sent";
+      }
+
+      .notifications-table td {
+        padding: 4px 0;
+      }
+
+      .view-details-btn {
+        width: auto;
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .search-bar {
+        gap: 8px;
+      }
+    }
   </style>
 </head>
 <body class="admin-notifications-page admin-page-bg">

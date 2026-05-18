@@ -491,12 +491,29 @@
     }
 
     @media (max-width: 768px) {
+      .search-bar {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+        width: 100%;
+        margin-bottom: 14px;
+      }
+
+      .search-input-wrapper,
+      .search-bar select,
+      .search-bar button,
+      .search-bar a {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+
       .students-table {
         display: block;
         width: 100%;
         min-width: 0;
         table-layout: auto;
         white-space: normal;
+        background: transparent;
       }
 
       .students-table thead {
@@ -527,7 +544,7 @@
       .students-table td {
         display: block;
         width: 100%;
-        padding: 4px 0;
+        padding: 3px 0;
         border: none;
         box-sizing: border-box;
         white-space: normal;
@@ -538,85 +555,68 @@
 
       .students-table td:first-child {
         grid-area: checkbox;
-        padding-top: 6px;
-        padding-bottom: 6px;
+        align-self: center;
       }
 
       .students-table td:nth-child(2) {
         grid-area: index;
-        padding-top: 6px;
-        padding-bottom: 6px;
+        align-self: center;
+        color: #334155;
+        font-size: 13px;
       }
 
       .students-table td:nth-child(3) {
         grid-area: fullname;
-        padding-top: 6px;
-        padding-bottom: 6px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #1f2937;
+        padding-top: 4px;
       }
 
       .students-table td:nth-child(4) {
         grid-area: email;
-        padding-top: 6px;
-        padding-bottom: 6px;
+        color: #64748b;
+        font-size: 13px;
+        padding-top: 4px;
       }
 
       .students-table td:nth-child(5) {
         grid-area: status;
+        display: flex;
+        align-items: center;
+        gap: 10px;
         padding-top: 6px;
-        padding-bottom: 6px;
       }
 
       .students-table td:nth-child(6) {
         grid-area: registered;
+        color: #64748b;
+        font-size: 13px;
         padding-top: 6px;
-        padding-bottom: 6px;
       }
 
       .students-table td:last-child {
         grid-area: actions;
         justify-self: end;
+        align-self: center;
         padding-top: 6px;
-        padding-bottom: 6px;
-      }
-
-      .students-table td:first-child:before,
-      .students-table td:nth-child(2):before,
-      .students-table td:last-child:before {
-        display: none;
       }
 
       .students-table td:before {
-        content: attr(data-label);
-        display: block;
-        margin-bottom: 3px;
-        font-size: 11px;
-        font-weight: 700;
-        color: #526075;
-        letter-spacing: 0.02em;
-      }
-
-      .student-name {
-        font-size: 15px;
-        line-height: 1.35;
-      }
-
-      .student-email,
-      .student-date {
-        font-size: 13px;
-        line-height: 1.35;
-        color: #5d6c7e;
+        display: none;
       }
 
       .status-badge {
         font-size: 12px;
-        padding: 4px 10px;
+        padding: 5px 10px;
+        min-width: auto;
       }
 
       .action-btn {
         display: inline-flex;
         width: auto;
-        max-width: 140px;
-        padding: 9px 12px;
+        max-width: 120px;
+        padding: 8px 12px;
         font-size: 13px;
         line-height: 1.2;
         justify-content: center;
@@ -628,28 +628,23 @@
       }
 
       .bulk-actions-bar {
-        display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
         gap: 10px;
-        justify-content: flex-end;
       }
 
       .bulk-actions-bar > div {
+        width: 100%;
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        justify-content: flex-end;
-        width: auto;
+        justify-content: flex-start;
       }
 
       .bulk-actions-bar > div > button {
-        width: auto;
-        min-width: 120px;
+        width: 100%;
+        min-width: 0;
         padding: 10px 12px;
-        font-size: 13px;
-      }
-
-      .students-table td:nth-child(2) strong {
         font-size: 13px;
       }
     }
@@ -670,7 +665,7 @@
       .main-content {
         margin-left: 0 !important;
         width: 100% !important;
-        padding: 18px 12px 26px !important;
+        padding: 16px 12px 24px !important;
       }
 
       .container {
@@ -686,25 +681,6 @@
         padding: 10px 10px;
       }
 
-      .search-input-wrapper {
-        flex: 1 1 auto !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-      }
-
-      .search-bar select {
-        width: 100% !important;
-        min-width: 0 !important;
-        margin-left: 0 !important;
-      }
-
-      .search-bar button,
-      .search-bar a {
-        width: 100%;
-        justify-content: center;
-      }
-
       .students-table tr {
         grid-template-columns: auto 1fr;
         grid-template-areas:
@@ -713,6 +689,8 @@
           "email email"
           "status registered"
           "actions actions";
+        padding: 10px 12px;
+        gap: 6px 10px;
       }
 
       .students-table td:last-child {
@@ -720,45 +698,20 @@
       }
 
       .students-table td {
-        padding: 5px 0;
-        line-height: 1.35;
-      }
-
-      .students-table td:before {
-        margin-bottom: 2px;
-        font-size: 11px;
+        padding: 4px 0;
       }
 
       .action-btn {
-        max-width: 120px;
-        padding: 9px 12px;
-        line-height: 1.2;
+        max-width: 110px;
+        padding: 8px 12px;
       }
 
       .actions-column {
         text-align: left;
       }
 
-      .bulk-actions-bar {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: flex-end;
-      }
-
-      .bulk-actions-bar > div {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: flex-end;
-        width: auto;
-      }
-
       .bulk-actions-bar > div > button {
-        width: auto;
-        min-width: 110px;
-        padding: 10px 12px;
-        font-size: 13px;
+        width: 100%;
       }
     }
 
