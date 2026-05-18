@@ -439,16 +439,19 @@ body.review-screen .review-form {
   border: 1px solid rgba(17, 153, 142, 0.16);
   border-radius: 24px;
   padding: 20px;
+  grid-auto-rows: minmax(48px, auto);
 }
 
 .review-item {
   display: grid;
-  grid-template-columns: auto 1fr;
+  /* Responsive label column: minimum 120px, up to ~28% of the card, then value column */
+  grid-template-columns: minmax(120px, 28%) 1fr;
   gap: 18px;
   align-items: center;
-  padding: 16px 18px;
+  padding: 14px 18px;
   background: rgba(17, 153, 142, 0.04);
-  border-radius: 16px;
+  border-radius: 12px;
+  min-height: 48px;
 }
 
 .review-item:last-child {
@@ -463,6 +466,7 @@ body.review-screen .review-form {
   letter-spacing: 0.08em;
   text-align: right;
   white-space: nowrap;
+  width: auto; /* allow grid column to control width */
 }
 
 .review-label::after {
@@ -473,11 +477,30 @@ body.review-screen .review-form {
 .review-value {
   color: #0f2419;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   text-align: left;
-  word-break: normal;
+  /* Ensure long text wraps and never overflows the card */
+  word-break: break-word;
   overflow-wrap: anywhere;
+  hyphens: auto;
   min-width: 0;
+}
+
+.review-value-wrap {
+  display: block;
+  width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Prevent clipping from outer container on review screen */
+body.review-screen .container.single-panel {
+  overflow: visible;
+}
+
+/* Ensure review card doesn't clip content */
+body.review-screen .review-card {
+  overflow: visible;
 }
 
 .review-actions {
@@ -544,6 +567,29 @@ body.review-screen .review-form {
 
   .review-actions {
     gap: 10px;
+  }
+
+  /* Stack label above value on small screens for better readability */
+  .review-item {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    gap: 8px;
+    align-items: start;
+    padding: 12px 14px;
+  }
+
+  .review-label {
+    text-align: left;
+    width: auto;
+    white-space: normal;
+    font-size: 13px;
+  }
+
+  .review-value {
+    text-align: left;
+    font-size: 15px;
+    font-weight: 600;
+    word-break: break-word;
   }
 }
 
