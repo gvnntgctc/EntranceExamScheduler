@@ -5324,3 +5324,88 @@ input, textarea, select, button {
     object-fit: contain;
   }
 }
+
+/* ==================== */
+/* MOBILE OVERRIDES: FIX TABLES/LISTS WRAPPING & OVERFLOW */
+/* Targets small devices to avoid cutting/truncation and horizontal scroll */
+/* ==================== */
+
+@media (max-width: 600px) {
+  /* Ensure containers don't force wider layouts */
+  .container,
+  .main-content,
+  .section-card,
+  .modal-content,
+  .student-modal,
+  .table-responsive,
+  .auth-right {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Tables: prefer wrapping to scrolling where possible */
+  table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  thead, tbody, tr { box-sizing: border-box !important; }
+
+  th, td {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding-right: 10px !important;
+  }
+
+  /* Override inline widths on table cells/headers */
+  th[style], td[style] {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Flex/grid items should wrap instead of overflowing */
+  .row, .flex-row, .student-item, .schedule-item, .schedule-item-top, .schedule-item-meta {
+    flex-wrap: wrap !important;
+    min-width: 0 !important;
+  }
+
+  /* Long names / emails / notes should wrap safely */
+  .applicant-name, .student-name, .user-name, .email, .note, .message-body, .table-cell-text {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    max-width: 100% !important;
+  }
+
+  /* Prevent icons/images from creating overflow */
+  img, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Buttons stack for readability on narrow screens */
+  .btn, .btn-primary, .btn-secondary {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Modal and student cards spacing */
+  .modal-content, .student-modal {
+    margin-left: 8px !important;
+    margin-right: 8px !important;
+    width: calc(100% - 16px) !important;
+    max-width: 100% !important;
+  }
+
+  /* Final safety: ensure no element deliberately exceeds viewport width */
+  * { min-width: 0 !important; }
+}
