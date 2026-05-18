@@ -5424,3 +5424,51 @@ input, textarea, select, button {
   /* Final safety: ensure no element deliberately exceeds viewport width */
   * { min-width: 0 !important; }
 }
+
+/* Stronger mobile fixes for sidebar and rotated headers */
+@media (max-width: 900px) {
+  /* Hide sidebar by default on small screens; open via `.sidebar.open` */
+  .sidebar {
+    transform: translateX(-100%) !important;
+    left: 0 !important;
+    width: 250px !important;
+    position: fixed !important;
+    z-index: 1400 !important;
+  }
+
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  .sidebar-overlay {
+    display: none; /* JS should show when sidebar opens */
+  }
+
+  /* Force tables to behave responsively */
+  table, .students-table, .notifications-table, .schedule-table {
+    table-layout: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  th, td, .students-table th, .students-table td, .notifications-table th, .notifications-table td {
+    transform: none !important;
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Remove forced min-widths coming from inline or template CSS */
+  .notifications-table, .admin-notifications-page .notifications-table {
+    min-width: 0 !important;
+  }
+
+  /* Ensure hamburger stays above sidebar */
+  .hamburger { z-index: 1500 !important; }
+}
