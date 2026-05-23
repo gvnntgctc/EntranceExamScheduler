@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const ExcelJS = require('exceljs');
 const router = express.Router();
 let nodemailer;
 try {
@@ -224,9 +225,22 @@ router.get('/month/:month', isAdmin, async (req, res) => {
     const schedulesList = [];
     const schedulesMap = {};
 
-    schedules.forEach(schedule => {
-      const d = new Date(schedule.examDate);
-      if (d.getMonth() === month - 1 && d.getFullYear() === year) {
+    schedules
+      .filter(schedule => {
+        const d = new Date(schedule.examDate);
+        return d.getFullYear() === year && d.getMonth() === month - 1;
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.examDate);
+        const dateB = new Date(b.examDate);
+        if (dateA - dateB !== 0) return dateA - dateB;
+        if (a.examTime !== b.examTime) return a.examTime.localeCompare(b.examTime, 'en-US', { numeric: true });
+        const nameA = a.studentId?.fullName || '';
+        const nameB = b.studentId?.fullName || '';
+        return nameA.localeCompare(nameB, 'en-US', { numeric: true });
+      })
+      .forEach(schedule => {
+        const d = new Date(schedule.examDate);
         const dateStr = d.toISOString().split('T')[0];
         const studentName = schedule.studentId ? schedule.studentId.fullName : 'Unknown Applicant';
 
@@ -244,11 +258,7 @@ router.get('/month/:month', isAdmin, async (req, res) => {
           fullName: studentName,
           examTime: schedule.examTime
         });
-      }
-    });
-
-    // Sort detailed list by date
-    schedulesList.sort((a, b) => new Date(a.examDate) - new Date(b.examDate));
+      });
 
     res.render('month-detail', { 
       month,
@@ -265,6 +275,129 @@ router.get('/month/:month', isAdmin, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.redirect('/admin/weekly-schedule?error=Failed to load month view');
+  }
+});
+
+// Export schedule applicants for a selected exam date as XLSX
+router.get('/export-schedule', isAdmin, async (req, res) => {
+  try {
+    const { examDate, filter = 'all', search = '' } = req.query;
+
+    if (!examDate || !/^\d{4}-\d{2}-\d{2}$/.test(examDate)) {
+      return res.status(400).json({ error: 'Invalid exam date' });
+    }
+
+    const parsedDate = new Date(`${examDate}T00:00:00.000Z`);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return res.status(400).json({ error: 'Invalid exam date' });
+    }
+
+    const startOfDay = new Date(`${examDate}T00:00:00.000Z`);
+    const endOfDay = new Date(`${examDate}T23:59:59.999Z`);
+
+    let schedules = await Schedule.find({
+      examDate: { $gte: startOfDay, $lte: endOfDay }
+    }).populate('studentId');
+
+    schedules = schedules
+      .filter(schedule => schedule.studentId)
+      .sort((a, b) => {
+        if (a.examTime !== b.examTime) {
+          return a.examTime.localeCompare(b.examTime, 'en-US', { numeric: true });
+        }
+        const nameA = a.studentId.fullName || '';
+        const nameB = b.studentId.fullName || '';
+        return nameA.localeCompare(nameB, 'en-US', { numeric: true });
+      });
+
+    const normalizedFilter = ['am', 'pm'].includes(filter.toLowerCase()) ? filter.toLowerCase() : 'all';
+    const normalizedSearch = (search || '').trim().toLowerCase();
+
+    const matchesFilter = schedule => {
+      if (normalizedFilter === 'all') return true;
+      const examTime = (schedule.examTime || '').toLowerCase();
+      if (normalizedFilter === 'am') return examTime.includes('a.m') || examTime.includes('am');
+      if (normalizedFilter === 'pm') return examTime.includes('p.m') || examTime.includes('pm');
+      return true;
+    };
+
+    const matchesSearch = schedule => {
+      if (!normalizedSearch) return true;
+      const name = (schedule.studentId.fullName || '').toLowerCase();
+      const email = (schedule.studentId.email || '').toLowerCase();
+      const time = (schedule.examTime || '').toLowerCase();
+      return name.includes(normalizedSearch) || email.includes(normalizedSearch) || time.includes(normalizedSearch);
+    };
+
+    const exportRows = schedules.filter(schedule => matchesFilter(schedule) && matchesSearch(schedule));
+
+    if (exportRows.length === 0) {
+      return res.status(400).json({ error: 'No applicants found for the selected exam date and filters.' });
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Exam Schedule');
+
+    const rowsData = exportRows.map(schedule => ({
+      fullName: schedule.studentId.fullName || '',
+      examDate: schedule.examDate ? new Date(schedule.examDate) : '',
+      examTime: schedule.examTime || '',
+      examLocation: schedule.location || ''
+    }));
+
+    worksheet.columns = [
+      { header: 'Applicant Name', key: 'fullName', width: 32 },
+      { header: 'Exam Date', key: 'examDate', width: 18 },
+      { header: 'Exam Time', key: 'examTime', width: 18 },
+      { header: 'Exam Location', key: 'examLocation', width: 32 }
+    ];
+
+    const maxColumnWidths = worksheet.columns.map(column => {
+      const headerLength = column.header.length;
+      const dataMaxLength = rowsData.reduce((max, row) => {
+        const value = row[column.key] || '';
+        const length = value instanceof Date ? 10 : String(value).length;
+        return Math.max(max, length);
+      }, 0);
+      return Math.min(Math.max(headerLength, dataMaxLength) + 2, 50);
+    });
+
+    worksheet.columns.forEach((column, index) => {
+      column.width = maxColumnWidths[index];
+      column.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+    });
+
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    worksheet.getRow(1).height = 24;
+
+    rowsData.forEach(rowData => {
+      worksheet.addRow(rowData);
+    });
+
+    const examDateColumn = worksheet.getColumn('examDate');
+    examDateColumn.numFmt = 'mm/dd/yyyy';
+
+    worksheet.eachRow({ includeEmpty: false }, row => {
+      row.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+      row.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+    });
+
+    worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const filename = `exam-schedule-${examDate}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.send(buffer);
+  } catch (error) {
+    console.error('Failed to export exam schedule:', error);
+    return res.status(500).json({ error: 'Server error while exporting exam schedule' });
   }
 });
 

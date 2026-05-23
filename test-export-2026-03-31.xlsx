@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - Exam Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <div class="container single-panel" id="container">
+    <div class="page-logo">
+      <img src="/images/logo.png" alt="PTC Logo" />
+    </div>
+    <div class="form-container sign-in-container" style="max-width: 420px; margin: auto;">
+      <form action="/auth/login" method="POST">
+        <h1>Admin Login</h1>
+        <p class="subtitle">Access the applicant management portal</p>
+
+        
+
+        
+
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" name="email" placeholder="Admin email" required autocomplete="email" />
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" name="password" placeholder="Password" required autocomplete="current-password" />
+        </div>
+
+        <button class="btn-submit" type="submit">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+      </form>
+      <div style="margin-top: 20px; text-align: center;">
+        <p>Applicant? <a href="/auth/apply">Register with your email</a></p>
+      </div>
+    </div>
+  </div>
+  <script src="/js/disable-once.js"></script>
+</body>
+</html>
