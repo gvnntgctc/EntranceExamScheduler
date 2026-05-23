@@ -196,7 +196,7 @@ router.post('/login', async (req, res) => {
 
     req.session.userId = user._id;
     req.session.role = user.role;
-    return res.redirect('/admin');
+    return res.redirect('/admin/weekly-schedule');
   } catch (err) {
     console.error('[LOGIN] ERROR:', err);
     return res.redirect('/auth/login?error=Login failed. Please try again.');

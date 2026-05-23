@@ -65,35 +65,62 @@
     }
     .availability-list {
       display: grid;
-      gap: 10px;
+      gap: 14px;
+    }
+    .availability-month {
+      padding: 0;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+    .availability-month[hidden],
+    .availability-day[hidden] {
+      display: none;
+    }
+    .month-summary {
+      display: grid;
+      grid-template-columns: minmax(200px, 1fr) repeat(4, minmax(88px, auto)) 24px;
+      gap: 12px;
+      align-items: center;
+      padding: 18px;
+      cursor: pointer;
+      list-style: none;
+    }
+    .month-summary::-webkit-details-marker {
+      display: none;
+    }
+    .month-body {
+      display: grid;
+      gap: 8px;
+      padding: 0 14px 14px;
     }
     .availability-day {
       margin-bottom: 0;
       padding: 0;
       overflow: hidden;
       border-radius: 8px;
-    }
-    .availability-day[hidden] {
-      display: none;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(226, 232, 240, 0.76);
     }
     .availability-summary {
       display: grid;
-      grid-template-columns: minmax(190px, 1fr) repeat(4, minmax(92px, auto)) 24px;
+      grid-template-columns: minmax(180px, 1fr) repeat(4, minmax(82px, auto)) 20px;
       gap: 12px;
       align-items: center;
-      padding: 16px 18px;
+      padding: 12px 14px;
       cursor: pointer;
       list-style: none;
     }
     .availability-summary::-webkit-details-marker {
       display: none;
     }
+    .month-date strong,
     .availability-date strong,
     .availability-count strong {
       display: block;
       color: #1f2937;
       line-height: 1.2;
     }
+    .month-date span,
     .availability-date span,
     .availability-count span {
       display: block;
@@ -106,7 +133,7 @@
     }
     .availability-progress {
       grid-column: 1 / -1;
-      height: 8px;
+      height: 7px;
       overflow: hidden;
       border-radius: 999px;
       background: #e2e8f0;
@@ -122,7 +149,8 @@
       color: #64748b;
       transition: transform 0.2s ease;
     }
-    details[open] .availability-chevron {
+    .availability-month[open] > .month-summary .availability-chevron,
+    .availability-day[open] > .availability-summary .availability-chevron {
       transform: rotate(180deg);
     }
     .availability-grid {
@@ -174,6 +202,7 @@
     @media (max-width: 900px) {
       .availability-page .availability-top,
       .availability-toolbar,
+      .month-summary,
       .availability-summary {
         grid-template-columns: 1fr 1fr;
       }
@@ -188,6 +217,7 @@
     @media (max-width: 560px) {
       .availability-page .availability-top,
       .availability-toolbar,
+      .month-summary,
       .availability-summary {
         grid-template-columns: 1fr;
       }
@@ -220,6 +250,48 @@
           const date = new Date(`${day.dateKey}T00:00:00`);
           return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}|${date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
         }))];
+        const decorateDay = (day) => {
+          const isBlockedDay = !!day.holidayName;
+          const booked = day.slots.reduce((sum, slot) => sum + slot.bookedCount, 0);
+          const capacity = day.slots.reduce((sum, slot) => sum + slot.maxCapacity, 0);
+          const remaining = isBlockedDay ? 0 : day.slots.reduce((sum, slot) => sum + slot.remaining, 0);
+          const fullSlotsForDay = isBlockedDay ? day.slots.length : day.slots.filter(slot => slot.remaining <= 0).length;
+          const openSlotsForDay = isBlockedDay ? 0 : day.slots.length - fullSlotsForDay;
+          const dateObject = new Date(`${day.dateKey}T00:00:00`);
+          const monthKey = `${dateObject.getFullYear()}-${String(dateObject.getMonth() + 1).padStart(2, '0')}`;
+          return {
+            ...day,
+            booked,
+            capacity,
+            remaining,
+            openSlots: openSlotsForDay,
+            usedPercent: capacity > 0 ? Math.min(100, Math.round((booked / capacity) * 100)) : 0,
+            monthKey,
+            status: isBlockedDay ? 'blocked' : (openSlotsForDay > 0 ? 'open' : 'full'),
+            search: `${day.displayDate} ${day.holidayName || ''} ${day.slots.map(slot => `${slot.room} ${slot.timeSlot}`).join(' ')}`.toLowerCase()
+          };
+        };
+        const decoratedDays = days.map(decorateDay);
+        const monthGroups = monthOptions.map(option => {
+          const [monthKey, label] = option.split('|');
+          const monthDays = decoratedDays.filter(day => day.monthKey === monthKey);
+          const monthBooked = monthDays.reduce((sum, day) => sum + day.booked, 0);
+          const monthCapacity = monthDays.reduce((sum, day) => sum + day.capacity, 0);
+          const monthRemaining = monthDays.reduce((sum, day) => sum + day.remaining, 0);
+          const monthOpenSlots = monthDays.reduce((sum, day) => sum + day.openSlots, 0);
+          const monthBlockedDays = monthDays.filter(day => day.holidayName).length;
+          return {
+            monthKey,
+            label,
+            days: monthDays,
+            booked: monthBooked,
+            capacity: monthCapacity,
+            remaining: monthRemaining,
+            openSlots: monthOpenSlots,
+            blockedDays: monthBlockedDays,
+            usedPercent: monthCapacity > 0 ? Math.min(100, Math.round((monthBooked / monthCapacity) * 100)) : 0
+          };
+        });
       %>
 
       <div class="availability-top">
@@ -254,61 +326,66 @@
             <option value="full">Full</option>
             <option value="blocked">Blocked</option>
           </select>
-          <button class="btn btn-secondary" type="button" id="toggleAvailability"><i class="fas fa-chevron-down"></i> Expand All</button>
+          <button class="btn btn-secondary" type="button" id="toggleAvailability"><i class="fas fa-chevron-down"></i> Expand Months</button>
         </div>
       <% } %>
 
       <div class="availability-list" id="availabilityList">
-      <% days.forEach(day => { %>
-        <%
-          const isBlockedDay = !!day.holidayName;
-          const dayBooked = day.slots.reduce((sum, slot) => sum + slot.bookedCount, 0);
-          const dayCapacity = day.slots.reduce((sum, slot) => sum + slot.maxCapacity, 0);
-          const dayRemaining = isBlockedDay ? 0 : day.slots.reduce((sum, slot) => sum + slot.remaining, 0);
-          const dayFullSlots = isBlockedDay ? day.slots.length : day.slots.filter(slot => slot.remaining <= 0).length;
-          const dayOpenSlots = isBlockedDay ? 0 : day.slots.length - dayFullSlots;
-          const usedPercent = dayCapacity > 0 ? Math.min(100, Math.round((dayBooked / dayCapacity) * 100)) : 0;
-          const dateObject = new Date(`${day.dateKey}T00:00:00`);
-          const monthKey = `${dateObject.getFullYear()}-${String(dateObject.getMonth() + 1).padStart(2, '0')}`;
-          const dayStatus = isBlockedDay ? 'blocked' : (dayOpenSlots > 0 ? 'open' : 'full');
-          const searchableText = `${day.displayDate} ${day.holidayName || ''} ${day.slots.map(slot => `${slot.room} ${slot.timeSlot}`).join(' ')}`.toLowerCase();
-        %>
-        <details class="section-card availability-day" data-month="<%= monthKey %>" data-status="<%= dayStatus %>" data-search="<%= searchableText %>">
-          <summary class="availability-summary">
-            <div class="availability-date">
-              <strong><i class="fas fa-calendar-day"></i> <%= day.displayDate %></strong>
-              <span><%= isBlockedDay ? day.holidayName : `${dayOpenSlots} available slot${dayOpenSlots === 1 ? '' : 's'}` %></span>
+      <% monthGroups.forEach((month, monthIndex) => { %>
+        <details class="section-card availability-month" data-month="<%= month.monthKey %>" <%= monthIndex === 0 ? 'open' : '' %>>
+          <summary class="month-summary">
+            <div class="month-date">
+              <strong><i class="fas fa-calendar-alt"></i> <%= month.label %></strong>
+              <span><%= month.days.length %> schedule day<%= month.days.length === 1 ? '' : 's' %></span>
             </div>
-            <div class="availability-count"><strong><%= dayRemaining %></strong><span>Seats Left</span></div>
-            <div class="availability-count"><strong><%= dayBooked %></strong><span>Booked</span></div>
-            <div class="availability-count"><strong><%= dayCapacity %></strong><span>Capacity</span></div>
-            <% if (day.holidayName) { %>
-              <span class="slot-status blocked"><i class="fas fa-ban"></i>&nbsp; <%= day.holidayName %></span>
-            <% } else if (dayOpenSlots > 0) { %>
-              <span class="slot-status open"><%= dayOpenSlots %> Open</span>
-            <% } else { %>
-              <span class="slot-status full">Full</span>
-            <% } %>
+            <div class="availability-count"><strong><%= month.remaining %></strong><span>Seats Left</span></div>
+            <div class="availability-count"><strong><%= month.openSlots %></strong><span>Open Slots</span></div>
+            <div class="availability-count"><strong><%= month.booked %></strong><span>Booked</span></div>
+            <div class="availability-count"><strong><%= month.blockedDays %></strong><span>Blocked</span></div>
             <i class="fas fa-chevron-down availability-chevron"></i>
-            <div class="availability-progress" style="--used:<%= usedPercent %>%"><span></span></div>
+            <div class="availability-progress" style="--used:<%= month.usedPercent %>%"><span></span></div>
           </summary>
-          <div class="availability-grid">
-            <% day.slots.forEach(slot => {
-              const isBlocked = !!day.holidayName;
-              const isFull = !isBlocked && slot.remaining <= 0;
-            %>
-              <div class="slot-card <%= isBlocked ? 'blocked' : (isFull ? 'full' : '') %>">
-                <strong><%= slot.room %></strong>
-                <div class="slot-meta">
-                  <span><i class="fas fa-clock"></i> <%= slot.timeSlot %></span>
-                  <span>Booked: <%= slot.bookedCount %></span>
-                  <span>Capacity: <%= slot.maxCapacity %></span>
-                  <span>Remaining: <%= isBlocked ? 0 : slot.remaining %></span>
+          <div class="month-body">
+            <% month.days.forEach(day => { %>
+              <details class="availability-day" data-month="<%= day.monthKey %>" data-status="<%= day.status %>" data-search="<%= day.search %>">
+                <summary class="availability-summary">
+                  <div class="availability-date">
+                    <strong><i class="fas fa-calendar-day"></i> <%= day.displayDate %></strong>
+                    <span><%= day.holidayName ? day.holidayName : `${day.openSlots} available slot${day.openSlots === 1 ? '' : 's'}` %></span>
+                  </div>
+                  <div class="availability-count"><strong><%= day.remaining %></strong><span>Seats Left</span></div>
+                  <div class="availability-count"><strong><%= day.booked %></strong><span>Booked</span></div>
+                  <div class="availability-count"><strong><%= day.capacity %></strong><span>Capacity</span></div>
+                  <% if (day.holidayName) { %>
+                    <span class="slot-status blocked"><i class="fas fa-ban"></i>&nbsp; Blocked</span>
+                  <% } else if (day.openSlots > 0) { %>
+                    <span class="slot-status open"><%= day.openSlots %> Open</span>
+                  <% } else { %>
+                    <span class="slot-status full">Full</span>
+                  <% } %>
+                  <i class="fas fa-chevron-down availability-chevron"></i>
+                  <div class="availability-progress" style="--used:<%= day.usedPercent %>%"><span></span></div>
+                </summary>
+                <div class="availability-grid">
+                  <% day.slots.forEach(slot => {
+                    const isBlocked = !!day.holidayName;
+                    const isFull = !isBlocked && slot.remaining <= 0;
+                  %>
+                    <div class="slot-card <%= isBlocked ? 'blocked' : (isFull ? 'full' : '') %>">
+                      <strong><%= slot.room %></strong>
+                      <div class="slot-meta">
+                        <span><i class="fas fa-clock"></i> <%= slot.timeSlot %></span>
+                        <span>Booked: <%= slot.bookedCount %></span>
+                        <span>Capacity: <%= slot.maxCapacity %></span>
+                        <span>Remaining: <%= isBlocked ? 0 : slot.remaining %></span>
+                      </div>
+                      <span class="slot-status <%= isBlocked ? 'blocked' : (isFull ? 'full' : 'open') %>">
+                        <%= isBlocked ? 'Blocked' : (isFull ? 'Full' : 'Available') %>
+                      </span>
+                    </div>
+                  <% }) %>
                 </div>
-                <span class="slot-status <%= isBlocked ? 'blocked' : (isFull ? 'full' : 'open') %>">
-                  <%= isBlocked ? 'Blocked' : (isFull ? 'Full' : 'Available') %>
-                </span>
-              </div>
+              </details>
             <% }) %>
           </div>
         </details>
@@ -326,6 +403,7 @@
     const statusFilter = document.getElementById('availabilityStatus');
     const toggleButton = document.getElementById('toggleAvailability');
     const emptyState = document.getElementById('availabilityEmpty');
+    const monthCards = Array.from(document.querySelectorAll('.availability-month'));
     const dayCards = Array.from(document.querySelectorAll('.availability-day'));
 
     function applyAvailabilityFilters() {
@@ -334,14 +412,26 @@
       const statusValue = statusFilter?.value || 'all';
       let visibleCount = 0;
 
-      dayCards.forEach(card => {
-        const matchesSearch = !searchTerm || card.dataset.search.includes(searchTerm);
-        const matchesMonth = monthValue === 'all' || card.dataset.month === monthValue;
-        const matchesStatus = statusValue === 'all' || card.dataset.status === statusValue;
-        const isVisible = matchesSearch && matchesMonth && matchesStatus;
+      monthCards.forEach(monthCard => {
+        let visibleDaysInMonth = 0;
 
-        card.hidden = !isVisible;
-        if (isVisible) visibleCount += 1;
+        monthCard.querySelectorAll('.availability-day').forEach(card => {
+          const matchesSearch = !searchTerm || card.dataset.search.includes(searchTerm);
+          const matchesMonth = monthValue === 'all' || card.dataset.month === monthValue;
+          const matchesStatus = statusValue === 'all' || card.dataset.status === statusValue;
+          const isVisible = matchesSearch && matchesMonth && matchesStatus;
+
+          card.hidden = !isVisible;
+          if (isVisible) {
+            visibleDaysInMonth += 1;
+            visibleCount += 1;
+          }
+        });
+
+        monthCard.hidden = visibleDaysInMonth === 0;
+        if (visibleDaysInMonth > 0 && (searchTerm || statusValue !== 'all' || monthValue !== 'all')) {
+          monthCard.open = true;
+        }
       });
 
       if (emptyState) {
@@ -351,9 +441,9 @@
 
     function updateToggleLabel() {
       if (!toggleButton) return;
-      const visibleCards = dayCards.filter(card => !card.hidden);
+      const visibleCards = monthCards.filter(card => !card.hidden);
       const allOpen = visibleCards.length > 0 && visibleCards.every(card => card.open);
-      toggleButton.innerHTML = `<i class="fas fa-chevron-${allOpen ? 'up' : 'down'}"></i> ${allOpen ? 'Collapse All' : 'Expand All'}`;
+      toggleButton.innerHTML = `<i class="fas fa-chevron-${allOpen ? 'up' : 'down'}"></i> ${allOpen ? 'Collapse Months' : 'Expand Months'}`;
     }
 
     [searchInput, monthFilter, statusFilter].forEach(control => {
@@ -364,7 +454,7 @@
     });
 
     toggleButton?.addEventListener('click', () => {
-      const visibleCards = dayCards.filter(card => !card.hidden);
+      const visibleCards = monthCards.filter(card => !card.hidden);
       const shouldOpen = visibleCards.some(card => !card.open);
       visibleCards.forEach(card => {
         card.open = shouldOpen;
@@ -372,6 +462,7 @@
       updateToggleLabel();
     });
 
+    monthCards.forEach(card => card.addEventListener('toggle', updateToggleLabel));
     dayCards.forEach(card => card.addEventListener('toggle', updateToggleLabel));
     applyAvailabilityFilters();
     updateToggleLabel();

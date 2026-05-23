@@ -351,12 +351,16 @@ function isAdmin(req, res, next) {
   res.redirect('/auth/login');
 }
 
-// Admin Dashboard redirects to Weekly Schedule page
+// Admin home redirects to Weekly Schedule page
 router.get('/', isAdmin, (req, res) => {
-  return res.redirect('/admin/dashboard');
+  return res.redirect('/admin/weekly-schedule');
 });
 
-router.get('/dashboard', isAdmin, async (req, res) => {
+router.get('/dashboard', isAdmin, (req, res) => {
+  return res.redirect('/admin/weekly-schedule');
+});
+
+router.get('/dashboard-old', isAdmin, async (req, res) => {
   try {
     const settings = await getAdmissionSettings();
     const [totalApplicants, pendingReview, scheduled, passed, failed, schedules] = await Promise.all([

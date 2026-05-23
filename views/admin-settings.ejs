@@ -101,6 +101,99 @@
       resize: vertical;
       line-height: 1.5;
     }
+    .list-editors {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .list-editor {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      min-height: 0;
+    }
+    .list-editor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .list-editor-header h3 {
+      margin: 0;
+      color: #344054;
+      font-size: 15px;
+    }
+    .list-editor-items {
+      display: grid;
+      gap: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+      scrollbar-gutter: stable;
+    }
+    .list-editor-items:empty::before {
+      content: "No items yet.";
+      padding: 12px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      color: #64748b;
+      font-size: 13px;
+      text-align: center;
+    }
+    .list-editor-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 38px;
+      gap: 8px;
+      align-items: center;
+    }
+    .holiday-row {
+      grid-template-columns: minmax(120px, 0.72fr) minmax(0, 1fr) 38px;
+    }
+    .list-editor-row input {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 11px;
+      border: 1px solid #d9dee5;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--color-text);
+      font-size: 0.94rem;
+    }
+    .list-editor-row input:focus {
+      outline: none;
+      border-color: #11998e;
+      box-shadow: 0 0 0 4px rgba(17, 153, 142, 0.08);
+    }
+    .editor-add-btn,
+    .editor-remove-btn {
+      min-height: 38px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .editor-add-btn {
+      width: auto;
+      padding: 8px 12px;
+      border: 1px solid var(--btn-secondary-border);
+      background: #fff;
+      color: var(--btn-secondary-text);
+      font-weight: 700;
+    }
+    .editor-remove-btn {
+      width: 38px;
+      border: 1px solid rgba(192, 57, 43, 0.26);
+      background: #fff;
+      color: #c0392b;
+    }
+    .editor-remove-btn:hover {
+      background: #fff1ef;
+      border-color: #c0392b;
+    }
+    .settings-hidden-field {
+      display: none;
+    }
     .capacity-shell {
       max-height: 460px;
       overflow: auto;
@@ -191,7 +284,7 @@
         <div class="summary-card"><span>School Year</span><strong><%= settings.schoolYear %></strong></div>
         <div class="summary-card"><span>Rooms</span><strong><%= scheduleConfig.rooms.length %></strong></div>
         <div class="summary-card"><span>Time Slots</span><strong><%= scheduleConfig.timeSlots.length %></strong></div>
-        <div class="summary-card"><span>Blocked Dates</span><strong><%= (settings.holidays || []).length %></strong></div>
+        <div class="summary-card"><span>Holidays</span><strong><%= (settings.holidays || []).length %></strong></div>
       </div>
 
       <form action="/admin/settings" method="POST" class="settings-form">
@@ -225,27 +318,63 @@
         <section class="settings-panel">
           <div class="settings-panel-header">
             <div>
-              <h2><i class="fas fa-door-open"></i> Rooms, Times, and Blocked Dates</h2>
-              <p>Use one item per line. Block dates with YYYY-MM-DD|Name or MM-DD|Name.</p>
+              <h2><i class="fas fa-door-open"></i> Rooms, Times, and Holidays</h2>
+              <p>Add, edit, or remove rooms, exam times, and holiday dates used by scheduling.</p>
             </div>
           </div>
-          <div class="settings-row">
-            <label class="settings-field">
-              <span>Rooms</span>
-              <textarea name="rooms" required><%= scheduleConfig.rooms.join('\n') %></textarea>
-              <small class="help-text">One room per line.</small>
-            </label>
-            <label class="settings-field">
-              <span>Time slots</span>
-              <textarea name="timeSlots" required><%= scheduleConfig.timeSlots.join('\n') %></textarea>
-              <small class="help-text">One time slot per line.</small>
-            </label>
-            <label class="settings-field">
-              <span>Holidays / blocked dates</span>
-              <textarea name="holidays"><%= (settings.holidays || []).map(h => `${h.date}|${h.name}`).join('\n') %></textarea>
-              <small class="help-text">Use YYYY-MM-DD|Name or MM-DD|Name, one per line.</small>
-            </label>
+          <div class="list-editors">
+            <div class="list-editor" data-editor="rooms">
+              <div class="list-editor-header">
+                <h3>Rooms</h3>
+                <button class="editor-add-btn" type="button" data-add-editor="rooms"><i class="fas fa-plus"></i>&nbsp; Add</button>
+              </div>
+              <div class="list-editor-items" data-editor-items="rooms">
+                <% scheduleConfig.rooms.forEach(room => { %>
+                  <div class="list-editor-row">
+                    <input type="text" value="<%= room %>" placeholder="Room name" data-list-value>
+                    <button class="editor-remove-btn" type="button" aria-label="Remove room"><i class="fas fa-times"></i></button>
+                  </div>
+                <% }) %>
+              </div>
+              <small class="help-text">Rooms shown in Add Schedule and Availability.</small>
+            </div>
+
+            <div class="list-editor" data-editor="timeSlots">
+              <div class="list-editor-header">
+                <h3>Time slots</h3>
+                <button class="editor-add-btn" type="button" data-add-editor="timeSlots"><i class="fas fa-plus"></i>&nbsp; Add</button>
+              </div>
+              <div class="list-editor-items" data-editor-items="timeSlots">
+                <% scheduleConfig.timeSlots.forEach(timeSlot => { %>
+                  <div class="list-editor-row">
+                    <input type="text" value="<%= timeSlot %>" placeholder="Time slot" data-list-value>
+                    <button class="editor-remove-btn" type="button" aria-label="Remove time slot"><i class="fas fa-times"></i></button>
+                  </div>
+                <% }) %>
+              </div>
+              <small class="help-text">Example: 7:00-8:30 A.M</small>
+            </div>
+
+            <div class="list-editor" data-editor="holidays">
+              <div class="list-editor-header">
+                <h3>Holidays</h3>
+                <button class="editor-add-btn" type="button" data-add-editor="holidays"><i class="fas fa-plus"></i>&nbsp; Add</button>
+              </div>
+              <div class="list-editor-items" data-editor-items="holidays">
+                <% (settings.holidays || []).forEach(holiday => { %>
+                  <div class="list-editor-row holiday-row">
+                    <input type="text" value="<%= holiday.date %>" placeholder="YYYY-MM-DD or MM-DD" data-holiday-date>
+                    <input type="text" value="<%= holiday.name %>" placeholder="Holiday name" data-holiday-name>
+                    <button class="editor-remove-btn" type="button" aria-label="Remove holiday"><i class="fas fa-times"></i></button>
+                  </div>
+                <% }) %>
+              </div>
+              <small class="help-text">Holiday dates are unavailable for scheduling.</small>
+            </div>
           </div>
+          <textarea class="settings-hidden-field" name="rooms"><%= scheduleConfig.rooms.join('\n') %></textarea>
+          <textarea class="settings-hidden-field" name="timeSlots"><%= scheduleConfig.timeSlots.join('\n') %></textarea>
+          <textarea class="settings-hidden-field" name="holidays"><%= (settings.holidays || []).map(h => `${h.date}|${h.name}`).join('\n') %></textarea>
         </section>
 
         <section class="settings-panel">
@@ -284,5 +413,83 @@
     </div>
   </div>
   <script src="/js/script.js"></script>
+  <script>
+    const settingsForm = document.querySelector('.settings-form');
+    const editors = {
+      rooms: document.querySelector('[data-editor-items="rooms"]'),
+      timeSlots: document.querySelector('[data-editor-items="timeSlots"]'),
+      holidays: document.querySelector('[data-editor-items="holidays"]')
+    };
+
+    function createTextRow(placeholder = '') {
+      const row = document.createElement('div');
+      row.className = 'list-editor-row';
+      row.innerHTML = `
+        <input type="text" placeholder="${placeholder}" data-list-value>
+        <button class="editor-remove-btn" type="button" aria-label="Remove item"><i class="fas fa-times"></i></button>
+      `;
+      return row;
+    }
+
+    function createHolidayRow() {
+      const row = document.createElement('div');
+      row.className = 'list-editor-row holiday-row';
+      row.innerHTML = `
+        <input type="text" placeholder="YYYY-MM-DD or MM-DD" data-holiday-date>
+        <input type="text" placeholder="Holiday name" data-holiday-name>
+        <button class="editor-remove-btn" type="button" aria-label="Remove holiday"><i class="fas fa-times"></i></button>
+      `;
+      return row;
+    }
+
+    function syncSettingsEditors() {
+      const roomValues = Array.from(editors.rooms.querySelectorAll('[data-list-value]'))
+        .map(input => input.value.trim())
+        .filter(Boolean);
+      const timeValues = Array.from(editors.timeSlots.querySelectorAll('[data-list-value]'))
+        .map(input => input.value.trim())
+        .filter(Boolean);
+      const holidayValues = Array.from(editors.holidays.querySelectorAll('.holiday-row'))
+        .map(row => {
+          const date = row.querySelector('[data-holiday-date]')?.value.trim() || '';
+          const name = row.querySelector('[data-holiday-name]')?.value.trim() || '';
+          return date && name ? `${date}|${name}` : '';
+        })
+        .filter(Boolean);
+
+      settingsForm.elements.rooms.value = roomValues.join('\n');
+      settingsForm.elements.timeSlots.value = timeValues.join('\n');
+      settingsForm.elements.holidays.value = holidayValues.join('\n');
+    }
+
+    document.querySelectorAll('[data-add-editor]').forEach(button => {
+      button.addEventListener('click', () => {
+        const editorName = button.dataset.addEditor;
+        const row = editorName === 'holidays'
+          ? createHolidayRow()
+          : createTextRow(editorName === 'rooms' ? 'Room name' : 'Time slot');
+        editors[editorName].appendChild(row);
+        row.querySelector('input')?.focus();
+        syncSettingsEditors();
+      });
+    });
+
+    document.addEventListener('click', event => {
+      const removeButton = event.target.closest('.editor-remove-btn');
+      if (!removeButton) return;
+
+      removeButton.closest('.list-editor-row')?.remove();
+      syncSettingsEditors();
+    });
+
+    document.addEventListener('input', event => {
+      if (event.target.matches('[data-list-value], [data-holiday-date], [data-holiday-name]')) {
+        syncSettingsEditors();
+      }
+    });
+
+    settingsForm?.addEventListener('submit', syncSettingsEditors);
+    syncSettingsEditors();
+  </script>
 </body>
 </html>
