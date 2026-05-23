@@ -224,7 +224,17 @@
       box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
     }
 
-    .no-schedule {
+    .calendar-day .no-schedule {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      margin-top: 10px;
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      text-align: center;
       color: #bbb;
       font-size: 11px;
       font-style: italic;
@@ -256,43 +266,6 @@
     .holiday-label i {
       flex: 0 0 auto;
       font-size: 10px;
-    }
-
-    .calendar-day .holiday-tooltip {
-      position: absolute;
-      left: 50%;
-      bottom: calc(100% + 8px);
-      z-index: 20;
-      width: max-content;
-      max-width: 240px;
-      padding: 8px 10px;
-      border-radius: 8px;
-      background: #111827;
-      color: #fff;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.24);
-      font-size: 12px;
-      font-weight: 700;
-      line-height: 1.25;
-      opacity: 0;
-      pointer-events: none;
-      text-align: center;
-      transform: translate(-50%, 4px);
-      transition: opacity 0.16s ease, transform 0.16s ease;
-    }
-
-    .calendar-day .holiday-tooltip::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 100%;
-      border: 6px solid transparent;
-      border-top-color: #111827;
-      transform: translateX(-50%);
-    }
-
-    .calendar-day.holiday-day:hover .holiday-tooltip {
-      opacity: 1;
-      transform: translate(-50%, 0);
     }
 
     .modal-overlay {
@@ -949,11 +922,10 @@
             <div class="calendar-day <%= isToday ? 'today' : '' %> <%= holidayName ? 'holiday-day' : '' %>" <% if (holidayName) { %>title="<%= holidayName %>"<% } %>>
               <span class="day-number"><%= day %></span>
               <% if (holidayName) { %>
-                <div class="holiday-label" aria-label="<%= holidayName %>">
+                <div class="holiday-label" aria-label="<%= holidayName %>" title="<%= holidayName %>">
                   <i class="fas fa-flag"></i>
                   <span><%= holidayName %></span>
                 </div>
-                <span class="holiday-tooltip"><%= holidayName %></span>
               <% } %>
               <% if (schedules.length > 0) { %>
                 <button class="applicant-count" onclick="openApplicantModal('<%= dateStr %>')" title="Click to view applicants">

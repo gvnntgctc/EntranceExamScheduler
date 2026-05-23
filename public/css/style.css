@@ -3260,6 +3260,14 @@ form.schedule-form {
   box-shadow: 0 0 10px rgba(17, 153, 142, 0.2);
 }
 
+.schedule-form .custom-schedule-input {
+  margin-top: 10px;
+}
+
+.schedule-form .custom-schedule-input[hidden] {
+  display: none;
+}
+
 .schedule-form .holiday-panel {
   margin-top: 8px;
   padding-top: 0;

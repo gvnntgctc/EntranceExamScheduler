@@ -30,6 +30,8 @@ const ALLOWED_EXAM_TIMES = [
   '3:30-5:00 P.M'
 ];
 
+const MAX_CUSTOM_FIELD_LENGTH = 120;
+
 const HOLIDAYS = {
   '01-01': "New Year's Day",
   '02-17': 'Chinese New Year',
@@ -112,12 +114,12 @@ function validateScheduleFields({ examDate, examTime, location }) {
     return 'All fields are required';
   }
 
-  if (!ALLOWED_LOCATIONS.includes(location)) {
-    return 'Invalid exam location selected';
+  if (examTime.length > MAX_CUSTOM_FIELD_LENGTH) {
+    return 'Exam time must be 120 characters or less';
   }
 
-  if (!ALLOWED_EXAM_TIMES.includes(examTime)) {
-    return 'Invalid exam time selected';
+  if (location.length > MAX_CUSTOM_FIELD_LENGTH) {
+    return 'Exam location must be 120 characters or less';
   }
 
   const parsedExamDate = parseExamDateValue(examDate);
@@ -1664,17 +1666,10 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
       return res.redirect('/admin/add-schedule?error=Schedule not found');
     }
 
-    // Enforce allowed locations for edits. Allow existing non-standard value to persist for backward compatibility.
-    if (!ALLOWED_LOCATIONS.includes(location) && schedule.location !== location) {
-      console.log('Validation failed: invalid location selected', { submitted: location, existing: schedule.location });
-      return res.redirect(`/admin/edit-schedule/${id}?error=Invalid exam location selected`);
-    }
-
-    const validationLocation = ALLOWED_LOCATIONS.includes(location) ? location : ALLOWED_LOCATIONS[0];
     const validationError = validateScheduleFields({
       examDate: (examDate || '').trim(),
       examTime: (examTime || '').trim(),
-      location: validationLocation
+      location: (location || '').trim()
     });
     if (validationError) {
       console.log('Validation failed:', validationError);

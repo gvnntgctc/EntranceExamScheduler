@@ -108,8 +108,13 @@
                 <option value="9:00-10:30 A.M" <% if(schedule.examTime === '9:00-10:30 A.M') { %>selected<% } %>>9:00-10:30 A.M</option>
                 <option value="1:30-3:00 P.M" <% if(schedule.examTime === '1:30-3:00 P.M') { %>selected<% } %>>1:30-3:00 P.M</option>
                 <option value="3:30-5:00 P.M" <% if(schedule.examTime === '3:30-5:00 P.M') { %>selected<% } %>>3:30-5:00 P.M</option>
+                <% if (schedule.examTime && !['7:00-8:30 A.M','9:00-10:30 A.M','1:30-3:00 P.M','3:30-5:00 P.M'].includes(schedule.examTime)) { %>
+                  <option value="<%= schedule.examTime %>" selected><%= schedule.examTime %> (existing)</option>
+                <% } %>
+                <option value="__custom__">Custom Time</option>
               </select>
-              <small class="sub-text">Select a time slot for the applicant's exam.</small>
+              <input type="text" id="customExamTime" class="custom-schedule-input" placeholder="Type custom exam time" maxlength="120" aria-label="Custom exam time" disabled hidden />
+              <small class="sub-text">Select a time slot or choose Custom Time.</small>
             </div>
             
             <div class="form-group">
@@ -122,8 +127,10 @@
                 <% if (schedule.location && !['3rd Floor Room 301 PTC Main Campus','3rd Floor Room 302 PTC Main Campus','3rd Floor Room 303 PTC Main Campus'].includes(schedule.location)) { %>
                   <option value="<%= schedule.location %>" selected><%= schedule.location %> (existing)</option>
                 <% } %>
+                <option value="__custom__">Custom Location</option>
               </select>
-              <small class="sub-text">Choose one of the predefined exam rooms. Existing non-standard value shown for compatibility.</small>
+              <input type="text" id="customLocation" class="custom-schedule-input" placeholder="Type custom exam location" maxlength="120" aria-label="Custom exam location" disabled hidden />
+              <small class="sub-text">Choose a predefined room or Custom Location.</small>
             </div>
           </div>
 
@@ -189,6 +196,10 @@
     const submitButton = scheduleForm?.querySelector('button[type="submit"]');
     const holidayWarning = document.getElementById('holidayWarning');
     const capacityWarning = document.getElementById('capacityWarning');
+    const examTimeSelect = document.getElementById('examTime');
+    const customExamTimeInput = document.getElementById('customExamTime');
+    const locationSelect = document.getElementById('location');
+    const customLocationInput = document.getElementById('customLocation');
     const holidays = {
       '01-01': "New Year's Day",
       '02-17': 'Chinese New Year',
@@ -238,6 +249,34 @@
     function pad(value) {
       return String(value).padStart(2, '0');
     }
+
+    function setupCustomSelect(selectElement, inputElement) {
+      if (!selectElement || !inputElement) return;
+
+      const syncCustomInput = () => {
+        const isCustom = selectElement.value === '__custom__';
+        inputElement.hidden = !isCustom;
+        inputElement.disabled = !isCustom;
+        inputElement.required = isCustom;
+        selectElement.name = isCustom ? '' : selectElement.id;
+        inputElement.name = isCustom ? selectElement.id : '';
+        if (!isCustom) {
+          inputElement.value = '';
+          inputElement.setCustomValidity('');
+        }
+      };
+
+      selectElement.addEventListener('change', () => {
+        syncCustomInput();
+        if (selectElement.value === '__custom__') {
+          inputElement.focus();
+        }
+      });
+      syncCustomInput();
+    }
+
+    setupCustomSelect(examTimeSelect, customExamTimeInput);
+    setupCustomSelect(locationSelect, customLocationInput);
 
     function formatHolidayKey(dateValue) {
       const [year, month, day] = dateValue.split('-');
@@ -495,6 +534,27 @@
         setExamDateInvalid(holidayWarning?.textContent || capacityWarning?.textContent || 'Please choose an available Saturday or Sunday.');
         examDateDisplay?.reportValidity();
         event.preventDefault();
+        return;
+      }
+
+      if (!examTimeSelect?.value) {
+        event.preventDefault();
+        examTimeSelect?.reportValidity();
+        return;
+      }
+      if (examTimeSelect.value === '__custom__' && !customExamTimeInput?.value.trim()) {
+        event.preventDefault();
+        customExamTimeInput?.reportValidity();
+        return;
+      }
+      if (!locationSelect?.value) {
+        event.preventDefault();
+        locationSelect?.reportValidity();
+        return;
+      }
+      if (locationSelect.value === '__custom__' && !customLocationInput?.value.trim()) {
+        event.preventDefault();
+        customLocationInput?.reportValidity();
         return;
       }
 
