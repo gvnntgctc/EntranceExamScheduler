@@ -12,6 +12,7 @@ try {
 const User = require('../models/User');
 const Schedule = require('../models/Schedule');
 const Notification = require('../models/Notification');
+const { buildEmailHtml } = require('../utils/emailUtils');
 
 function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -102,7 +103,7 @@ if (nodemailer && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
   console.log('Email transporter NOT initialized. nodemailer:', !!nodemailer, 'EMAIL_USER:', !!process.env.EMAIL_USER, 'EMAIL_PASS:', !!process.env.EMAIL_PASS);
 }
 
-async function sendEmail({ recipientId, to, subject, text }) {
+async function sendEmail({ recipientId, to, subject, text, html }) {
   if (!nodemailer) {
     console.warn('sendEmail skipped: nodemailer not available');
     await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'failed', errorMessage: 'nodemailer not available' });
@@ -120,7 +121,8 @@ async function sendEmail({ recipientId, to, subject, text }) {
       from: process.env.EMAIL_USER,
       to,
       subject,
-      text
+      text,
+      html
     });
 
     await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'sent' });
@@ -536,12 +538,37 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
     });
 
     // Notify applicant with schedule details
-    const scheduleEmail = `Dear ${student.fullName || student.email},\n\nRe: Official Exam Schedule - Bachelor of Science in Information Technology Program\n\nWe are writing to confirm your examination schedule for the BSIT entrance examination.\n\n═══════════════════════════════════════════════════════════════════════════════\nEXAMINATION DETAILS\n═══════════════════════════════════════════════════════════════════════════════\n\nExamination Date: ${new Date(examDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\nExamination Time: ${examTime}\nExamination Location: ${location}\n\n═══════════════════════════════════════════════════════════════════════════════\nIMPORTANT INSTRUCTIONS\n═══════════════════════════════════════════════════════════════════════════════\n\n✓ ARRIVAL TIME: Please arrive AT LEAST 15 MINUTES BEFORE your scheduled examination time.\n\n✓ REQUIRED DOCUMENTS: Bring a valid government-issued ID for verification purposes.\n\n✓ PROHIBITED ITEMS: Mobile phones, calculators (unless explicitly permitted), notes, and other unauthorized materials are strictly not allowed in the examination room.\n\n✓ DRESS CODE: Professional attire is recommended.\n\n✓ CONDUCT: Academic integrity is paramount. Any form of cheating or misconduct will result in automatic disqualification.\n\n═══════════════════════════════════════════════════════════════════════════════\nADDITIONAL INFORMATION\n═══════════════════════════════════════════════════════════════════════════════\n\n• The examination will test your knowledge in mathematics, computer science fundamentals, and logical reasoning.\n• Duration: Approximately 2-3 hours (specific duration will be announced at the examination venue)\n• Results will be communicated within 2-3 weeks following the examination date.\n\nIf you have any questions regarding your examination schedule or require any clarifications, please contact our Admissions Office immediately.\n\nBest wishes for your examination!\n\nRegards,\n\nAdmissions Office\nBachelor of Science in Information Technology Program\nEntranceExam Administration`;
+    const scheduleEmail = `Dear ${student.fullName || student.email},\n\nRe: Official Exam Schedule - Bachelor of Science in Information Technology Program\n\nWe are writing to confirm your examination schedule for the BSIT entrance examination.\n\nExamination Date: ${new Date(examDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\nExamination Time: ${examTime}\nExamination Location: ${location}\n\nImportant Instructions:\n• Arrive at least 15 minutes before your scheduled examination time.\n• Bring a valid government-issued ID.\n• Do not bring mobile phones, calculators, notes, or unauthorized materials.\n• Professional attire is recommended.\n\nIf you have any questions, please contact our Admissions Office.\n\nBest wishes for your examination!\n\nAdmissions Office\nBachelor of Science in Information Technology Program\nEntranceExam Administration`;
+    const appUrl = process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : '';
+    const scheduleHtml = buildEmailHtml({
+      appName: 'PTC Admission System',
+      systemName: 'Pateros Technological College',
+      heroText: 'Your official examination schedule has been confirmed.',
+      greetingName: student.fullName || student.email,
+      heading: 'Exam Schedule Confirmation',
+      introText: 'Thank you for completing your application. Below are the official details for your upcoming exam.',
+      applicantDetails: [
+        { label: 'Applicant Name', value: student.fullName || student.email },
+        { label: 'Email Address', value: student.email }
+      ],
+      examDetails: [
+        { label: 'Exam Date', value: new Date(examDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) },
+        { label: 'Exam Time', value: examTime },
+        { label: 'Exam Location', value: location }
+      ],
+      statusLabel: 'Schedule Confirmed',
+      statusMessage: 'Please arrive at least 15 minutes early and bring a valid government-issued ID for verification.',
+      buttonText: appUrl ? 'Visit Applicant Portal' : '',
+      buttonUrl: appUrl ? `${appUrl}/auth/login` : '',
+      footerNote: 'If you have any questions or need assistance, please contact the Admissions Office.'
+    });
+
     const notificationSent = await sendEmail({
       recipientId: student._id,
       to: student.email,
       subject: 'Official Examination Schedule Confirmation - BSIT Program',
-      text: scheduleEmail
+      text: scheduleEmail,
+      html: scheduleHtml
     });
 
     if (notificationSent) {
@@ -928,7 +955,8 @@ router.post('/students/status/:id', isAdmin, async (req, res) => {
       recipientId: student._id,
       to: student.email,
       subject: emailSubject,
-      text: emailBody
+      text: emailBody,
+      html: emailHtml
     });
 
     if (sent) {
@@ -1046,6 +1074,31 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
             emailSubject = 'Congratulations! You Successfully Passed in Certificate in Computer Science (CCS)';
             emailBody = `Dear Applicant,\n\nCongratulations!\n\nWe are delighted to inform you that you have SUCCESSFULLY PASSED in the Certificate in Computer Science (CCS) program.\n\n═══════════════════════════════════════════════════════════════════════════════\nADMISSION STATUS\n═══════════════════════════════════════════════════════════════════════════════\n\nAdmission Status: APPROVED\nProgram: Certificate in Computer Science (CCS)\nDecision Date: ${new Date().toLocaleDateString()}\n\nYour performance on the entrance examination qualifies you for the Certificate in Computer Science (CCS) program. This program provides a strong foundation in computing fundamentals and practical skills to prepare you for success in the technology field.\n\n═══════════════════════════════════════════════════════════════════════════════\nNEXT STEPS\n═══════════════════════════════════════════════════════════════════════════════\n\n1. Contact our Admissions Office to accept this offer and complete your enrollment\n2. Review the CCS program requirements and course schedule\n3. Prepare for your enrollment procedures as instructed\n4. Reach out with any questions about the program or next steps\n\nWe are excited to welcome you to the Certificate in Computer Science program. We look forward to supporting your academic journey and helping you develop valuable skills in computing.\n\nOnce again, congratulations on your success!\n\nWarm regards,\n\nAdmissions Office\nCertificate in Computer Science Program\nEntranceExam Administration`;
           }
+
+          const appUrl = process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : '';
+          const emailHtml = buildEmailHtml({
+            appName: 'PTC Admission System',
+            systemName: 'Pateros Technological College',
+            heroText: 'Your admission decision is now available.',
+            greetingName: student.fullName || student.email,
+            heading: status === 'passed' ? 'Admission Approved' : 'Program Placement Confirmed',
+            introText: status === 'passed'
+              ? 'Congratulations on your successful application to the BSIT program. Please review the details below.'
+              : 'Great news! You have been offered placement in the Certificate in Computer Science program.',
+            applicantDetails: [
+              { label: 'Applicant Name', value: student.fullName || student.email },
+              { label: 'Email Address', value: student.email }
+            ],
+            examDetails: [
+              { label: 'Program', value: status === 'passed' ? 'Bachelor of Science in Information Technology (BSIT)' : 'Certificate in Computer Science (CCS)' },
+              { label: 'Decision Date', value: new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }
+            ],
+            statusLabel: status === 'passed' ? 'Application Approved' : 'Program Placement Approved',
+            statusMessage,
+            buttonText: appUrl ? 'Visit Applicant Portal' : '',
+            buttonUrl: appUrl ? `${appUrl}/auth/login` : '',
+            footerNote: 'For questions, please contact the Admissions Office using the contact details on the portal.'
+          });
 
           student.resultMessage = statusMessage;
           

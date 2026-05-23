@@ -2,6 +2,7 @@
 const dns = require('dns').promises;
 const https = require('https');
 const User = require('../models/User');
+const { buildEmailHtml } = require('../utils/emailUtils');
 let nodemailer;
 try {
   nodemailer = require('nodemailer');
@@ -95,7 +96,7 @@ async function validateEmailExistence(address) {
   });
 }
 
-async function sendEmail({ to, subject, text }) {
+async function sendEmail({ to, subject, text, html }) {
   console.log('sendEmail called with to:', to, 'subject:', subject);
   if (!nodemailer) {
     console.warn('sendEmail skipped: nodemailer not available');
@@ -112,7 +113,8 @@ async function sendEmail({ to, subject, text }) {
       from: process.env.EMAIL_USER,
       to,
       subject,
-      text
+      text,
+      html
     });
     console.log('Email sent successfully to:', to);
     return true;
@@ -347,12 +349,32 @@ router.post('/apply-confirm', async (req, res) => {
     console.log('✅ Registration data stored in session for:', rawEmail);
 
     const pendingSubject = 'Application Received - Entrance Examination Registration Confirmation';
-    const pendingText = `Dear ${fullName || rawEmail},\n\nThank you for submitting your application for admission to our Bachelor of Science in Information Technology (BSIT) program.\n\nWe are pleased to confirm that we have successfully received your registration. Your application is currently under review by our Admissions Committee.\n\n═══════════════════════════════════════════════════════════════════════════════\nVERIFICATION CODE\n═══════════════════════════════════════════════════════════════════════════════\n\nYour one-time verification code is: ${otp}\n\nIMPORTANT: This code will expire in 3 minutes. Please enter this code to complete your email verification.\n\n═══════════════════════════════════════════════════════════════════════════════\nNEXT STEPS\n═══════════════════════════════════════════════════════════════════════════════\n\n1. Enter your verification code in the portal\n2. Wait for admission decision notification\n3. Once approved, you will receive your exam schedule details\n\nWe will communicate with you via email regarding all updates about your application status and examination schedule. Please monitor your inbox regularly.\n\nIf you have any questions or concerns, please contact our Admissions Office.\n\nBest regards,\n\nAdmissions Office\nBachelor of Science in Information Technology Program\nEntranceExam Administration`;
+    const pendingText = `Dear ${fullName || rawEmail},\n\nThank you for submitting your application for admission to our Bachelor of Science in Information Technology (BSIT) program.\n\nWe are pleased to confirm that we have successfully received your registration. Your application is currently under review by our Admissions Committee.\n\nYour one-time verification code is: ${otp}\n\nIMPORTANT: This code will expire in 3 minutes. Please enter this code to complete your email verification.\n\nNext steps:\n1. Enter your verification code in the portal\n2. Wait for admission decision notification\n3. Once approved, you will receive your exam schedule details\n\nWe will communicate with you via email regarding all updates about your application status and examination schedule. Please monitor your inbox regularly.\n\nIf you have any questions or concerns, please contact our Admissions Office.\n\nBest regards,\n\nAdmissions Office\nBachelor of Science in Information Technology Program\nEntranceExam Administration`;
+    const appUrl = process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : '';
+    const pendingHtml = buildEmailHtml({
+      appName: 'PTC Admission System',
+      systemName: 'Pateros Technological College',
+      heroText: 'Registration received and verification code issued.',
+      greetingName: fullName || rawEmail,
+      heading: 'Application Received',
+      introText: 'Thank you for completing your registration. Your application is now being reviewed by the Admissions Committee.',
+      applicantDetails: [
+        { label: 'Applicant Name', value: fullName || rawEmail },
+        { label: 'Email Address', value: rawEmail },
+        { label: 'Phone Number', value: phoneNumber }
+      ],
+      statusLabel: 'Verification Required',
+      statusMessage: `Your one-time verification code is ${otp}. It expires in 3 minutes.`,
+      buttonText: appUrl ? 'Verify Your Email' : '',
+      buttonUrl: appUrl ? `${appUrl}/auth/verify-otp` : '',
+      footerNote: 'If you did not request this email, please disregard it.'
+    });
 
     const emailSent = await sendEmail({
       to: rawEmail,
       subject: pendingSubject,
-      text: pendingText
+      text: pendingText,
+      html: pendingHtml
     });
 
     if (!emailSent) {
@@ -439,17 +461,12 @@ router.post('/verify-otp', async (req, res) => {
 
     const verifiedText = `Dear ${user.fullName || user.email},\n\n` +
       `Congratulations. Your email address has been successfully verified for the Pateros Technological College entrance examination registration.\n\n` +
-      `══════════════════════════════════════════════════════════════════════\n` +
-      `APPLICATION CONFIRMATION\n` +
-      `══════════════════════════════════════════════════════════════════════\n\n` +
       `Applicant Name: ${user.fullName}\n` +
       `Email Address: ${user.email}\n` +
       `Phone Number: ${user.phoneNumber}\n` +
       `Verification Status: Verified\n` +
       `Verification Date: ${verificationDate}\n\n` +
-      `══════════════════════════════════════════════════════════════════════\n` +
-      `NEXT STEPS\n` +
-      `══════════════════════════════════════════════════════════════════════\n\n` +
+      `Next steps:\n` +
       `1. Your application is now pending review by the Admissions Committee.\n` +
       `2. You will receive a separate email once your exam schedule has been confirmed.\n` +
       `3. Please monitor your inbox regularly and add our address to your safe sender list.\n\n` +
@@ -458,11 +475,31 @@ router.post('/verify-otp', async (req, res) => {
       `Admissions Office\n` +
       `Pateros Technological College\n` +
       `Entrance Exam Administration`;
+    const appUrl = process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : '';
+    const verifiedHtml = buildEmailHtml({
+      appName: 'PTC Admission System',
+      systemName: 'Pateros Technological College',
+      heroText: 'Your registration has been verified successfully.',
+      greetingName: user.fullName || user.email,
+      heading: 'Application Verified',
+      introText: 'Thank you for verifying your email. Your application is now pending review by our Admissions Committee.',
+      applicantDetails: [
+        { label: 'Applicant Name', value: user.fullName },
+        { label: 'Email Address', value: user.email },
+        { label: 'Phone Number', value: user.phoneNumber }
+      ],
+      statusLabel: 'Verification Complete',
+      statusMessage: 'Your application is now under review. We will notify you when the exam schedule is ready.',
+      buttonText: appUrl ? 'Return to Applicant Portal' : '',
+      buttonUrl: appUrl ? `${appUrl}/auth/login` : '',
+      footerNote: 'If you have any questions, please contact our Admissions Office.'
+    });
 
     await sendEmail({
       to: user.email,
       subject: 'Application Verified — Entrance Exam Registration',
-      text: verifiedText
+      text: verifiedText,
+      html: verifiedHtml
     });
 
     // Clean up session
@@ -496,9 +533,6 @@ router.post('/resend-otp', async (req, res) => {
 
     const otpMessage = `Dear Applicant,\n\n` +
       `Your request for a new verification code has been processed. Please use the code below to complete your email verification.\n\n` +
-      `══════════════════════════════════════════════════════════════════════\n` +
-      `VERIFICATION CODE\n` +
-      `══════════════════════════════════════════════════════════════════════\n\n` +
       `One-time verification code: ${otp}\n` +
       `Expires in: 3 minutes\n\n` +
       `Please enter this code in the portal to verify your email address.\n\n` +
@@ -507,11 +541,26 @@ router.post('/resend-otp', async (req, res) => {
       `Admissions Office\n` +
       `Pateros Technological College\n` +
       `Entrance Exam Administration`;
+    const appUrl = process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : '';
+    const otpHtml = buildEmailHtml({
+      appName: 'PTC Admission System',
+      systemName: 'Pateros Technological College',
+      heroText: 'Your verification code has been resent.',
+      greetingName: 'Applicant',
+      heading: 'Verification Code Resent',
+      introText: 'A new one-time verification code has been generated for your registration.',
+      statusLabel: 'Verification Code',
+      statusMessage: `Your current verification code is ${otp} and it expires in 3 minutes.`,
+      buttonText: appUrl ? 'Continue Verification' : '',
+      buttonUrl: appUrl ? `${appUrl}/auth/verify-otp` : '',
+      footerNote: 'If you did not request this code, please ignore this message.'
+    });
 
     const emailSent = await sendEmail({
       to: email,
       subject: 'Entrance Exam — Verification Code Resent',
-      text: otpMessage
+      text: otpMessage,
+      html: otpHtml
     });
 
     if (!emailSent) {
