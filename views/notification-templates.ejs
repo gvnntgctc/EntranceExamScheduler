@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification Templates</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .notification-templates-page .template-editor-card {
+      padding: 30px;
+    }
+
+    .notification-templates-page .template-form {
+      max-width: none;
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .notification-templates-page .placeholder-note {
+      margin-bottom: 18px;
+      color: #2f3e4d;
+      font-size: 0.95rem;
+    }
+
+    .notification-templates-page .template-form .form-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .notification-templates-page .template-form .form-group {
+      min-width: 0;
+    }
+
+    .notification-templates-page .template-form .form-group.subject-field,
+    .notification-templates-page .template-form .form-group.body-field {
+      grid-column: 1 / -1;
+    }
+
+    .notification-templates-page .template-form input,
+    .notification-templates-page .template-form textarea {
+      width: 100%;
+      border: 1px solid #d9dee5;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--color-text);
+      font-size: 0.98rem;
+    }
+
+    .notification-templates-page .template-form input {
+      min-height: 52px;
+      padding: 12px 14px;
+    }
+
+    .notification-templates-page .template-form textarea {
+      min-height: 220px;
+      padding: 14px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .notification-templates-page .template-form input:focus,
+    .notification-templates-page .template-form textarea:focus {
+      outline: none;
+      border-color: #11998e;
+      box-shadow: 0 0 0 4px rgba(17, 153, 142, 0.08);
+    }
+
+    .notification-templates-page .template-form .form-buttons {
+      margin-top: 12px;
+    }
+
+    .notification-templates-page .saved-template-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin: 16px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .notification-templates-page .saved-template-list li {
+      padding: 14px 16px;
+      border: 1px solid rgba(203, 213, 225, 0.8);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      color: #475569;
+    }
+
+    .notification-templates-page .saved-template-list strong {
+      display: block;
+      color: #1f2937;
+      margin-bottom: 2px;
+    }
+
+    @media (max-width: 800px) {
+      .notification-templates-page .template-editor-card {
+        padding: 20px;
+      }
+
+      .notification-templates-page .template-form .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .notification-templates-page .template-form .form-buttons {
+        justify-content: stretch;
+      }
+
+      .notification-templates-page .template-form .btn {
+        flex: 1 1 160px;
+      }
+    }
+  </style>
+</head>
+<body class="admin-page-bg notification-templates-page">
+  <%- include('partials/sidebar', { page: 'templates' }) %>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <button class="hamburger" id="hamburger" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+  <div class="main-content">
+    <div class="page-logo"><img src="/images/logo.png" alt="PTC Logo" /></div>
+    <div class="container">
+      <h1><i class="fas fa-envelope-open-text"></i> Notification Templates</h1>
+      <% if (error) { %><div class="message error"><%= error %></div><% } %>
+      <% if (success) { %><div class="message success"><%= success %></div><% } %>
+      <div class="section-card template-editor-card">
+        <p class="sub-text placeholder-note">Allowed placeholders: <%= placeholders.map(p => `{{${p}}}`).join(', ') %></p>
+        <form method="POST" action="/admin/templates" class="schedule-form template-form">
+          <div class="form-grid">
+            <div class="form-group"><label>Key</label><input name="key" required placeholder="schedule_confirmation"></div>
+            <div class="form-group"><label>Name</label><input name="name" required placeholder="Schedule confirmation"></div>
+            <div class="form-group subject-field"><label>Subject</label><input name="subject" placeholder="Exam schedule for {{applicantName}}"></div>
+            <div class="form-group body-field"><label>Body</label><textarea name="body" required rows="8"></textarea></div>
+          </div>
+          <div class="form-buttons">
+            <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Save Template</button>
+            <button class="btn btn-secondary" type="submit" formaction="/admin/templates/preview"><i class="fas fa-eye"></i> Preview</button>
+          </div>
+        </form>
+      </div>
+      <% if (preview) { %>
+        <div class="section-card">
+          <h2>Preview</h2>
+          <strong><%= preview.subject %></strong>
+          <pre style="white-space:pre-wrap;"><%= preview.body %></pre>
+        </div>
+      <% } %>
+      <div class="section-card">
+        <h2>Saved Templates</h2>
+        <% if (!templates.length) { %><div class="no-data"><p>No templates saved yet.</p></div><% } %>
+        <ul class="saved-template-list">
+          <% templates.forEach(template => { %>
+            <li><strong><%= template.name %></strong> (<%= template.key %>)</li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <script src="/js/script.js"></script>
+</body>
+</html>

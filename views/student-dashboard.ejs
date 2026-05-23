@@ -37,6 +37,8 @@
     </div>
     <div class="container">
       <h1><i class="fas fa-tachometer-alt"></i> Welcome, <%= user.fullName %>!</h1>
+      <% if (typeof error !== 'undefined' && error) { %><div class="message error"><i class="fas fa-exclamation-circle"></i> <%= error %></div><% } %>
+      <% if (typeof success !== 'undefined' && success) { %><div class="message success"><i class="fas fa-check-circle"></i> <%= success %></div><% } %>
       
       <div class="section-card" id="schedule">
         <h2><i class="fas fa-calendar-check"></i> My Exam Schedule</h2>
@@ -96,6 +98,41 @@
               </div>
             </div>
           </div>
+          <div class="form-buttons">
+            <a class="btn btn-primary" href="/student/permit"><i class="fas fa-file-pdf"></i> Download Exam Permit</a>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="section-card">
+        <h2><i class="fas fa-history"></i> Applicant Timeline</h2>
+        <% if (timeline && timeline.length) { %>
+          <ul class="schedule-list">
+            <% timeline.forEach(item => { %>
+              <li><strong><%= item.label %></strong> - <%= new Date(item.date).toLocaleString('en-US') %></li>
+            <% }) %>
+          </ul>
+        <% } else { %>
+          <div class="no-data"><p>No timeline events are available yet.</p></div>
+        <% } %>
+      </div>
+
+      <div class="section-card">
+        <h2><i class="fas fa-calendar-plus"></i> Request Reschedule</h2>
+        <form action="/student/reschedule-request" method="POST" class="schedule-form">
+          <div class="form-group">
+            <label for="reason">Reason</label>
+            <textarea id="reason" name="reason" maxlength="1000" required aria-label="Reason for reschedule request"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Request</button>
+        </form>
+        <% if (rescheduleRequests && rescheduleRequests.length) { %>
+          <h3>Previous requests</h3>
+          <ul class="schedule-list">
+            <% rescheduleRequests.forEach(request => { %>
+              <li><strong><%= request.status %></strong> - <%= request.reason %></li>
+            <% }) %>
+          </ul>
         <% } %>
       </div>
     </div>

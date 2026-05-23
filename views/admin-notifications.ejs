@@ -16,11 +16,42 @@
       margin-bottom: 18px;
     }
     .search-bar {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(240px, 1.4fr) repeat(4, minmax(135px, 1fr)) auto auto;
       gap: 12px;
-      align-items: center;
+      align-items: stretch;
       margin-bottom: 18px;
-      flex-wrap: wrap;
+      padding: 0;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+    .admin-notifications-page .search-input-wrapper {
+      min-width: 0;
+    }
+    .admin-notifications-page .search-bar input,
+    .admin-notifications-page .search-bar select,
+    .admin-notifications-page .search-bar .btn {
+      width: 100%;
+      min-height: 48px;
+      margin: 0;
+    }
+    .admin-notifications-page .search-bar select,
+    .admin-notifications-page .search-bar input[type="date"] {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--color-text);
+      font-size: 0.95rem;
+    }
+    .admin-notifications-page .search-bar .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+      padding: 10px 18px;
     }
     .notifications-table {
       width: 100%;
@@ -438,12 +469,27 @@
         <div class="message success"><i class="fas fa-check-circle"></i> <%= success %></div>
       <% } %>
       <div class="section-card">
-        <div class="search-bar">
+        <form class="search-bar" method="GET" action="/admin/notifications">
           <div class="search-input-wrapper">
             <i class="fas fa-search search-icon"></i>
-            <input id="notificationSearch" class="search-input" type="search" placeholder="Search recipient or action..." aria-label="Search notifications" value="<%= search %>" autocomplete="off" />
+            <input id="notificationSearch" name="search" class="search-input" type="search" placeholder="Search recipient or applicant..." aria-label="Search notifications" value="<%= search %>" autocomplete="off" />
           </div>
-        </div>
+          <select name="status" aria-label="Notification status">
+            <option value="all" <%= status === 'all' ? 'selected' : '' %>>All statuses</option>
+            <option value="sent" <%= status === 'sent' ? 'selected' : '' %>>Sent</option>
+            <option value="failed" <%= status === 'failed' ? 'selected' : '' %>>Failed</option>
+          </select>
+          <select name="actionType" aria-label="Action type">
+            <option value="all" <%= actionType === 'all' ? 'selected' : '' %>>All actions</option>
+            <option value="schedule_created" <%= actionType === 'schedule_created' ? 'selected' : '' %>>Schedule created</option>
+            <option value="settings_updated" <%= actionType === 'settings_updated' ? 'selected' : '' %>>Settings updated</option>
+            <option value="notification_retry" <%= actionType === 'notification_retry' ? 'selected' : '' %>>Notification retry</option>
+          </select>
+          <input type="date" name="dateFrom" value="<%= dateFrom %>" aria-label="From date">
+          <input type="date" name="dateTo" value="<%= dateTo %>" aria-label="To date">
+          <button class="btn btn-primary" type="submit"><i class="fas fa-filter"></i> Filter</button>
+          <a class="btn btn-secondary" href="/admin/notifications">Clear</a>
+        </form>
 
         <div class="table-responsive">
           <table class="notifications-table">
@@ -460,7 +506,7 @@
             </thead>
             <tbody>
               <% if (notifications.length === 0) { %>
-                <tr><td colspan="7" style="text-align:center; color:#66788a;">No activity logged yet.</td></tr>
+                <tr><td colspan="7" style="text-align:center; color:#66788a;">No activity matches the selected filters.</td></tr>
               <% } %>
               <% notifications.forEach((notification, idx) => { %>
                 <tr>
@@ -474,6 +520,11 @@
                   <td class="sent-at" data-timestamp="<%= notification.createdAt.toISOString() %>"></td>
                   <td class="manage-actions">
                     <a href="/admin/notifications/<%= notification._id %>" class="view-details-btn" aria-label="View notification details"><i class="fas fa-eye"></i></a>
+                    <% if (notification.status === 'failed') { %>
+                      <form action="/admin/notifications/<%= notification._id %>/retry" method="POST">
+                        <button type="submit" class="view-details-btn" aria-label="Retry notification"><i class="fas fa-redo"></i></button>
+                      </form>
+                    <% } %>
                   </td>
                 </tr>
               <% }) %>
@@ -482,13 +533,13 @@
           <% if (totalPages > 1) { %>
             <div class="pagination">
               <% if (currentPage > 1) { %>
-                <a href="/admin/notifications?search=<%= encodeURIComponent(search) %>&status=<%= status %>&page=<%= currentPage - 1 %>" class="page-link">Previous</a>
+                <a href="/admin/notifications?search=<%= encodeURIComponent(search) %>&status=<%= status %>&actionType=<%= actionType %>&dateFrom=<%= dateFrom %>&dateTo=<%= dateTo %>&page=<%= currentPage - 1 %>" class="page-link">Previous</a>
               <% } %>
               <% for (let p = 1; p <= totalPages; p++) { %>
-                <a href="/admin/notifications?search=<%= encodeURIComponent(search) %>&status=<%= status %>&page=<%= p %>" class="page-link <%= currentPage === p ? 'active' : '' %>"><%= p %></a>
+                <a href="/admin/notifications?search=<%= encodeURIComponent(search) %>&status=<%= status %>&actionType=<%= actionType %>&dateFrom=<%= dateFrom %>&dateTo=<%= dateTo %>&page=<%= p %>" class="page-link <%= currentPage === p ? 'active' : '' %>"><%= p %></a>
               <% } %>
               <% if (currentPage < totalPages) { %>
-                <a href="/admin/notifications?search=<%= encodeURIComponent(search) %>&status=<%= status %>&page=<%= currentPage + 1 %>" class="page-link">Next</a>
+                <a href="/admin/notifications?search=<%= encodeURIComponent(search) %>&status=<%= status %>&actionType=<%= actionType %>&dateFrom=<%= dateFrom %>&dateTo=<%= dateTo %>&page=<%= currentPage + 1 %>" class="page-link">Next</a>
               <% } %>
             </div>
           <% } %>

@@ -533,7 +533,16 @@
            'January', 'February', 'March', 'April', 'May', 'June',
            'July', 'August', 'September', 'October', 'November', 'December'
          ];
-         const displayMonthNumbers = [3, 4, 5, 6, 7, 8];
+         const safeScheduleConfig = typeof scheduleConfig !== 'undefined' ? scheduleConfig : {
+           allowedMonths: [3, 4, 5, 6, 7, 8].map((monthNumber, index) => ({
+             monthNumber,
+             month: monthNumber - 1,
+             year: currentYear,
+             label: `${months[monthNumber - 1]} ${currentYear}`
+           })),
+           cycleLabel: `March 1, ${currentYear} to August 31, ${currentYear}`
+         };
+         const displayMonthNumbers = (safeScheduleConfig.allowedMonths || []).map(item => item.monthNumber);
          const totalApplicants = displayMonthNumbers.reduce((sum, num) => sum + (monthCounts[num] || 0), 0);
          const busiestMonth = totalApplicants > 0
            ? displayMonthNumbers.reduce((best, num) => {
@@ -554,7 +563,7 @@
           <div class="summary-card">
             <span class="summary-label">Active exam months</span>
             <strong class="summary-value"><%= displayMonthNumbers.length %></strong>
-            <p class="summary-note">March through August are currently included in this term’s schedule.</p>
+            <p class="summary-note"><%= safeScheduleConfig.cycleLabel %> is currently included in this term's schedule.</p>
           </div>
           <div class="summary-card">
             <span class="summary-label">Total applicants</span>
@@ -593,8 +602,7 @@
         <% 
           months.forEach((month, index) => {
             const monthNum = index + 1;
-            // Only show March (3) to August (8)
-            if (monthNum < 3 || monthNum > 8) return;
+            if (!displayMonthNumbers.includes(monthNum)) return;
             
             const count = monthCounts[monthNum] || 0;
         %>

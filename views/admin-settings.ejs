@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admission Settings</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .settings-page .settings-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+    .settings-page .summary-card {
+      padding: 16px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(226, 232, 240, 0.85);
+    }
+    .settings-page .summary-card span {
+      display: block;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .settings-page .summary-card strong {
+      display: block;
+      margin-top: 5px;
+      color: #1f2937;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+    .settings-form {
+      display: grid;
+      gap: 18px;
+      max-width: none;
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .settings-panel {
+      padding: 24px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.05);
+    }
+    .settings-panel-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .settings-panel-header h2 {
+      margin-bottom: 4px;
+    }
+    .settings-panel-header p {
+      color: #64748b;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+    .settings-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .settings-field {
+      display: grid;
+      gap: 7px;
+    }
+    .settings-field span {
+      color: #344054;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .settings-field input,
+    .settings-field textarea {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid #d9dee5;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--color-text);
+      font-size: 0.96rem;
+    }
+    .settings-field input:focus,
+    .settings-field textarea:focus,
+    .capacity-table input:focus {
+      outline: none;
+      border-color: #11998e;
+      box-shadow: 0 0 0 4px rgba(17, 153, 142, 0.08);
+    }
+    .settings-field textarea {
+      min-height: 150px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    .capacity-shell {
+      max-height: 460px;
+      overflow: auto;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+    .capacity-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 680px;
+    }
+    .capacity-table th,
+    .capacity-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e8eee9;
+      text-align: left;
+      color: #334155;
+    }
+    .capacity-table th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.45px;
+    }
+    .capacity-table tr:nth-child(even) td {
+      background: rgba(248, 250, 252, 0.56);
+    }
+    .capacity-table input {
+      width: 110px;
+      padding: 9px 10px;
+      border: 1px solid #d9dee5;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .help-text {
+      color: #5f7166;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .settings-actions {
+      position: sticky;
+      bottom: 0;
+      z-index: 3;
+      padding: 14px;
+      border-radius: 8px;
+      background: rgba(248, 250, 252, 0.95);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      backdrop-filter: blur(12px);
+    }
+    @media (max-width: 820px) {
+      .settings-page .settings-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .settings-panel {
+        padding: 18px;
+      }
+      .settings-panel-header {
+        display: block;
+      }
+    }
+    @media (max-width: 520px) {
+      .settings-page .settings-summary,
+      .settings-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="admin-page-bg settings-page">
+  <%- include('partials/sidebar', { page: 'settings' }) %>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <button class="hamburger" id="hamburger" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+
+  <div class="main-content">
+    <div class="page-logo"><img src="/images/logo.png" alt="PTC Logo" /></div>
+    <div class="container">
+      <h1><i class="fas fa-sliders-h"></i> Admission Settings</h1>
+      <% if (error) { %><div class="message error"><i class="fas fa-exclamation-triangle"></i> <%= error %></div><% } %>
+      <% if (success) { %><div class="message success"><i class="fas fa-check-circle"></i> <%= success %></div><% } %>
+
+      <div class="settings-summary">
+        <div class="summary-card"><span>School Year</span><strong><%= settings.schoolYear %></strong></div>
+        <div class="summary-card"><span>Rooms</span><strong><%= scheduleConfig.rooms.length %></strong></div>
+        <div class="summary-card"><span>Time Slots</span><strong><%= scheduleConfig.timeSlots.length %></strong></div>
+        <div class="summary-card"><span>Blocked Dates</span><strong><%= (settings.holidays || []).length %></strong></div>
+      </div>
+
+      <form action="/admin/settings" method="POST" class="settings-form">
+        <section class="settings-panel">
+          <div class="settings-panel-header">
+            <div>
+              <h2><i class="fas fa-calendar-check"></i> Admission Cycle</h2>
+              <p>Controls the active dates and default capacity used by schedule pages.</p>
+            </div>
+          </div>
+          <div class="settings-row">
+            <label class="settings-field">
+              <span>School year</span>
+              <input name="schoolYear" value="<%= settings.schoolYear %>" required maxlength="40">
+            </label>
+            <label class="settings-field">
+              <span>Cycle start date</span>
+              <input type="date" name="cycleStartDate" value="<%= scheduleConfig.minDate %>" required>
+            </label>
+            <label class="settings-field">
+              <span>Cycle end date</span>
+              <input type="date" name="cycleEndDate" value="<%= scheduleConfig.maxDate %>" required>
+            </label>
+            <label class="settings-field">
+              <span>Fallback daily capacity</span>
+              <input type="number" name="dailyCapacityFallback" value="<%= settings.dailyCapacityFallback %>" min="1" required>
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-panel">
+          <div class="settings-panel-header">
+            <div>
+              <h2><i class="fas fa-door-open"></i> Rooms, Times, and Blocked Dates</h2>
+              <p>Use one item per line. Block dates with YYYY-MM-DD|Name or MM-DD|Name.</p>
+            </div>
+          </div>
+          <div class="settings-row">
+            <label class="settings-field">
+              <span>Rooms</span>
+              <textarea name="rooms" required><%= scheduleConfig.rooms.join('\n') %></textarea>
+              <small class="help-text">One room per line.</small>
+            </label>
+            <label class="settings-field">
+              <span>Time slots</span>
+              <textarea name="timeSlots" required><%= scheduleConfig.timeSlots.join('\n') %></textarea>
+              <small class="help-text">One time slot per line.</small>
+            </label>
+            <label class="settings-field">
+              <span>Holidays / blocked dates</span>
+              <textarea name="holidays"><%= (settings.holidays || []).map(h => `${h.date}|${h.name}`).join('\n') %></textarea>
+              <small class="help-text">Use YYYY-MM-DD|Name or MM-DD|Name, one per line.</small>
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-panel">
+          <div class="settings-panel-header">
+            <div>
+              <h2><i class="fas fa-chair"></i> Room and Time Slot Capacity</h2>
+              <p>Set how many applicants can be assigned to each room and time slot.</p>
+            </div>
+            <span class="help-text"><%= scheduleConfig.rooms.length * scheduleConfig.timeSlots.length %> combinations</span>
+          </div>
+          <div class="capacity-shell">
+            <table class="capacity-table">
+              <thead><tr><th>Room</th><th>Time slot</th><th>Capacity</th></tr></thead>
+              <tbody>
+                <% scheduleConfig.rooms.forEach(room => { %>
+                  <% scheduleConfig.timeSlots.forEach(timeSlot => {
+                    const slot = (settings.slotCapacities || []).find(item => item.room === room && item.timeSlot === timeSlot);
+                  %>
+                    <tr>
+                      <td><%= room %></td>
+                      <td><%= timeSlot %></td>
+                      <td><input type="number" min="0" name="<%= capacityFieldName(room, timeSlot) %>" value="<%= slot ? slot.capacity : settings.dailyCapacityFallback %>" required></td>
+                    </tr>
+                  <% }) %>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="form-buttons settings-actions">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Settings</button>
+          <a class="btn btn-secondary" href="/admin/availability"><i class="fas fa-table"></i> View Availability</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="/js/script.js"></script>
+</body>
+</html>

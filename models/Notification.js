@@ -26,6 +26,25 @@ const notificationSchema = new mongoose.Schema({
   errorMessage: {
     type: String,
     default: ''
+  },
+  channel: {
+    type: String,
+    enum: ['email', 'sms', 'system'],
+    default: 'email'
+  },
+  actionType: {
+    type: String,
+    default: '',
+    index: true
+  },
+  retryOf: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Notification',
+    required: false
+  },
+  metadata: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   }
 }, { timestamps: true });
 

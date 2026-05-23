@@ -36,6 +36,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  applicantReferenceNumber: {
+    type: String,
+    default: '',
+    index: true
+  },
   isVerified: {
     type: Boolean,
     default: false

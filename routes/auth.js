@@ -464,6 +464,7 @@ router.post('/verify-otp', async (req, res) => {
       isVerified: true,
       resultMessage: 'Your application is pending review. We will notify you by email once schedule/result is set.'
     });
+    user.applicantReferenceNumber = `PTC-${user._id.toString().slice(-8).toUpperCase()}`;
 
     try {
       await user.save();
@@ -483,6 +484,7 @@ router.post('/verify-otp', async (req, res) => {
     const verifiedText = `Dear ${user.fullName || user.email},\n\n` +
       `Congratulations. Your email address has been successfully verified for the Pateros Technological College entrance examination registration.\n\n` +
       `Applicant Name: ${user.fullName}\n` +
+      `Reference Number: ${user.applicantReferenceNumber}\n` +
       `Email Address: ${user.email}\n` +
       `Phone Number: ${user.phoneNumber}\n` +
       `Verification Status: Verified\n` +
@@ -506,6 +508,7 @@ router.post('/verify-otp', async (req, res) => {
       introText: 'Thank you for verifying your email. Your application is now pending review by our Admissions Committee.',
       applicantDetails: [
         { label: 'Applicant Name', value: user.fullName },
+        { label: 'Reference Number', value: user.applicantReferenceNumber },
         { label: 'Email Address', value: user.email },
         { label: 'Phone Number', value: user.phoneNumber }
       ],

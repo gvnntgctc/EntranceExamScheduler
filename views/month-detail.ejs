@@ -1249,60 +1249,33 @@
       }
     });
 
-    // Navigation between months (restricted to March-August)
+    const allowedMonths = <%- JSON.stringify(scheduleConfig.allowedMonths || []) %>;
+
+    function currentAllowedMonthIndex() {
+      return allowedMonths.findIndex(item => item.monthNumber === <%= month %> && item.year === <%= year %>);
+    }
+
     function goToNextMonth() {
-      const currentMonth = <%= month %>;
-      const currentYear = <%= year %>;
-      let nextMonth = currentMonth + 1;
-      let nextYear = currentYear;
-      
-      // Restrict to August (month 8)
-      if (nextMonth > 8) {
-        return; // Don't navigate past August
-      }
-      
-      if (nextMonth > 12) {
-        nextMonth = 1;
-        nextYear++;
-      }
-      
-      window.location.href = `/admin/month/${nextMonth}`;
+      const index = currentAllowedMonthIndex();
+      const next = allowedMonths[index + 1];
+      if (!next) return;
+      window.location.href = `/admin/month/${next.monthNumber}`;
     }
 
     function goToPreviousMonth() {
-      const currentMonth = <%= month %>;
-      const currentYear = <%= year %>;
-      let prevMonth = currentMonth - 1;
-      let prevYear = currentYear;
-      
-      // Restrict to March (month 3)
-      if (prevMonth < 3) {
-        return; // Don't navigate above March
-      }
-      
-      if (prevMonth < 1) {
-        prevMonth = 12;
-        prevYear--;
-      }
-      
-      window.location.href = `/admin/month/${prevMonth}`;
+      const index = currentAllowedMonthIndex();
+      const previous = allowedMonths[index - 1];
+      if (!previous) return;
+      window.location.href = `/admin/month/${previous.monthNumber}`;
     }
 
     // Disable navigation buttons at boundaries
     window.addEventListener('DOMContentLoaded', function() {
-      const currentMonth = <%= month %>;
       const prevBtn = document.getElementById('prevMonthBtn');
       const nextBtn = document.getElementById('nextMonthBtn');
-      
-      // Disable previous button if at March
-      if (currentMonth <= 3) {
-        prevBtn.disabled = true;
-      }
-      
-      // Disable next button if at August
-      if (currentMonth >= 8) {
-        nextBtn.disabled = true;
-      }
+      const index = currentAllowedMonthIndex();
+      if (prevBtn) prevBtn.disabled = index <= 0;
+      if (nextBtn) nextBtn.disabled = index === -1 || index >= allowedMonths.length - 1;
     });
   </script>
 </body>

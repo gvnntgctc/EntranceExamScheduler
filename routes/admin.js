@@ -14,47 +14,21 @@ try {
 const User = require('../models/User');
 const Schedule = require('../models/Schedule');
 const Notification = require('../models/Notification');
+const AdmissionSettings = require('../models/AdmissionSettings');
+const NotificationTemplate = require('../models/NotificationTemplate');
+const RescheduleRequest = require('../models/RescheduleRequest');
 const { buildEmailHtml } = require('../utils/emailUtils');
-
-// Allowed exam locations (strict list)
-const ALLOWED_LOCATIONS = [
-  '3rd Floor Room 301 PTC Main Campus',
-  '3rd Floor Room 302 PTC Main Campus',
-  '3rd Floor Room 303 PTC Main Campus'
-];
-
-const ALLOWED_EXAM_TIMES = [
-  '7:00-8:30 A.M',
-  '9:00-10:30 A.M',
-  '1:30-3:00 P.M',
-  '3:30-5:00 P.M'
-];
+const {
+  formatLongDate,
+  getAdmissionSettings,
+  getAllowedMonths,
+  getHolidayName,
+  getSlotCapacity,
+  toDateInputValue,
+  validateSettingsPayload
+} = require('../utils/admissionSettings');
 
 const MAX_CUSTOM_FIELD_LENGTH = 120;
-
-const HOLIDAYS = {
-  '01-01': "New Year's Day",
-  '02-17': 'Chinese New Year',
-  '02-25': 'EDSA People Power Revolution Anniversary',
-  '03-20': "Eid'l Fitr",
-  '04-02': 'Maundy Thursday',
-  '04-03': 'Good Friday',
-  '04-04': 'Black Saturday',
-  '04-09': 'Day of Valor',
-  '05-01': 'Labor Day',
-  '05-27': "Eid'l Adha",
-  '06-12': 'Independence Day',
-  '08-21': 'Ninoy Aquino Day',
-  '08-31': 'National Heroes Day',
-  '11-01': "All Saints' Day",
-  '11-02': "All Souls' Day",
-  '11-30': 'Bonifacio Day',
-  '12-08': 'Feast of the Immaculate Conception of Mary',
-  '12-24': 'Christmas Eve',
-  '12-25': 'Christmas Day',
-  '12-30': 'Rizal Day',
-  '12-31': 'Last Day of the Year'
-};
 
 function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -89,11 +63,6 @@ function parseExamDateValue(examDate) {
   return parsedDate;
 }
 
-function getHolidayName(examDate) {
-  const [, , month, day] = examDate.match(/^(\d{4})-(\d{2})-(\d{2})$/) || [];
-  return month && day ? HOLIDAYS[`${month}-${day}`] : '';
-}
-
 function isWeekendDate(dateValue) {
   const parsedDate = parseExamDateValue(dateValue);
   if (!parsedDate) return false;
@@ -109,7 +78,61 @@ function getExamDateRange(examDate) {
   return { dateStart, dateEnd };
 }
 
-function validateScheduleFields({ examDate, examTime, location }) {
+function buildScheduleViewConfig(settings) {
+  const rooms = (settings.rooms || []).filter(room => room.active !== false).map(room => room.name);
+  const timeSlots = (settings.timeSlots || []).filter(slot => slot.active !== false).map(slot => slot.label);
+  return {
+    schoolYear: settings.schoolYear,
+    minDate: toDateInputValue(settings.cycleStartDate),
+    maxDate: toDateInputValue(settings.cycleEndDate),
+    cycleLabel: `${formatLongDate(settings.cycleStartDate)} to ${formatLongDate(settings.cycleEndDate)}`,
+    allowedMonths: getAllowedMonths(settings),
+    holidays: settings.holidays || [],
+    rooms,
+    timeSlots,
+    dailyCapacityFallback: settings.dailyCapacityFallback,
+    slotCapacities: settings.slotCapacities || []
+  };
+}
+
+async function getSlotUsage({ examDate, examTime, location, excludeScheduleId = null }) {
+  const { dateStart, dateEnd } = getExamDateRange(examDate);
+  const query = { examDate: { $gte: dateStart, $lte: dateEnd }, examTime, location };
+  if (excludeScheduleId) query._id = { $ne: excludeScheduleId };
+  return Schedule.countDocuments(query);
+}
+
+async function validateSlotCapacity({ settings, examDate, examTime, location, requestedSeats = 1, excludeScheduleId = null }) {
+  const maxCapacity = getSlotCapacity(settings, location, examTime);
+  const bookedCount = await getSlotUsage({ examDate, examTime, location, excludeScheduleId });
+  const remaining = Math.max(0, maxCapacity - bookedCount);
+  if (requestedSeats > remaining) {
+    return {
+      ok: false,
+      bookedCount,
+      maxCapacity,
+      remaining,
+      message: `This room and time slot only has ${remaining} remaining slot(s). Capacity is ${maxCapacity}.`
+    };
+  }
+  return { ok: true, bookedCount, maxCapacity, remaining };
+}
+
+function buildSlotUsageMap(schedules = []) {
+  return schedules.reduce((acc, schedule) => {
+    const dateKey = toDateInputValue(schedule.examDate);
+    const key = `${dateKey}|||${schedule.location || ''}|||${schedule.examTime || ''}`;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+function getPermitCode(schedule) {
+  const id = schedule?._id ? schedule._id.toString().slice(-8).toUpperCase() : 'PENDING';
+  return schedule?.permitCode || `PTC-${id}`;
+}
+
+function validateScheduleFields({ examDate, examTime, location }, settings) {
   if (!examDate || !examTime || !location) {
     return 'All fields are required';
   }
@@ -129,18 +152,16 @@ function validateScheduleFields({ examDate, examTime, location }) {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const allowedStart = new Date(2026, 2, 1);
-  const allowedEnd = new Date(2026, 7, 31);
-  if (parsedExamDate < today || parsedExamDate < allowedStart || parsedExamDate > allowedEnd) {
-    return 'Exam date must be between March 1, 2026 and August 31, 2026';
+  if (parsedExamDate < today || parsedExamDate < settings.cycleStartDate || parsedExamDate > settings.cycleEndDate) {
+    return `Exam date must be between ${formatLongDate(settings.cycleStartDate)} and ${formatLongDate(settings.cycleEndDate)}`;
   }
 
-  const holidayName = getHolidayName(examDate);
+  const holidayName = getHolidayName(settings, examDate);
   if (holidayName) {
     return `Cannot schedule on holiday: ${holidayName}`;
   }
 
-  if (!isWeekendDate(examDate)) {
+  if (!(settings.scheduleWeekdays || [0, 6]).includes(parsedExamDate.getDay())) {
     return 'Exam schedules are only available on Saturday and Sunday';
   }
 
@@ -332,14 +353,55 @@ function isAdmin(req, res, next) {
 
 // Admin Dashboard redirects to Weekly Schedule page
 router.get('/', isAdmin, (req, res) => {
-  return res.redirect('/admin/weekly-schedule');
+  return res.redirect('/admin/dashboard');
+});
+
+router.get('/dashboard', isAdmin, async (req, res) => {
+  try {
+    const settings = await getAdmissionSettings();
+    const [totalApplicants, pendingReview, scheduled, passed, failed, schedules] = await Promise.all([
+      User.countDocuments({ role: 'student' }),
+      User.countDocuments({ role: 'student', status: 'pending' }),
+      Schedule.countDocuments({ examDate: { $gte: settings.cycleStartDate, $lte: settings.cycleEndDate } }),
+      User.countDocuments({ role: 'student', status: 'passed' }),
+      User.countDocuments({ role: 'student', status: 'failed' }),
+      Schedule.find({ examDate: { $gte: settings.cycleStartDate, $lte: settings.cycleEndDate } }).lean()
+    ]);
+    const usage = buildSlotUsageMap(schedules);
+    let totalCapacity = 0;
+    const cursor = new Date(settings.cycleStartDate);
+    cursor.setHours(0, 0, 0, 0);
+    while (cursor <= settings.cycleEndDate) {
+      const dateKey = toDateInputValue(cursor);
+      if ((settings.scheduleWeekdays || [0, 6]).includes(cursor.getDay()) && !getHolidayName(settings, dateKey)) {
+        totalCapacity += (settings.slotCapacities || []).reduce((sum, slot) => sum + Number(slot.capacity || 0), 0);
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    const busiest = Object.entries(usage).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([key, count]) => {
+      const [date, room, timeSlot] = key.split('|||');
+      return { date, room, timeSlot, count };
+    });
+    res.render('admin-dashboard', {
+      metrics: { totalApplicants, pendingReview, scheduled, passed, failed, remainingSlots: Math.max(0, totalCapacity - scheduled), busiest },
+      page: 'dashboard',
+      error: '',
+      success: ''
+    });
+  } catch (error) {
+    console.error('Failed to load dashboard:', error);
+    res.redirect('/admin/weekly-schedule?error=Failed to load dashboard');
+  }
 });
 
 // Monthly Schedule Grid Page (12 months view)
 router.get('/weekly-schedule', isAdmin, async (req, res) => {
   try {
+    const settings = await getAdmissionSettings();
+    const scheduleConfig = buildScheduleViewConfig(settings);
+    const allowedMonthNumbers = scheduleConfig.allowedMonths.map(month => month.monthNumber);
     const schedules = await Schedule.find().populate('studentId');
-    const currentYear = new Date().getFullYear();
+    const currentYear = settings.cycleStartDate.getFullYear();
 
     // Count schedules for each month
     const monthCounts = {};
@@ -357,7 +419,7 @@ router.get('/weekly-schedule', isAdmin, async (req, res) => {
 
     const today = new Date();
     const upcomingDates = schedules
-      .filter(schedule => new Date(schedule.examDate) >= today)
+      .filter(schedule => new Date(schedule.examDate) >= today && new Date(schedule.examDate) >= settings.cycleStartDate && new Date(schedule.examDate) <= settings.cycleEndDate)
       .sort((a, b) => new Date(a.examDate) - new Date(b.examDate))
       .reduce((acc, schedule) => {
         const dateObj = new Date(schedule.examDate);
@@ -378,6 +440,8 @@ router.get('/weekly-schedule', isAdmin, async (req, res) => {
       monthCounts, 
       currentYear, 
       upcomingDates,
+      scheduleConfig,
+      allowedMonthNumbers,
       page: 'weekly', 
       error: req.query.error || '', 
       success: req.query.success || '' 
@@ -389,6 +453,8 @@ router.get('/weekly-schedule', isAdmin, async (req, res) => {
       monthCounts: {},
       currentYear: new Date().getFullYear(),
       upcomingDates: [],
+      scheduleConfig: buildScheduleViewConfig(await getAdmissionSettings()),
+      allowedMonthNumbers: [],
       page: 'weekly',
       error: 'Failed to load schedules',
       success: ''
@@ -399,13 +465,16 @@ router.get('/weekly-schedule', isAdmin, async (req, res) => {
 // Month Detail Calendar Page
 router.get('/month/:month', isAdmin, async (req, res) => {
   try {
+    const settings = await getAdmissionSettings();
+    const scheduleConfig = buildScheduleViewConfig(settings);
     const month = parseInt(req.params.month);
     
-    if (month < 1 || month > 12) {
-      return res.redirect('/admin/weekly-schedule?error=Invalid month');
+    const allowedMonthNumbers = scheduleConfig.allowedMonths.map(item => item.monthNumber);
+    if (month < 1 || month > 12 || !allowedMonthNumbers.includes(month)) {
+      return res.redirect('/admin/weekly-schedule?error=Month is outside the configured admission cycle');
     }
 
-    const year = new Date().getFullYear();
+    const year = (scheduleConfig.allowedMonths.find(item => item.monthNumber === month) || {}).year || settings.cycleStartDate.getFullYear();
     const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
@@ -458,7 +527,12 @@ router.get('/month/:month', isAdmin, async (req, res) => {
       monthName,
       schedulesMap,
       schedulesList,
-      holidayMap: HOLIDAYS,
+      holidayMap: (settings.holidays || []).reduce((acc, holiday) => {
+        acc[holiday.date] = holiday.name;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(holiday.date)) acc[holiday.date.slice(5)] = holiday.name;
+        return acc;
+      }, {}),
+      scheduleConfig,
       totalSchedules: schedulesList.length,
       page: 'weekly',
       error: req.query.error || '', 
@@ -594,9 +668,170 @@ router.get('/export-schedule', isAdmin, async (req, res) => {
   }
 });
 
+router.get('/schedule-slot-status', isAdmin, async (req, res) => {
+  try {
+    const settings = await getAdmissionSettings();
+    const examDate = String(req.query.examDate || '').trim();
+    const examTime = String(req.query.examTime || '').trim();
+    const location = String(req.query.location || '').trim();
+    const validationError = validateScheduleFields({ examDate, examTime, location }, settings);
+    if (validationError) {
+      return res.status(400).json({ ok: false, message: validationError });
+    }
+    const capacity = await validateSlotCapacity({ settings, examDate, examTime, location, requestedSeats: 0 });
+    return res.json({ ok: true, ...capacity });
+  } catch (error) {
+    console.error('Failed to load slot status:', error);
+    return res.status(500).json({ ok: false, message: 'Failed to load slot status' });
+  }
+});
+
+router.get('/availability', isAdmin, async (req, res) => {
+  try {
+    const settings = await getAdmissionSettings();
+    const scheduleConfig = buildScheduleViewConfig(settings);
+    const schedules = await Schedule.find({
+      examDate: { $gte: settings.cycleStartDate, $lte: settings.cycleEndDate }
+    }).lean();
+    const usage = buildSlotUsageMap(schedules);
+    const days = [];
+    const cursor = new Date(settings.cycleStartDate);
+    cursor.setHours(0, 0, 0, 0);
+    while (cursor <= settings.cycleEndDate) {
+      const dateKey = toDateInputValue(cursor);
+      const holidayName = getHolidayName(settings, dateKey);
+      if ((settings.scheduleWeekdays || [0, 6]).includes(cursor.getDay()) || holidayName) {
+        days.push({
+          dateKey,
+          displayDate: cursor.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }),
+          holidayName,
+          slots: scheduleConfig.rooms.flatMap(room => scheduleConfig.timeSlots.map(timeSlot => {
+            const bookedCount = usage[`${dateKey}|||${room}|||${timeSlot}`] || 0;
+            const maxCapacity = getSlotCapacity(settings, room, timeSlot);
+            return { room, timeSlot, bookedCount, maxCapacity, remaining: Math.max(0, maxCapacity - bookedCount) };
+          }))
+        });
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    res.render('schedule-availability', {
+      days,
+      scheduleConfig,
+      page: 'availability',
+      error: req.query.error || '',
+      success: req.query.success || ''
+    });
+  } catch (error) {
+    console.error('Failed to load availability:', error);
+    res.redirect('/admin/weekly-schedule?error=Failed to load availability');
+  }
+});
+
+router.get('/settings', isAdmin, async (req, res) => {
+  const settings = await getAdmissionSettings();
+  res.render('admin-settings', {
+    settings,
+    scheduleConfig: buildScheduleViewConfig(settings),
+    capacityFieldName: (room, timeSlot) => `capacity__${Buffer.from(`${room}|||${timeSlot}`).toString('base64')}`,
+    page: 'settings',
+    error: req.query.error || '',
+    success: req.query.success || ''
+  });
+});
+
+router.post('/settings', isAdmin, async (req, res) => {
+  try {
+    const result = validateSettingsPayload(req.body);
+    if (result.errors.length) {
+      return res.redirect(`/admin/settings?error=${encodeURIComponent(result.errors.join(' '))}`);
+    }
+    await AdmissionSettings.findOneAndUpdate(
+      { key: 'default' },
+      { $set: { ...result.settings, key: 'default' } },
+      { upsert: true, runValidators: true }
+    );
+    await Notification.create({
+      recipientEmail: req.session.email || 'admin',
+      subject: 'Admission Settings Updated',
+      body: `Admin updated admission settings for ${result.settings.schoolYear}`,
+      status: 'sent',
+      channel: 'system',
+      actionType: 'settings_updated'
+    });
+    return res.redirect('/admin/settings?success=Settings saved');
+  } catch (error) {
+    console.error('Failed to save settings:', error);
+    return res.redirect('/admin/settings?error=Failed to save settings');
+  }
+});
+
+const TEMPLATE_PLACEHOLDERS = ['applicantName', 'date', 'time', 'room', 'referenceNumber'];
+
+function renderTemplate(text, data) {
+  return String(text || '').replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, key) => {
+    if (!TEMPLATE_PLACEHOLDERS.includes(key)) return `[invalid:${key}]`;
+    return data[key] || '';
+  });
+}
+
+router.get('/templates', isAdmin, async (req, res) => {
+  const templates = await NotificationTemplate.find().sort({ name: 1 });
+  res.render('notification-templates', {
+    templates,
+    placeholders: TEMPLATE_PLACEHOLDERS,
+    preview: null,
+    page: 'templates',
+    error: req.query.error || '',
+    success: req.query.success || ''
+  });
+});
+
+router.post('/templates', isAdmin, async (req, res) => {
+  try {
+    const key = String(req.body.key || '').trim();
+    const name = String(req.body.name || '').trim();
+    const subject = String(req.body.subject || '').trim();
+    const body = String(req.body.body || '').trim();
+    if (!key || !name || !body) return res.redirect('/admin/templates?error=Template key, name, and body are required');
+    await NotificationTemplate.findOneAndUpdate(
+      { key },
+      { $set: { key, name, subject, body, channel: 'email', active: true } },
+      { upsert: true, runValidators: true }
+    );
+    return res.redirect('/admin/templates?success=Template saved');
+  } catch (error) {
+    console.error('Failed to save template:', error);
+    return res.redirect('/admin/templates?error=Failed to save template');
+  }
+});
+
+router.post('/templates/preview', isAdmin, async (req, res) => {
+  const templates = await NotificationTemplate.find().sort({ name: 1 });
+  const sample = {
+    applicantName: 'Sample Applicant',
+    date: 'June 6, 2026',
+    time: '7:00-8:30 A.M',
+    room: '3rd Floor Room 301 PTC Main Campus',
+    referenceNumber: 'PTC-1234ABCD'
+  };
+  res.render('notification-templates', {
+    templates,
+    placeholders: TEMPLATE_PLACEHOLDERS,
+    preview: {
+      subject: renderTemplate(req.body.subject, sample),
+      body: renderTemplate(req.body.body, sample)
+    },
+    page: 'templates',
+    error: '',
+    success: ''
+  });
+});
+
 // Add Schedule Page
 router.get('/add-schedule', isAdmin, async (req, res) => {
   try {
+    const settings = await getAdmissionSettings();
+    const scheduleConfig = buildScheduleViewConfig(settings);
     const schedules = await Schedule.find().populate('studentId');
     const pendingStudents = await User.find({ role: 'student', status: 'pending' }).sort({ fullName: 1 });
     
@@ -607,20 +842,17 @@ router.get('/add-schedule', isAdmin, async (req, res) => {
     const students = pendingStudents.filter(student => !scheduledStudentIds.has(student._id.toString()));
 
     const scheduleCounts = schedules.reduce((acc, schedule) => {
-      const dateKey = new Date(schedule.examDate).toISOString().split('T')[0];
+      const dateKey = toDateInputValue(schedule.examDate);
       acc[dateKey] = (acc[dateKey] || 0) + 1;
       return acc;
     }, {});
-    
-    const minDate = '2026-03-01';
-    const maxDate = '2026-08-31';
 
     res.render('add-schedule', { 
       schedules,
       students,
       scheduleCounts,
-      minDate,
-      maxDate,
+      slotUsage: buildSlotUsageMap(schedules),
+      scheduleConfig,
       page: 'addSchedule',
       error: req.query.error || '',
       success: req.query.success || ''
@@ -629,14 +861,13 @@ router.get('/add-schedule', isAdmin, async (req, res) => {
   } catch (error) {
     console.error(error);
     const students = [];
-    const minDate = '2026-03-01';
-    const maxDate = '2026-08-31';
+    const settings = await getAdmissionSettings();
     res.render('add-schedule', { 
       schedules: [], 
       students,
       scheduleCounts: {},
-      minDate,
-      maxDate,
+      slotUsage: {},
+      scheduleConfig: buildScheduleViewConfig(settings),
       page: 'addSchedule',
       error: 'Failed to load schedules',
       success: ''
@@ -647,10 +878,11 @@ router.get('/add-schedule', isAdmin, async (req, res) => {
 // Create Schedule - supports one applicant or bulk applicant selection.
 router.post('/add-schedule', isAdmin, async (req, res) => {
   try {
+    const settings = await getAdmissionSettings();
     const examDate = (req.body.examDate || '').trim();
     const examTime = (req.body.examTime || '').trim();
     const location = (req.body.location || '').trim();
-    const validationError = validateScheduleFields({ examDate, examTime, location });
+    const validationError = validateScheduleFields({ examDate, examTime, location }, settings);
     if (validationError) {
       return res.redirect(`/admin/add-schedule?error=${encodeURIComponent(validationError)}`);
     }
@@ -710,10 +942,15 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
       return res.redirect('/admin/add-schedule?error=Duplicate schedule detected for one or more selected applicants');
     }
 
-    const dateCount = await Schedule.countDocuments({ examDate: { $gte: dateStart, $lte: dateEnd } });
-    if (dateCount + orderedStudents.length > 50) {
-      const remainingSlots = Math.max(0, 50 - dateCount);
-      return res.redirect(`/admin/add-schedule?error=${encodeURIComponent(`This exam date only has ${remainingSlots} remaining slot(s). Reduce selected applicants or choose another date.`)}`);
+    const slotCapacity = await validateSlotCapacity({
+      settings,
+      examDate,
+      examTime,
+      location,
+      requestedSeats: orderedStudents.length
+    });
+    if (!slotCapacity.ok) {
+      return res.redirect(`/admin/add-schedule?error=${encodeURIComponent(`${slotCapacity.message} Reduce selected applicants or choose another slot.`)}`);
     }
 
     const scheduleDocs = orderedStudents.map(student => ({
@@ -727,6 +964,14 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
     const session = await mongoose.startSession();
     try {
       await session.withTransaction(async () => {
+        const checkedCapacity = await validateSlotCapacity({
+          settings,
+          examDate,
+          examTime,
+          location,
+          requestedSeats: orderedStudents.length
+        });
+        if (!checkedCapacity.ok) throw new Error(checkedCapacity.message);
         createdSchedules = await Schedule.insertMany(scheduleDocs, { session, ordered: true });
       });
     } catch (transactionError) {
@@ -745,7 +990,9 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
       recipientEmail: student.email,
       subject: isBulkRequest ? 'Bulk Schedule Added' : 'Schedule Added',
       body: `Admin created exam schedule: ${new Date(examDate).toLocaleDateString()} at ${examTime} in ${location}`,
-      status: 'sent'
+      status: 'sent',
+      channel: 'system',
+      actionType: 'schedule_created'
     })), { ordered: false });
 
     let emailSuccessCount = 0;
@@ -779,13 +1026,14 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
 // Legacy single-applicant schedule handler retained off the active route.
 router.post('/add-schedule-legacy', isAdmin, async (req, res) => {
   try {
+    const settings = await getAdmissionSettings();
     const { studentId, examDate, examTime, location } = req.body;
 
     const validationError = validateScheduleFields({
       examDate: (examDate || '').trim(),
       examTime: (examTime || '').trim(),
       location: (location || '').trim()
-    });
+    }, settings);
     if (!studentId || validationError) {
       return res.redirect(`/admin/add-schedule?error=${encodeURIComponent(!studentId ? 'All fields are required' : validationError)}`);
     }
@@ -815,9 +1063,9 @@ router.post('/add-schedule-legacy', isAdmin, async (req, res) => {
 
     // Prevent duplicate schedules for the same student on the same day
     const { dateStart, dateEnd } = getExamDateRange(examDate);
-    const dateCount = await Schedule.countDocuments({ examDate: { $gte: dateStart, $lte: dateEnd } });
-    if (dateCount >= 50) {
-      return res.redirect('/admin/add-schedule?error=This exam date has reached the maximum limit of 50 scheduled applicants');
+    const slotCapacity = await validateSlotCapacity({ settings, examDate, examTime: examTime.trim(), location: location.trim() });
+    if (!slotCapacity.ok) {
+      return res.redirect(`/admin/add-schedule?error=${encodeURIComponent(slotCapacity.message)}`);
     }
 
     const existing = await Schedule.findOne({ studentId: student._id, examDate: { $gte: dateStart, $lte: dateEnd } });
@@ -840,7 +1088,9 @@ router.post('/add-schedule-legacy', isAdmin, async (req, res) => {
       recipientEmail: student.email,
       subject: 'Schedule Added',
       body: `Admin created exam schedule: ${new Date(examDate).toLocaleDateString()} at ${examTime} in ${location}`,
-      status: 'sent'
+      status: 'sent',
+      channel: 'system',
+      actionType: 'schedule_created'
     });
 
     // Notify applicant with schedule details
@@ -998,6 +1248,16 @@ router.get('/students', isAdmin, async (req, res) => {
     if (req.query.status && req.query.status !== 'all') {
       query.status = req.query.status;
     }
+
+    if (req.query.actionType && req.query.actionType !== 'all') {
+      query.actionType = req.query.actionType;
+    }
+
+    if (req.query.dateFrom || req.query.dateTo) {
+      query.createdAt = {};
+      if (req.query.dateFrom) query.createdAt.$gte = new Date(`${req.query.dateFrom}T00:00:00`);
+      if (req.query.dateTo) query.createdAt.$lte = new Date(`${req.query.dateTo}T23:59:59.999`);
+    }
     
     console.log('Final query:', JSON.stringify(query, null, 2));
     
@@ -1067,6 +1327,50 @@ router.get('/students', isAdmin, async (req, res) => {
   }
 });
 
+router.get('/reschedule-requests', isAdmin, async (req, res) => {
+  try {
+    const requests = await RescheduleRequest.find().populate('studentId').populate('scheduleId').sort({ createdAt: -1 });
+    res.render('admin-reschedule-requests', {
+      requests,
+      page: 'rescheduleRequests',
+      error: req.query.error || '',
+      success: req.query.success || ''
+    });
+  } catch (error) {
+    console.error('Failed to load reschedule requests:', error);
+    res.redirect('/admin/weekly-schedule?error=Failed to load reschedule requests');
+  }
+});
+
+router.post('/reschedule-requests/:id/status', isAdmin, async (req, res) => {
+  try {
+    const status = String(req.body.status || '').trim();
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.redirect('/admin/reschedule-requests?error=Invalid request status');
+    }
+    const request = await RescheduleRequest.findById(req.params.id).populate('studentId');
+    if (!request) return res.redirect('/admin/reschedule-requests?error=Request not found');
+    request.status = status;
+    request.reviewedBy = req.session.userId;
+    request.reviewedAt = new Date();
+    request.adminNote = String(req.body.adminNote || '').trim();
+    await request.save();
+    await Notification.create({
+      recipientId: request.studentId?._id,
+      recipientEmail: request.studentId?.email || 'unknown',
+      subject: 'Reschedule Request Reviewed',
+      body: `Admin marked reschedule request as ${status}. ${request.adminNote || ''}`,
+      status: 'sent',
+      channel: 'system',
+      actionType: 'reschedule_reviewed'
+    });
+    return res.redirect('/admin/reschedule-requests?success=Request updated');
+  } catch (error) {
+    console.error('Failed to update reschedule request:', error);
+    return res.redirect('/admin/reschedule-requests?error=Failed to update request');
+  }
+});
+
 // Admin activity log page
 router.get('/notifications', isAdmin, async (req, res) => {
   try {
@@ -1115,6 +1419,9 @@ router.get('/notifications', isAdmin, async (req, res) => {
       notifications: notificationsWithActions,
       search: req.query.search || '',
       status: req.query.status || 'all',
+      actionType: req.query.actionType || 'all',
+      dateFrom: req.query.dateFrom || '',
+      dateTo: req.query.dateTo || '',
       currentPage,
       totalPages,
       totalNotifications,
@@ -1128,6 +1435,9 @@ router.get('/notifications', isAdmin, async (req, res) => {
       notifications: [],
       search: req.query.search || '',
       status: req.query.status || 'all',
+      actionType: req.query.actionType || 'all',
+      dateFrom: req.query.dateFrom || '',
+      dateTo: req.query.dateTo || '',
       page: 'notifications',
       error: 'Failed to load activity log',
       success: ''
@@ -1154,6 +1464,40 @@ router.get('/notifications/:id', isAdmin, async (req, res) => {
   } catch (err) {
     console.error('Failed to load notification detail:', err);
     res.redirect('/admin/notifications?error=Failed to load notification detail');
+  }
+});
+
+router.post('/notifications/:id/retry', isAdmin, async (req, res) => {
+  try {
+    const notification = await Notification.findById(req.params.id);
+    if (!notification) {
+      return res.redirect('/admin/notifications?error=Notification not found');
+    }
+    if (notification.status !== 'failed') {
+      return res.redirect('/admin/notifications?error=Only failed notifications can be retried');
+    }
+    const sent = await sendEmail({
+      recipientId: notification.recipientId,
+      to: notification.recipientEmail,
+      subject: notification.subject,
+      text: notification.body,
+      html: notification.metadata?.html || ''
+    });
+    await Notification.create({
+      recipientId: notification.recipientId,
+      recipientEmail: notification.recipientEmail,
+      subject: `Retry: ${notification.subject}`,
+      body: `Retry attempted for notification ${notification._id}. Result: ${sent ? 'sent' : 'failed'}`,
+      status: sent ? 'sent' : 'failed',
+      errorMessage: sent ? '' : 'Provider/send function returned failure',
+      channel: notification.channel || 'email',
+      actionType: 'notification_retry',
+      retryOf: notification._id
+    });
+    return res.redirect(`/admin/notifications?${sent ? 'success=Notification retry sent' : 'error=Notification retry failed'}`);
+  } catch (error) {
+    console.error('Failed to retry notification:', error);
+    return res.redirect('/admin/notifications?error=Failed to retry notification');
   }
 });
 
@@ -1615,6 +1959,7 @@ router.get('/schedules/day/:day', isAdmin, async (req, res) => {
 // Get Edit Schedule Page
 router.get('/edit-schedule/:id', isAdmin, async (req, res) => {
   try {
+    const settings = await getAdmissionSettings();
     const { id } = req.params;
     const schedule = await Schedule.findById(id).populate('studentId');
     
@@ -1625,7 +1970,7 @@ router.get('/edit-schedule/:id', isAdmin, async (req, res) => {
     // Get schedule counts for capacity checking in the calendar
     const allSchedules = await Schedule.find().populate('studentId');
     const scheduleCounts = allSchedules.reduce((acc, sched) => {
-      const dateKey = new Date(sched.examDate).toISOString().split('T')[0];
+      const dateKey = toDateInputValue(sched.examDate);
       acc[dateKey] = (acc[dateKey] || 0) + 1;
       return acc;
     }, {});
@@ -1633,6 +1978,8 @@ router.get('/edit-schedule/:id', isAdmin, async (req, res) => {
     res.render('edit-schedule', { 
       schedule,
       scheduleCounts,
+      slotUsage: buildSlotUsageMap(allSchedules.filter(item => item._id.toString() !== id)),
+      scheduleConfig: buildScheduleViewConfig(settings),
       page: 'editSchedule',
       error: req.query.error || '',
       success: req.query.success || ''
@@ -1647,6 +1994,7 @@ router.get('/edit-schedule/:id', isAdmin, async (req, res) => {
 // Update Schedule
 router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
   try {
+    const settings = await getAdmissionSettings();
     const { id } = req.params;
     const { examDate, examTime, location } = req.body;
 
@@ -1670,7 +2018,7 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
       examDate: (examDate || '').trim(),
       examTime: (examTime || '').trim(),
       location: (location || '').trim()
-    });
+    }, settings);
     if (validationError) {
       console.log('Validation failed:', validationError);
       return res.redirect(`/admin/edit-schedule/${id}?error=${encodeURIComponent(validationError)}`);
@@ -1685,15 +2033,17 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
     const oldLocation = schedule.location || '';
     console.log('Existing DB values:', { oldDate, oldTime, oldLocation });
 
-    const { dateStart, dateEnd } = getExamDateRange(examDate);
-
-    const dateCount = await Schedule.countDocuments({
-      examDate: { $gte: dateStart, $lte: dateEnd },
-      _id: { $ne: schedule._id }
+    const slotCapacity = await validateSlotCapacity({
+      settings,
+      examDate,
+      examTime: examTime.trim(),
+      location: location.trim(),
+      requestedSeats: 1,
+      excludeScheduleId: schedule._id
     });
 
-    if (dateCount >= 50) {
-      return res.redirect(`/admin/edit-schedule/${id}?error=That exam date has already reached the maximum limit of 50 scheduled applicants`);
+    if (!slotCapacity.ok) {
+      return res.redirect(`/admin/edit-schedule/${id}?error=${encodeURIComponent(slotCapacity.message)}`);
     }
 
     // Detect changes (capture previous values already in oldDate/oldTime/oldLocation)
@@ -1707,6 +2057,18 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
     const locationChanged = oldLocation !== newLocation;
 
     console.log('Change detection result:', { dateChanged, timeChanged, locationChanged });
+
+    if (dateChanged || timeChanged || locationChanged) {
+      schedule.previousSchedules.push({
+        examDate: schedule.examDate,
+        examTime: oldTime,
+        location: oldLocation,
+        changedAt: new Date()
+      });
+      schedule.rescheduled = true;
+      schedule.rescheduledAt = new Date();
+      schedule.rescheduleCount = (schedule.rescheduleCount || 0) + 1;
+    }
 
     // Update the schedule
     schedule.examDate = parseExamDateValue(examDate);
