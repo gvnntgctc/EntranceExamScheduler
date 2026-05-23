@@ -44,6 +44,12 @@
 /* Unified Button Colors */
 /* ==================== */
 
+:root {
+  --motion-fast: 160ms;
+  --motion-medium: 240ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .btn,
 .btn-primary,
 .btn-secondary,
@@ -219,6 +225,26 @@ button:disabled {
   cursor: not-allowed !important;
   transform: none !important;
   box-shadow: none !important;
+}
+
+.is-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.btn-spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  flex: 0 0 auto;
+  animation: btnSpin 0.75s linear infinite;
+}
+
+@keyframes btnSpin {
+  to { transform: rotate(360deg); }
 }
 
 * {
@@ -3341,6 +3367,7 @@ form.schedule-form {
 
   .modal-body .date-grid .date-cell {
     min-height: 50px;
+    position: relative;
   }
 
   .modal-body .date-grid .date-cell button {
@@ -3372,7 +3399,8 @@ form.schedule-form {
   }
 
   .modal-body .date-grid .date-cell button.disabled-holiday,
-  .modal-body .date-grid .date-cell button.disabled-weekend {
+  .modal-body .date-grid .date-cell button.disabled-weekend,
+  .modal-body .date-grid .date-cell button.disabled-weekday {
     border-color: #ef4444;
     color: #b91c1c;
     background: #fef2f2;
@@ -3380,6 +3408,51 @@ form.schedule-form {
 
   .modal-body .date-grid .date-cell button.disabled-full {
     border-color: #6b7280;
+  }
+
+  .modal-body .date-grid .date-cell.holiday-cell {
+    cursor: not-allowed;
+  }
+
+  .modal-body .date-grid .date-cell.holiday-cell button:disabled {
+    pointer-events: none;
+  }
+
+  .modal-body .date-grid .date-cell .holiday-tooltip {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    z-index: 20;
+    width: max-content;
+    max-width: 220px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #111827;
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.24);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    opacity: 0;
+    pointer-events: none;
+    text-align: center;
+    transform: translate(-50%, 4px);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+  }
+
+  .modal-body .date-grid .date-cell .holiday-tooltip::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    border: 6px solid transparent;
+    border-top-color: #111827;
+    transform: translateX(-50%);
+  }
+
+  .modal-body .date-grid .date-cell.holiday-cell:hover .holiday-tooltip {
+    opacity: 1;
+    transform: translate(-50%, 0);
   }
 
   .modal-body .date-grid .empty-cell {
@@ -6107,4 +6180,109 @@ input, textarea, select, button {
 
   /* Pagination center and full width */
   .pagination { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+}
+
+/* ==================== */
+/* Motion Polish Layer */
+/* ==================== */
+
+.section-card,
+.stat-card,
+.schedule-item-card,
+.student-card,
+.student-item,
+.day-card,
+.applicant-item,
+.schedule-form,
+.bulk-applicant-option,
+.students-table tbody tr,
+.notifications-table tbody tr,
+.schedule-table tbody tr {
+  transition:
+    transform var(--motion-medium) var(--motion-ease),
+    box-shadow var(--motion-medium) var(--motion-ease),
+    border-color var(--motion-medium) var(--motion-ease),
+    background-color var(--motion-fast) ease !important;
+}
+
+.section-card:hover,
+.stat-card:hover,
+.schedule-item-card:hover,
+.student-card:hover,
+.student-item:hover,
+.day-card:hover {
+  transform: translateY(-2px);
+}
+
+.modal-overlay,
+.modal,
+.student-modal-bg {
+  opacity: 0;
+  transition: opacity var(--motion-medium) ease !important;
+}
+
+.modal-overlay.active,
+.modal.show,
+.student-modal-bg[style*="flex"] {
+  opacity: 1;
+}
+
+.modal-overlay .modal-content,
+.modal .modal-content,
+.student-modal {
+  transform: translateY(12px) scale(0.985);
+  transition:
+    transform var(--motion-medium) var(--motion-ease),
+    opacity var(--motion-medium) ease !important;
+}
+
+.modal-overlay.active .modal-content,
+.modal.show .modal-content,
+.student-modal[style*="flex"] {
+  transform: translateY(0) scale(1);
+}
+
+.toast-message,
+.message,
+.no-data,
+.bulk-empty,
+.empty-applicants {
+  animation: softEnter var(--motion-medium) var(--motion-ease);
+}
+
+.toast-message.show {
+  animation: toastEnter var(--motion-medium) var(--motion-ease);
+}
+
+@keyframes softEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
 }

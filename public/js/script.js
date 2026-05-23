@@ -56,6 +56,46 @@ sidebarLinks.forEach(link => {
   });
 });
 
+// Consistent submit loading state for admin forms
+(function () {
+  function applySubmitLoading(form, event) {
+    setTimeout(() => {
+      if (event.defaultPrevented || !form.checkValidity()) return;
+
+      form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(button => {
+        if (button.dataset.loadingApplied === 'true') return;
+
+        button.dataset.loadingApplied = 'true';
+        button.disabled = true;
+        button.classList.add('disabled', 'is-loading');
+        button.setAttribute('aria-busy', 'true');
+
+        if (button.tagName === 'BUTTON') {
+          button.dataset.originalHtml = button.innerHTML;
+          button.innerHTML = `<span class="btn-spinner" aria-hidden="true"></span>${button.dataset.loadingText || 'Processing...'}`;
+        } else {
+          button.dataset.originalValue = button.value;
+          button.value = button.dataset.loadingText || 'Processing...';
+        }
+      });
+    }, 0);
+  }
+
+  function initSubmitLoading() {
+    document.querySelectorAll('form').forEach(form => {
+      if (form.dataset.submitLoadingReady === 'true') return;
+      form.dataset.submitLoadingReady = 'true';
+      form.addEventListener('submit', event => applySubmitLoading(form, event));
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSubmitLoading);
+  } else {
+    initSubmitLoading();
+  }
+})();
+
 // Auto-dismiss success notifications with smooth fade-out
 (function () {
   const AUTO_DISMISS_MS = 4200;

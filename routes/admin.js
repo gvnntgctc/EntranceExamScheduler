@@ -30,6 +30,30 @@ const ALLOWED_EXAM_TIMES = [
   '3:30-5:00 P.M'
 ];
 
+const HOLIDAYS = {
+  '01-01': "New Year's Day",
+  '02-17': 'Chinese New Year',
+  '02-25': 'EDSA People Power Revolution Anniversary',
+  '03-20': "Eid'l Fitr",
+  '04-02': 'Maundy Thursday',
+  '04-03': 'Good Friday',
+  '04-04': 'Black Saturday',
+  '04-09': 'Day of Valor',
+  '05-01': 'Labor Day',
+  '05-27': "Eid'l Adha",
+  '06-12': 'Independence Day',
+  '08-21': 'Ninoy Aquino Day',
+  '08-31': 'National Heroes Day',
+  '11-01': "All Saints' Day",
+  '11-02': "All Souls' Day",
+  '11-30': 'Bonifacio Day',
+  '12-08': 'Feast of the Immaculate Conception of Mary',
+  '12-24': 'Christmas Eve',
+  '12-25': 'Christmas Day',
+  '12-30': 'Rizal Day',
+  '12-31': 'Last Day of the Year'
+};
+
 function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -46,8 +70,37 @@ function hasDuplicateValues(items) {
   return new Set(items).size !== items.length;
 }
 
+function parseExamDateValue(examDate) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(examDate || '');
+  if (!match) return null;
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const parsedDate = new Date(year, monthIndex, day);
+  if (
+    parsedDate.getFullYear() !== year ||
+    parsedDate.getMonth() !== monthIndex ||
+    parsedDate.getDate() !== day
+  ) {
+    return null;
+  }
+  return parsedDate;
+}
+
+function getHolidayName(examDate) {
+  const [, , month, day] = examDate.match(/^(\d{4})-(\d{2})-(\d{2})$/) || [];
+  return month && day ? HOLIDAYS[`${month}-${day}`] : '';
+}
+
+function isWeekendDate(dateValue) {
+  const parsedDate = parseExamDateValue(dateValue);
+  if (!parsedDate) return false;
+  const dayOfWeek = parsedDate.getDay();
+  return dayOfWeek === 0 || dayOfWeek === 6;
+}
+
 function getExamDateRange(examDate) {
-  const dateStart = new Date(examDate);
+  const dateStart = parseExamDateValue(examDate);
   dateStart.setHours(0, 0, 0, 0);
   const dateEnd = new Date(dateStart);
   dateEnd.setHours(23, 59, 59, 999);
@@ -67,13 +120,8 @@ function validateScheduleFields({ examDate, examTime, location }) {
     return 'Invalid exam time selected';
   }
 
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(examDate)) {
-    return 'Invalid exam date';
-  }
-
-  const parsedExamDate = new Date(examDate);
-  if (Number.isNaN(parsedExamDate.getTime()) || parsedExamDate.toISOString().slice(0, 10) !== examDate) {
+  const parsedExamDate = parseExamDateValue(examDate);
+  if (!parsedExamDate) {
     return 'Invalid exam date';
   }
 
@@ -83,6 +131,15 @@ function validateScheduleFields({ examDate, examTime, location }) {
   const allowedEnd = new Date(2026, 7, 31);
   if (parsedExamDate < today || parsedExamDate < allowedStart || parsedExamDate > allowedEnd) {
     return 'Exam date must be between March 1, 2026 and August 31, 2026';
+  }
+
+  const holidayName = getHolidayName(examDate);
+  if (holidayName) {
+    return `Cannot schedule on holiday: ${holidayName}`;
+  }
+
+  if (!isWeekendDate(examDate)) {
+    return 'Exam schedules are only available on Saturday and Sunday';
   }
 
   return '';
@@ -399,6 +456,7 @@ router.get('/month/:month', isAdmin, async (req, res) => {
       monthName,
       schedulesMap,
       schedulesList,
+      holidayMap: HOLIDAYS,
       totalSchedules: schedulesList.length,
       page: 'weekly',
       error: req.query.error || '', 
@@ -658,7 +716,7 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
 
     const scheduleDocs = orderedStudents.map(student => ({
       studentId: student._id,
-      examDate: new Date(examDate),
+      examDate: parseExamDateValue(examDate),
       examTime,
       location
     }));
@@ -721,32 +779,13 @@ router.post('/add-schedule-legacy', isAdmin, async (req, res) => {
   try {
     const { studentId, examDate, examTime, location } = req.body;
 
-    // Basic validation
-    if (!studentId || !examDate || !examTime || !location) {
-      return res.redirect('/admin/add-schedule?error=All fields are required');
-    }
-
-    // Enforce allowed locations for new schedules
-    if (!ALLOWED_LOCATIONS.includes(location)) {
-      return res.redirect('/admin/add-schedule?error=Invalid exam location selected');
-    }
-
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(examDate)) {
-      return res.redirect('/admin/add-schedule?error=Invalid exam date');
-    }
-
-    const parsedExamDate = new Date(examDate);
-    if (Number.isNaN(parsedExamDate.getTime()) || parsedExamDate.toISOString().slice(0, 10) !== examDate) {
-      return res.redirect('/admin/add-schedule?error=Invalid exam date');
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const allowedStart = new Date(2026, 2, 1);
-    const allowedEnd = new Date(2026, 7, 31);
-    if (parsedExamDate < today || parsedExamDate < allowedStart || parsedExamDate > allowedEnd) {
-      return res.redirect('/admin/add-schedule?error=Exam date must be between March 1, 2026 and August 31, 2026');
+    const validationError = validateScheduleFields({
+      examDate: (examDate || '').trim(),
+      examTime: (examTime || '').trim(),
+      location: (location || '').trim()
+    });
+    if (!studentId || validationError) {
+      return res.redirect(`/admin/add-schedule?error=${encodeURIComponent(!studentId ? 'All fields are required' : validationError)}`);
     }
 
     // Try to find student by id first, otherwise allow using email or full name text
@@ -773,10 +812,7 @@ router.post('/add-schedule-legacy', isAdmin, async (req, res) => {
     }
 
     // Prevent duplicate schedules for the same student on the same day
-    const dateStart = new Date(examDate);
-    dateStart.setHours(0, 0, 0, 0);
-    const dateEnd = new Date(dateStart);
-    dateEnd.setHours(23, 59, 59, 999);
+    const { dateStart, dateEnd } = getExamDateRange(examDate);
     const dateCount = await Schedule.countDocuments({ examDate: { $gte: dateStart, $lte: dateEnd } });
     if (dateCount >= 50) {
       return res.redirect('/admin/add-schedule?error=This exam date has reached the maximum limit of 50 scheduled applicants');
@@ -789,7 +825,7 @@ router.post('/add-schedule-legacy', isAdmin, async (req, res) => {
 
     const newSchedule = new Schedule({
       studentId: student._id,
-      examDate: new Date(examDate),
+      examDate: parseExamDateValue(examDate),
       examTime: examTime.trim(),
       location: location.trim()
     });
@@ -1634,6 +1670,17 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
       return res.redirect(`/admin/edit-schedule/${id}?error=Invalid exam location selected`);
     }
 
+    const validationLocation = ALLOWED_LOCATIONS.includes(location) ? location : ALLOWED_LOCATIONS[0];
+    const validationError = validateScheduleFields({
+      examDate: (examDate || '').trim(),
+      examTime: (examTime || '').trim(),
+      location: validationLocation
+    });
+    if (validationError) {
+      console.log('Validation failed:', validationError);
+      return res.redirect(`/admin/edit-schedule/${id}?error=${encodeURIComponent(validationError)}`);
+    }
+
     // Get student info for logging
     const student = await User.findById(schedule.studentId);
 
@@ -1643,10 +1690,7 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
     const oldLocation = schedule.location || '';
     console.log('Existing DB values:', { oldDate, oldTime, oldLocation });
 
-    const dateStart = new Date(examDate);
-    dateStart.setHours(0, 0, 0, 0);
-    const dateEnd = new Date(dateStart);
-    dateEnd.setHours(23, 59, 59, 999);
+    const { dateStart, dateEnd } = getExamDateRange(examDate);
 
     const dateCount = await Schedule.countDocuments({
       examDate: { $gte: dateStart, $lte: dateEnd },
@@ -1670,7 +1714,7 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
     console.log('Change detection result:', { dateChanged, timeChanged, locationChanged });
 
     // Update the schedule
-    schedule.examDate = new Date(examDate);
+    schedule.examDate = parseExamDateValue(examDate);
     schedule.examTime = newExamTime;
     schedule.location = newLocation;
 
