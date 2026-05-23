@@ -62,6 +62,13 @@
   --color-muted: #6b7280;
   --color-heading: #1f2937;
   --color-border: #e0e0e0;
+  --btn-primary-bg: #167a3a;
+  --btn-primary-bg-hover: #126331;
+  --btn-primary-shadow: rgba(22, 122, 58, 0.24);
+  --btn-secondary-bg: #ffffff;
+  --btn-secondary-bg-hover: #eef7f1;
+  --btn-secondary-text: #166534;
+  --btn-secondary-border: #b9d9c3;
   --type-h1: 1.8rem;
   --type-copy: 1rem;
   --type-button: 0.95rem;
@@ -263,7 +270,7 @@ h1 {
 .btn-submit {
   width: 100%;
   padding: 15px;
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: var(--btn-primary-bg);
   color: white;
   border: none;
   border-radius: 10px;
@@ -280,7 +287,8 @@ h1 {
 
 .btn-submit:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(17, 153, 142, 0.3);
+  background: var(--btn-primary-bg-hover);
+  box-shadow: 0 10px 25px var(--btn-primary-shadow);
 }
 
 .btn-submit:disabled,
@@ -296,9 +304,9 @@ button:disabled {
 
 .btn-ghost {
   padding: 12px 40px;
-  background: transparent;
-  border: 2px solid white;
-  color: white;
+  background: var(--btn-secondary-bg);
+  border: 1px solid var(--btn-secondary-border);
+  color: var(--btn-secondary-text);
   border-radius: 25px;
   font-size: var(--type-button);
   font-weight: 600;
@@ -310,8 +318,8 @@ button:disabled {
 }
 
 .btn-ghost:hover {
-  background: white;
-  color: #11998e;
+  background: var(--btn-secondary-bg-hover);
+  color: var(--btn-primary-bg);
 }
 
 body.review-screen {
@@ -986,4 +994,46 @@ body.review-screen .review-card {
 
 *::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
+}
+
+/* ==================== */
+/* Unified Auth Button Colors */
+/* ==================== */
+
+.btn-submit,
+.btn-verify {
+  background: var(--btn-primary-bg) !important;
+  border-color: var(--btn-primary-bg) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px var(--btn-primary-shadow) !important;
+}
+
+.btn-submit:hover:not(:disabled),
+.btn-verify:hover:not(:disabled) {
+  background: var(--btn-primary-bg-hover) !important;
+  border-color: var(--btn-primary-bg-hover) !important;
+  color: #ffffff !important;
+}
+
+.btn-ghost,
+.btn-secondary {
+  background: var(--btn-secondary-bg) !important;
+  border: 1px solid var(--btn-secondary-border) !important;
+  color: var(--btn-secondary-text) !important;
+  box-shadow: none !important;
+}
+
+.btn-ghost:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled) {
+  background: var(--btn-secondary-bg-hover) !important;
+  border-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-bg) !important;
+}
+
+.btn-resend {
+  color: var(--btn-secondary-text) !important;
+}
+
+.btn-resend:hover {
+  color: var(--btn-primary-bg-hover) !important;
 }

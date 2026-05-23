@@ -7,4 +7,6 @@ const scheduleSchema = new mongoose.Schema({
   location: { type: String, required: true }, // e.g., "Room 101"
 });
 
+scheduleSchema.index({ studentId: 1, examDate: 1, examTime: 1 }, { unique: true });
+
 module.exports = mongoose.model('Schedule', scheduleSchema);

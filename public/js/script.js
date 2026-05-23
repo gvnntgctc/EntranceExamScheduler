@@ -56,16 +56,55 @@ sidebarLinks.forEach(link => {
   });
 });
 
-// Time Input Elements
-const hourInput = document.getElementById('hourInput');
-const minuteInput = document.getElementById('minuteInput');
-const ampmSelect = document.getElementById('ampmSelect');
-const examTimeInput = document.getElementById('examTimeInput');
+// Auto-dismiss success notifications with smooth fade-out
+(function () {
+  const AUTO_DISMISS_MS = 4200;
+  const CLEANUP_MS = 420;
+  const timers = new WeakMap();
 
-// Helper to pad numbers
-function pad(num) {
-  return num.toString().padStart(2, '0');
-}
+  function clearExistingTimer(el) {
+    const existingTimer = timers.get(el);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+      timers.delete(el);
+    }
+  }
+
+  function removeMessage(el) {
+    if (!el || !el.parentNode) return;
+    clearExistingTimer(el);
+    el.classList.add('hide');
+    const cleanupId = setTimeout(() => {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+      timers.delete(el);
+    }, CLEANUP_MS);
+    timers.set(el, cleanupId);
+  }
+
+  function scheduleDismiss(el, timeout = AUTO_DISMISS_MS) {
+    clearExistingTimer(el);
+    const timerId = setTimeout(() => removeMessage(el), timeout);
+    timers.set(el, timerId);
+  }
+
+  function initAutoDismissMessages() {
+    const successMessages = document.querySelectorAll('.message.success');
+    successMessages.forEach(message => {
+      if (message.dataset.autoDismiss === 'false') return;
+      scheduleDismiss(message);
+      message.addEventListener('mouseenter', () => clearExistingTimer(message));
+      message.addEventListener('mouseleave', () => scheduleDismiss(message, 2200));
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAutoDismissMessages);
+  } else {
+    initAutoDismissMessages();
+  }
+})();
 
 function updateHiddenInput() {
   if (!hourInput || !minuteInput || !ampmSelect || !examTimeInput) return;

@@ -1,4 +1,6 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const mongoose = require('mongoose');
 const ExcelJS = require('exceljs');
 const router = express.Router();
@@ -14,8 +16,76 @@ const Schedule = require('../models/Schedule');
 const Notification = require('../models/Notification');
 const { buildEmailHtml } = require('../utils/emailUtils');
 
+// Allowed exam locations (strict list)
+const ALLOWED_LOCATIONS = [
+  '3rd Floor Room 301 PTC Main Campus',
+  '3rd Floor Room 302 PTC Main Campus',
+  '3rd Floor Room 303 PTC Main Campus'
+];
+
+const ALLOWED_EXAM_TIMES = [
+  '7:00-8:30 A.M',
+  '9:00-10:30 A.M',
+  '1:30-3:00 P.M',
+  '3:30-5:00 P.M'
+];
+
 function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function normalizeIdList(value) {
+  const rawIds = Array.isArray(value) ? value : (value ? [value] : []);
+  return rawIds
+    .flatMap(id => String(id || '').split(','))
+    .map(id => id.trim())
+    .filter(Boolean);
+}
+
+function hasDuplicateValues(items) {
+  return new Set(items).size !== items.length;
+}
+
+function getExamDateRange(examDate) {
+  const dateStart = new Date(examDate);
+  dateStart.setHours(0, 0, 0, 0);
+  const dateEnd = new Date(dateStart);
+  dateEnd.setHours(23, 59, 59, 999);
+  return { dateStart, dateEnd };
+}
+
+function validateScheduleFields({ examDate, examTime, location }) {
+  if (!examDate || !examTime || !location) {
+    return 'All fields are required';
+  }
+
+  if (!ALLOWED_LOCATIONS.includes(location)) {
+    return 'Invalid exam location selected';
+  }
+
+  if (!ALLOWED_EXAM_TIMES.includes(examTime)) {
+    return 'Invalid exam time selected';
+  }
+
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(examDate)) {
+    return 'Invalid exam date';
+  }
+
+  const parsedExamDate = new Date(examDate);
+  if (Number.isNaN(parsedExamDate.getTime()) || parsedExamDate.toISOString().slice(0, 10) !== examDate) {
+    return 'Invalid exam date';
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const allowedStart = new Date(2026, 2, 1);
+  const allowedEnd = new Date(2026, 7, 31);
+  if (parsedExamDate < today || parsedExamDate < allowedStart || parsedExamDate > allowedEnd) {
+    return 'Exam date must be between March 1, 2026 and August 31, 2026';
+  }
+
+  return '';
 }
 
 function buildNotificationAction(notification) {
@@ -117,13 +187,31 @@ async function sendEmail({ recipientId, to, subject, text, html }) {
   }
 
   try {
-    await transporter.sendMail({
+    const mailOptions = {
       from: process.env.EMAIL_USER,
       to,
       subject,
       text,
       html
-    });
+    };
+
+    const logoCid = 'ptc-logo@ptcadmission';
+    const logoPath = path.join(__dirname, '..', 'public', 'images', 'logo.png');
+    if (html && html.includes(`cid:${logoCid}`) && fs.existsSync(logoPath)) {
+      mailOptions.attachments = [
+        {
+          filename: 'logo.png',
+          path: logoPath,
+          cid: logoCid
+        }
+      ];
+    }
+
+    console.log('[SEND-EMAIL] htmlLength:', html ? html.length : 'NO HTML', 'htmlExists:', !!html, 'textLength:', text ? text.length : 0);
+    if (html && html.length < 100) {
+      console.log('[SEND-EMAIL] WARNING: HTML is suspiciously short. Content:', html.substring(0, 100));
+    }
+    await transporter.sendMail(mailOptions);
 
     await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'sent' });
     return true;
@@ -132,6 +220,49 @@ async function sendEmail({ recipientId, to, subject, text, html }) {
     await Notification.create({ recipientId, recipientEmail: to, subject, body: text, status: 'failed', errorMessage: error.message || String(error) });
     return false;
   }
+}
+
+function buildScheduleEmailPayload({ student, examDate, examTime, location }) {
+  const formattedExamDate = new Date(examDate).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+  const scheduleEmail = `Dear ${student.fullName || student.email},\n\nRe: Official Exam Schedule - Bachelor of Science in Information Technology Program\n\nWe are writing to confirm your examination schedule for the BSIT entrance examination.\n\nExamination Date: ${formattedExamDate}\nExamination Time: ${examTime}\nExamination Location: ${location}\n\nImportant Instructions:\n- Arrive at least 15 minutes before your scheduled examination time.\n- Bring a valid government-issued ID.\n- Do not bring mobile phones, calculators, notes, or unauthorized materials.\n- Professional attire is recommended.\n\nIf you have any questions, please contact our Admissions Office.\n\nBest wishes for your examination!\n\nAdmissions Office\nBachelor of Science in Information Technology Program\nEntranceExam Administration`;
+  const appUrl = process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : '';
+  const scheduleHtml = buildEmailHtml({
+    appName: 'PTC Admission System',
+    systemName: 'Pateros Technological College',
+    heroText: 'Your official examination schedule has been confirmed.',
+    greetingName: student.fullName || student.email,
+    heading: 'Exam Schedule Confirmation',
+    introText: 'Thank you for completing your application. Below are the official details for your upcoming exam.',
+    applicantDetails: [
+      { label: 'Applicant Name', value: student.fullName || student.email },
+      { label: 'Email Address', value: student.email }
+    ],
+    examDetails: [
+      { label: 'Exam Date', value: formattedExamDate },
+      { label: 'Exam Time', value: examTime },
+      { label: 'Exam Location', value: location }
+    ],
+    statusLabel: 'Schedule Confirmed',
+    statusMessage: 'Please arrive at least 15 minutes early and bring a valid government-issued ID for verification.',
+    importantInstructions: 'Follow these instructions to ensure a smooth exam day experience.',
+    instructionItems: [
+      'Arrive at least 15 minutes before your scheduled exam time.',
+      'Bring a valid government-issued ID for verification.',
+      'Do not bring mobile phones, calculators, notes, or unauthorized materials.',
+      'Professional attire is recommended for the entrance exam.'
+    ],
+    buttonText: appUrl ? 'Visit Applicant Portal' : '',
+    buttonUrl: appUrl ? `${appUrl}/auth/login` : '',
+    footerNote: 'If you have any questions or need assistance, please contact the Admissions Office.',
+    logoUrl: appUrl ? `${appUrl}/images/logo.png` : ''
+  });
+
+  return { text: scheduleEmail, html: scheduleHtml };
 }
 
 // Middleware: Admin check
@@ -453,14 +584,151 @@ router.get('/add-schedule', isAdmin, async (req, res) => {
   }
 });
 
-// Create Schedule
+// Create Schedule - supports one applicant or bulk applicant selection.
 router.post('/add-schedule', isAdmin, async (req, res) => {
+  try {
+    const examDate = (req.body.examDate || '').trim();
+    const examTime = (req.body.examTime || '').trim();
+    const location = (req.body.location || '').trim();
+    const validationError = validateScheduleFields({ examDate, examTime, location });
+    if (validationError) {
+      return res.redirect(`/admin/add-schedule?error=${encodeURIComponent(validationError)}`);
+    }
+
+    const submittedIds = normalizeIdList(req.body.studentIds || req.body['studentIds[]']);
+    const studentIds = submittedIds.length > 0 ? submittedIds : normalizeIdList(req.body.studentId);
+    const isBulkRequest = studentIds.length > 1 || req.body.bulkMode === '1';
+
+    if (studentIds.length === 0) {
+      return res.redirect('/admin/add-schedule?error=Please select at least one applicant');
+    }
+
+    if (hasDuplicateValues(studentIds)) {
+      return res.redirect('/admin/add-schedule?error=Duplicate applicants selected. Please remove duplicates and try again.');
+    }
+
+    const invalidIds = studentIds.filter(id => !mongoose.Types.ObjectId.isValid(id));
+    if (invalidIds.length > 0) {
+      return res.redirect('/admin/add-schedule?error=Invalid applicant selected');
+    }
+
+    const students = await User.find({
+      _id: { $in: studentIds },
+      role: 'student',
+      status: 'pending',
+      isVerified: true
+    }).lean();
+
+    if (students.length !== studentIds.length) {
+      return res.redirect('/admin/add-schedule?error=One or more selected applicants are invalid, unverified, or already finalized');
+    }
+
+    const studentsById = new Map(students.map(student => [student._id.toString(), student]));
+    const orderedStudents = studentIds.map(id => studentsById.get(id));
+    const { dateStart, dateEnd } = getExamDateRange(examDate);
+
+    const existingSchedules = await Schedule.find({
+      studentId: { $in: studentIds }
+    }).populate('studentId', 'fullName email').lean();
+
+    if (existingSchedules.length > 0) {
+      const names = existingSchedules
+        .map(schedule => schedule.studentId?.fullName || schedule.studentId?.email || 'Selected applicant')
+        .slice(0, 3)
+        .join(', ');
+      const suffix = existingSchedules.length > 3 ? ' and others' : '';
+      return res.redirect(`/admin/add-schedule?error=${encodeURIComponent(`${names}${suffix} already have an existing schedule`)}`);
+    }
+
+    const sameSlotSchedules = await Schedule.find({
+      studentId: { $in: studentIds },
+      examDate: { $gte: dateStart, $lte: dateEnd },
+      examTime
+    }).lean();
+
+    if (sameSlotSchedules.length > 0) {
+      return res.redirect('/admin/add-schedule?error=Duplicate schedule detected for one or more selected applicants');
+    }
+
+    const dateCount = await Schedule.countDocuments({ examDate: { $gte: dateStart, $lte: dateEnd } });
+    if (dateCount + orderedStudents.length > 50) {
+      const remainingSlots = Math.max(0, 50 - dateCount);
+      return res.redirect(`/admin/add-schedule?error=${encodeURIComponent(`This exam date only has ${remainingSlots} remaining slot(s). Reduce selected applicants or choose another date.`)}`);
+    }
+
+    const scheduleDocs = orderedStudents.map(student => ({
+      studentId: student._id,
+      examDate: new Date(examDate),
+      examTime,
+      location
+    }));
+
+    let createdSchedules = [];
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        createdSchedules = await Schedule.insertMany(scheduleDocs, { session, ordered: true });
+      });
+    } catch (transactionError) {
+      const transactionUnsupported = /Transaction numbers are only allowed|replica set|sharded cluster|Transaction.*not supported/i.test(transactionError.message || '');
+      if (!transactionUnsupported) {
+        throw transactionError;
+      }
+      console.warn('Schedule transaction unavailable, retrying with prevalidated ordered insert:', transactionError.message);
+      createdSchedules = await Schedule.insertMany(scheduleDocs, { ordered: true });
+    } finally {
+      await session.endSession();
+    }
+
+    await Notification.insertMany(orderedStudents.map(student => ({
+      recipientId: student._id,
+      recipientEmail: student.email,
+      subject: isBulkRequest ? 'Bulk Schedule Added' : 'Schedule Added',
+      body: `Admin created exam schedule: ${new Date(examDate).toLocaleDateString()} at ${examTime} in ${location}`,
+      status: 'sent'
+    })), { ordered: false });
+
+    let emailSuccessCount = 0;
+    for (const student of orderedStudents) {
+      const emailPayload = buildScheduleEmailPayload({ student, examDate, examTime, location });
+      const sent = await sendEmail({
+        recipientId: student._id,
+        to: student.email,
+        subject: 'Official Examination Schedule Confirmation - BSIT Program',
+        text: emailPayload.text,
+        html: emailPayload.html
+      });
+      if (sent) emailSuccessCount++;
+    }
+
+    const scheduleCount = createdSchedules.length;
+    const successMessage = isBulkRequest
+      ? `${scheduleCount} applicant${scheduleCount === 1 ? '' : 's'} scheduled successfully. ${emailSuccessCount} email notification${emailSuccessCount === 1 ? '' : 's'} sent.`
+      : `Schedule created successfully${emailSuccessCount ? ' and applicant notified' : '; applicant notification failed'}`;
+
+    return res.redirect(`/admin/add-schedule?success=${encodeURIComponent(successMessage)}`);
+  } catch (error) {
+    console.error('Failed to create schedule:', error);
+    if (error && error.code === 11000) {
+      return res.redirect('/admin/add-schedule?error=Duplicate schedule detected. Please refresh and try again.');
+    }
+    return res.redirect(`/admin/add-schedule?error=${encodeURIComponent('Failed to create schedule. No applicants were scheduled.')}`);
+  }
+});
+
+// Legacy single-applicant schedule handler retained off the active route.
+router.post('/add-schedule-legacy', isAdmin, async (req, res) => {
   try {
     const { studentId, examDate, examTime, location } = req.body;
 
     // Basic validation
     if (!studentId || !examDate || !examTime || !location) {
       return res.redirect('/admin/add-schedule?error=All fields are required');
+    }
+
+    // Enforce allowed locations for new schedules
+    if (!ALLOWED_LOCATIONS.includes(location)) {
+      return res.redirect('/admin/add-schedule?error=Invalid exam location selected');
     }
 
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -558,9 +826,17 @@ router.post('/add-schedule', isAdmin, async (req, res) => {
       ],
       statusLabel: 'Schedule Confirmed',
       statusMessage: 'Please arrive at least 15 minutes early and bring a valid government-issued ID for verification.',
+      importantInstructions: 'Follow these instructions to ensure a smooth exam day experience.',
+      instructionItems: [
+        'Arrive at least 15 minutes before your scheduled exam time.',
+        'Bring a valid government-issued ID for verification.',
+        'Do not bring mobile phones, calculators, notes, or unauthorized materials.',
+        'Professional attire is recommended for the entrance exam.'
+      ],
       buttonText: appUrl ? 'Visit Applicant Portal' : '',
       buttonUrl: appUrl ? `${appUrl}/auth/login` : '',
-      footerNote: 'If you have any questions or need assistance, please contact the Admissions Office.'
+      footerNote: 'If you have any questions or need assistance, please contact the Admissions Office.',
+      logoUrl: appUrl ? `${appUrl}/images/logo.png` : ''
     });
 
     const notificationSent = await sendEmail({
@@ -1097,7 +1373,8 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
             statusMessage,
             buttonText: appUrl ? 'Visit Applicant Portal' : '',
             buttonUrl: appUrl ? `${appUrl}/auth/login` : '',
-            footerNote: 'For questions, please contact the Admissions Office using the contact details on the portal.'
+            footerNote: 'For questions, please contact the Admissions Office using the contact details on the portal.',
+            logoUrl: appUrl ? `${appUrl}/images/logo.png` : ''
           });
 
           student.resultMessage = statusMessage;
@@ -1124,7 +1401,8 @@ router.post('/students/bulk-status', isAdmin, async (req, res) => {
             recipientId: student._id,
             to: student.email,
             subject: emailSubject,
-            text: emailBody
+            text: emailBody,
+            html: emailHtml
           });
 
           if (sent) {
@@ -1334,23 +1612,36 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
     const { id } = req.params;
     const { examDate, examTime, location } = req.body;
 
+    console.log('--- SCHEDULE UPDATE REQUEST RECEIVED ---');
+    console.log('Schedule ID:', id);
+    console.log('Incoming values:', { examDate, examTime, location });
+
     // Basic validation
     if (!examDate || !examTime || !location) {
+      console.log('Validation failed: missing required fields', { examDate, examTime, location });
       return res.redirect(`/admin/edit-schedule/${id}?error=All fields are required`);
     }
 
     const schedule = await Schedule.findById(id);
     if (!schedule) {
+      console.log('Schedule not found for ID:', id);
       return res.redirect('/admin/add-schedule?error=Schedule not found');
+    }
+
+    // Enforce allowed locations for edits. Allow existing non-standard value to persist for backward compatibility.
+    if (!ALLOWED_LOCATIONS.includes(location) && schedule.location !== location) {
+      console.log('Validation failed: invalid location selected', { submitted: location, existing: schedule.location });
+      return res.redirect(`/admin/edit-schedule/${id}?error=Invalid exam location selected`);
     }
 
     // Get student info for logging
     const student = await User.findById(schedule.studentId);
-    
-    // Store old values for comparison
-    const oldDate = new Date(schedule.examDate).toLocaleDateString();
-    const oldTime = schedule.examTime;
-    const oldLocation = schedule.location;
+
+    // Store old values for comparison (normalized)
+    const oldDate = schedule.examDate ? new Date(schedule.examDate).toISOString().slice(0,10) : null;
+    const oldTime = schedule.examTime || '';
+    const oldLocation = schedule.location || '';
+    console.log('Existing DB values:', { oldDate, oldTime, oldLocation });
 
     const dateStart = new Date(examDate);
     dateStart.setHours(0, 0, 0, 0);
@@ -1366,21 +1657,94 @@ router.post('/edit-schedule/:id', isAdmin, async (req, res) => {
       return res.redirect(`/admin/edit-schedule/${id}?error=That exam date has already reached the maximum limit of 50 scheduled applicants`);
     }
 
+    // Detect changes (capture previous values already in oldDate/oldTime/oldLocation)
+    const oldExamIso = schedule.examDate ? new Date(schedule.examDate).toISOString().slice(0, 10) : null;
+    const newExamIso = examDate;
+    const newExamTime = examTime.trim();
+    const newLocation = location.trim();
+
+    const dateChanged = oldExamIso !== newExamIso;
+    const timeChanged = oldTime !== newExamTime;
+    const locationChanged = oldLocation !== newLocation;
+
+    console.log('Change detection result:', { dateChanged, timeChanged, locationChanged });
+
     // Update the schedule
     schedule.examDate = new Date(examDate);
-    schedule.examTime = examTime.trim();
-    schedule.location = location.trim();
+    schedule.examTime = newExamTime;
+    schedule.location = newLocation;
 
-    await schedule.save();
+    try {
+      console.log('Saving schedule to DB...');
+      await schedule.save();
+      console.log('Schedule saved:', schedule._id.toString());
+    } catch (saveErr) {
+      console.error('Error saving schedule:', saveErr);
+      return res.redirect(`/admin/edit-schedule/${id}?error=Failed to save schedule`);
+    }
 
-    // Log schedule update in activity log
-    await Notification.create({
-      recipientId: schedule.studentId,
-      recipientEmail: student?.email,
-      subject: 'Schedule Updated',
-      body: `Admin updated exam schedule from [${oldDate} at ${oldTime} in ${oldLocation}] to [${new Date(examDate).toLocaleDateString()} at ${examTime.trim()} in ${location.trim()}]`,
-      status: 'sent'
-    });
+    // If any tracked field changed, send an update email to applicant
+    if (dateChanged || timeChanged || locationChanged) {
+      console.log('Tracked changes detected; preparing email notification');
+      try {
+        const changeParts = [];
+        if (dateChanged) changeParts.push(`Date: ${new Date(newExamIso).toLocaleDateString()}`);
+        if (timeChanged) changeParts.push(`Time: ${newExamTime}`);
+        if (locationChanged) changeParts.push(`Location: ${newLocation}`);
+
+        const subject = 'Exam Schedule Updated — PTC Admission';
+        const text = `Dear ${student.fullName || student.email},\n\nYour exam schedule has been updated.\n\nUpdated details:\n${changeParts.join('\n')}\n\nPlease review the updated schedule and attend at the revised date/time/location.\n\nIf you have questions, contact the Admissions Office.`;
+
+        const appUrl = process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : '';
+        const html = buildEmailHtml({
+          appName: 'PTC Admission System',
+          systemName: 'Pateros Technological College',
+          heroText: 'Your exam schedule has been updated.',
+          greetingName: student.fullName || student.email,
+          heading: 'Exam Schedule Updated',
+          introText: 'Your examination schedule was recently updated by the Admissions Office. Please review the new details below and take note of the changes.',
+          applicantDetails: [
+            { label: 'Applicant Name', value: student.fullName || '' },
+            { label: 'Email Address', value: student.email || '' }
+          ],
+          examDetails: [
+            { label: 'Exam Date', value: new Date(newExamIso).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) },
+            { label: 'Exam Time', value: newExamTime },
+            { label: 'Exam Location', value: newLocation }
+          ],
+          statusLabel: 'Schedule Updated',
+          statusMessage: `Your schedule was updated. Changes: ${changeParts.join(', ')}`,
+          buttonText: appUrl ? 'Visit Applicant Portal' : '',
+          buttonUrl: appUrl ? `${appUrl}/auth/login` : '',
+          footerNote: 'If you have any questions, please contact the Admissions Office.',
+          logoUrl: appUrl ? `${appUrl}/images/logo.png` : ''
+        });
+
+        console.log('Calling sendEmail() for applicant:', student?.email);
+        const sent = await sendEmail({
+          recipientId: schedule.studentId,
+          to: student?.email,
+          subject,
+          text,
+          html
+        });
+        console.log('sendEmail result:', sent);
+
+        // Check recent notification record
+        const recentNotif = await Notification.findOne({ recipientId: schedule.studentId }).sort({ createdAt: -1 }).lean();
+        console.log('Recent notification (if any):', recentNotif ? { id: recentNotif._id, status: recentNotif.status, subject: recentNotif.subject } : 'NONE');
+
+        if (!sent) {
+          console.log('Email sending failed (sendEmail returned false)');
+          return res.redirect('/admin/add-schedule?success=Schedule updated; notification failed to send');
+        }
+      } catch (err) {
+        console.error('Failed to send schedule update email:', err);
+        return res.redirect('/admin/add-schedule?success=Schedule updated; notification failed to send');
+      }
+    } else {
+      console.log('No relevant fields changed; skipping notification');
+    }
 
     return res.redirect('/admin/add-schedule?success=Schedule updated successfully');
   } catch (error) {

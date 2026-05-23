@@ -7,6 +7,60 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .submit-loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.58);
+      backdrop-filter: blur(3px);
+      padding: 18px;
+    }
+
+    .submit-loading-overlay.show {
+      display: flex;
+    }
+
+    .submit-loading-card {
+      width: min(90vw, 360px);
+      padding: 34px 28px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+      text-align: center;
+    }
+
+    .submit-loading-ring {
+      width: 62px;
+      height: 62px;
+      margin: 0 auto 18px;
+      border: 6px solid rgba(17, 153, 142, 0.22);
+      border-top-color: #11998e;
+      border-right-color: #38ef7d;
+      border-radius: 50%;
+      animation: submit-spin 0.9s linear infinite;
+    }
+
+    .submit-loading-card p {
+      margin: 0;
+      color: #0f766e;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .btn.is-loading {
+      pointer-events: none;
+      opacity: 0.82;
+    }
+
+    @keyframes submit-spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body class="admin-page-bg">
   <%- include('partials/sidebar', { page: 'editSchedule' }) %>
@@ -41,9 +95,9 @@
               <label for="examDateDisplay"><i class="fas fa-calendar"></i> Exam Date</label>
               <div class="exam-date-card">
                 <input type="hidden" id="examDate" name="examDate" value="<%= schedule.examDate ? new Date(schedule.examDate).toISOString().split('T')[0] : '' %>" />
-                <input type="text" id="examDateDisplay" placeholder="Click to choose a date from March to August 2026" readonly required aria-label="Selected exam date" aria-describedby="holidayHelp" />
+                <input type="text" id="examDateDisplay" placeholder="Click to choose a date from March to August 2026" readonly required aria-label="Selected exam date" aria-describedby="holidayHelp capacityWarning" />
               </div>
-              <small class="sub-text">Click the field to open the exam date picker.</small>
+              <small class="sub-text" id="holidayHelp">Click the field to open the exam date picker.</small>
             </div>
             
             <div class="form-group">
@@ -60,9 +114,16 @@
             
             <div class="form-group">
               <label for="location"><i class="fas fa-map-marker-alt"></i> Location</label>
-              <input type="text" id="location" name="location" value="<%= schedule.location || '3rd Floor PTC Main Campus' %>" disabled />
-              <input type="hidden" name="location" value="<%= schedule.location || '3rd Floor PTC Main Campus' %>" />
-              <small class="sub-text">Fixed location for all exams</small>
+              <select id="location" name="location" required aria-required="true" aria-label="Select exam location">
+                <option value="">Select Exam Location</option>
+                <option value="3rd Floor Room 301 PTC Main Campus" <% if(schedule.location === '3rd Floor Room 301 PTC Main Campus') { %>selected<% } %>>3rd Floor Room 301 PTC Main Campus</option>
+                <option value="3rd Floor Room 302 PTC Main Campus" <% if(schedule.location === '3rd Floor Room 302 PTC Main Campus') { %>selected<% } %>>3rd Floor Room 302 PTC Main Campus</option>
+                <option value="3rd Floor Room 303 PTC Main Campus" <% if(schedule.location === '3rd Floor Room 303 PTC Main Campus') { %>selected<% } %>>3rd Floor Room 303 PTC Main Campus</option>
+                <% if (schedule.location && !['3rd Floor Room 301 PTC Main Campus','3rd Floor Room 302 PTC Main Campus','3rd Floor Room 303 PTC Main Campus'].includes(schedule.location)) { %>
+                  <option value="<%= schedule.location %>" selected><%= schedule.location %> (existing)</option>
+                <% } %>
+              </select>
+              <small class="sub-text">Choose one of the predefined exam rooms. Existing non-standard value shown for compatibility.</small>
             </div>
           </div>
 
@@ -102,6 +163,13 @@
       </div>
     </div>
   </div>
+
+  <div class="submit-loading-overlay" id="submitLoadingOverlay" aria-hidden="true">
+    <div class="submit-loading-card" role="status" aria-live="polite">
+      <div class="submit-loading-ring" aria-hidden="true"></div>
+      <p>Updating applicant info...</p>
+    </div>
+  </div>
   
   <script id="scheduleData" type="application/json">{"scheduleCounts":<%- JSON.stringify(scheduleCounts || {}) %>}</script>
   <script src="/js/script.js"></script>
@@ -117,6 +185,8 @@
     const calendarTitle = document.getElementById('calendarTitle');
     const dateGrid = document.getElementById('dateGrid');
     const scheduleForm = document.querySelector('.schedule-form');
+    const submitLoadingOverlay = document.getElementById('submitLoadingOverlay');
+    const submitButton = scheduleForm?.querySelector('button[type="submit"]');
     const holidayWarning = document.getElementById('holidayWarning');
     const capacityWarning = document.getElementById('capacityWarning');
     const holidays = {
@@ -311,7 +381,9 @@
       if (!examDateInput || !examDateDisplay) return;
       examDateInput.value = dateValue;
       examDateDisplay.value = formatDisplayDate(dateValue);
-      clearExamDateValidity();
+      validateHolidayDate(dateValue);
+      validateCapacityDate(dateValue);
+      examDateDisplay.setCustomValidity('');
       renderDateGrid();
       closeExamDateModal();
     }
@@ -370,6 +442,16 @@
         setExamDateInvalid('Please select an exam date between March and August 2026.');
         examDateDisplay?.reportValidity();
         event.preventDefault();
+        return;
       }
+
+      submitButton?.classList.add('is-loading');
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.setAttribute('aria-busy', 'true');
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+      }
+      submitLoadingOverlay?.classList.add('show');
+      submitLoadingOverlay?.setAttribute('aria-hidden', 'false');
     });
   </script>

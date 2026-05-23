@@ -10,6 +10,20 @@
   --color-muted: #5f6c7a;
   --color-heading: #1f2937;
   --color-border: #e0e0e0;
+  --btn-primary-bg: #167a3a;
+  --btn-primary-bg-hover: #126331;
+  --btn-primary-shadow: rgba(22, 122, 58, 0.24);
+  --btn-secondary-bg: #ffffff;
+  --btn-secondary-bg-hover: #eef7f1;
+  --btn-secondary-text: #166534;
+  --btn-secondary-border: #b9d9c3;
+  --btn-danger-bg: #c0392b;
+  --btn-danger-bg-hover: #9f2f24;
+  --btn-danger-shadow: rgba(192, 57, 43, 0.24);
+  --btn-neutral-bg: #f8fafc;
+  --btn-neutral-bg-hover: #e9f1ec;
+  --btn-neutral-text: #334155;
+  --btn-neutral-border: #cbd5e1;
   --radius-default: 12px;
   --space-xxs: 0.35rem;
   --space-xs: 0.75rem;
@@ -24,6 +38,187 @@
   --type-label: 0.95rem;
   --type-button: 0.95rem;
   --type-small: 0.875rem;
+}
+
+/* ==================== */
+/* Unified Button Colors */
+/* ==================== */
+
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-submit,
+.btn-verify,
+.btn-resend,
+.edit-btn,
+.delete-btn,
+.cancel-btn,
+.pagination-btn,
+.view-details-btn,
+.back-button,
+.export-btn,
+.filter-btn,
+.month-nav-btn,
+.modal-back,
+.modal-close-btn,
+.confirm-delete,
+.cancel-delete,
+.action-btn,
+.clear-selected-btn,
+.bulk-select-all-btn,
+.page-link,
+.view-calendar-btn,
+.hamburger,
+.btn-icon,
+.circle-btn {
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease !important;
+}
+
+.btn-primary,
+button.btn-primary,
+.btn-submit,
+.btn-verify,
+.pagination-btn,
+.view-details-btn,
+.back-button,
+.export-btn,
+.bulk-select-all-btn,
+.view-calendar-btn,
+.hamburger,
+.confirm-delete,
+.action-btn.edit-btn,
+.edit-btn:not(.circle-btn):not(.btn-icon),
+.page-link.active,
+.filter-btn.active {
+  background: var(--btn-primary-bg) !important;
+  border-color: var(--btn-primary-bg) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px var(--btn-primary-shadow) !important;
+}
+
+.btn-primary:hover:not(:disabled),
+button.btn-primary:hover:not(:disabled),
+.btn-submit:hover:not(:disabled),
+.btn-verify:hover:not(:disabled),
+.pagination-btn:hover:not(:disabled),
+.view-details-btn:hover:not(:disabled),
+.back-button:hover,
+.export-btn:hover:not(:disabled),
+.bulk-select-all-btn:hover:not(:disabled),
+.view-calendar-btn:hover:not(:disabled),
+.hamburger:hover:not(:disabled),
+.confirm-delete:hover:not(:disabled),
+.action-btn.edit-btn:hover:not(:disabled),
+.edit-btn:not(.circle-btn):not(.btn-icon):hover,
+.page-link.active:hover,
+.filter-btn.active:hover {
+  background: var(--btn-primary-bg-hover) !important;
+  border-color: var(--btn-primary-bg-hover) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px var(--btn-primary-shadow) !important;
+}
+
+.btn-secondary,
+.cancel-btn,
+.cancel-delete,
+.clear-selected-btn,
+.page-link:not(.active),
+.filter-btn:not(.active) {
+  background: var(--btn-secondary-bg) !important;
+  border: 1px solid var(--btn-secondary-border) !important;
+  color: var(--btn-secondary-text) !important;
+  box-shadow: none !important;
+}
+
+.btn-secondary:hover:not(:disabled),
+.cancel-btn:hover:not(:disabled),
+.cancel-delete:hover:not(:disabled),
+.clear-selected-btn:hover:not(:disabled),
+.page-link:not(.active):hover,
+.filter-btn:not(.active):hover {
+  background: var(--btn-secondary-bg-hover) !important;
+  border-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-bg) !important;
+  transform: translateY(-1px);
+}
+
+.delete-btn:not(.circle-btn):not(.btn-icon),
+.action-btn.delete-btn,
+.btn-icon.delete,
+.confirm-delete.is-danger {
+  background: var(--btn-danger-bg) !important;
+  border-color: var(--btn-danger-bg) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px var(--btn-danger-shadow) !important;
+}
+
+.delete-btn:not(.circle-btn):not(.btn-icon):hover,
+.action-btn.delete-btn:hover:not(:disabled),
+.btn-icon.delete:hover,
+.confirm-delete.is-danger:hover:not(:disabled) {
+  background: var(--btn-danger-bg-hover) !important;
+  border-color: var(--btn-danger-bg-hover) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 20px var(--btn-danger-shadow) !important;
+}
+
+.circle-btn,
+.btn-icon {
+  background: #ffffff !important;
+  border: 1px solid var(--btn-secondary-border) !important;
+  color: var(--btn-secondary-text) !important;
+  box-shadow: none !important;
+}
+
+.circle-btn:hover,
+.btn-icon:hover {
+  background: var(--btn-secondary-bg-hover) !important;
+  border-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-bg) !important;
+}
+
+.circle-btn.delete-btn,
+.btn-icon.delete {
+  color: var(--btn-danger-bg) !important;
+  border-color: rgba(192, 57, 43, 0.32) !important;
+}
+
+.circle-btn.delete-btn:hover,
+.btn-icon.delete:hover {
+  background: #fff1ef !important;
+  border-color: var(--btn-danger-bg) !important;
+  color: var(--btn-danger-bg) !important;
+}
+
+.modal-back,
+.modal-close-btn,
+.month-nav-btn {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.modal-back:hover:not(:disabled),
+.modal-close-btn:hover:not(:disabled),
+.month-nav-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.26) !important;
+  color: #ffffff !important;
+}
+
+.btn:disabled,
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-submit:disabled,
+.btn-verify:disabled,
+.pagination-btn:disabled,
+.action-btn:disabled,
+button:disabled {
+  opacity: 0.58 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 * {
@@ -1348,6 +1543,18 @@ h2 i {
   align-items: center;
   gap: 12px;
   font-weight: 500;
+  max-height: 999px;
+  transition: opacity 0.35s ease, max-height 0.35s ease, margin 0.35s ease, padding 0.35s ease;
+  overflow: hidden;
+}
+
+.message.hide {
+  opacity: 0;
+  max-height: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-left-width: 0;
 }
 
 .message.error {

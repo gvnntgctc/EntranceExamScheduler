@@ -1,6 +1,8 @@
 ﻿const express = require('express');
 const dns = require('dns').promises;
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const User = require('../models/User');
 const { buildEmailHtml } = require('../utils/emailUtils');
 let nodemailer;
@@ -109,13 +111,31 @@ async function sendEmail({ to, subject, text, html }) {
   }
 
   try {
-    await transporter.sendMail({
+    const mailOptions = {
       from: process.env.EMAIL_USER,
       to,
       subject,
       text,
       html
-    });
+    };
+
+    const logoCid = 'ptc-logo@ptcadmission';
+    const logoPath = path.join(__dirname, '..', 'public', 'images', 'logo.png');
+    if (html && html.includes(`cid:${logoCid}`) && fs.existsSync(logoPath)) {
+      mailOptions.attachments = [
+        {
+          filename: 'logo.png',
+          path: logoPath,
+          cid: logoCid
+        }
+      ];
+    }
+
+    console.log('[AUTH-SEND-EMAIL] htmlLength:', html ? html.length : 'NO HTML', 'htmlExists:', !!html, 'textLength:', text ? text.length : 0);
+    if (html && html.length < 100) {
+      console.log('[AUTH-SEND-EMAIL] WARNING: HTML is suspiciously short. Content:', html.substring(0, 100));
+    }
+    await transporter.sendMail(mailOptions);
     console.log('Email sent successfully to:', to);
     return true;
   } catch (error) {
@@ -367,7 +387,8 @@ router.post('/apply-confirm', async (req, res) => {
       statusMessage: `Your one-time verification code is ${otp}. It expires in 3 minutes.`,
       buttonText: appUrl ? 'Verify Your Email' : '',
       buttonUrl: appUrl ? `${appUrl}/auth/verify-otp` : '',
-      footerNote: 'If you did not request this email, please disregard it.'
+      footerNote: 'If you did not request this email, please disregard it.',
+      logoUrl: appUrl ? `${appUrl}/images/logo.png` : ''
     });
 
     const emailSent = await sendEmail({
@@ -492,7 +513,8 @@ router.post('/verify-otp', async (req, res) => {
       statusMessage: 'Your application is now under review. We will notify you when the exam schedule is ready.',
       buttonText: appUrl ? 'Return to Applicant Portal' : '',
       buttonUrl: appUrl ? `${appUrl}/auth/login` : '',
-      footerNote: 'If you have any questions, please contact our Admissions Office.'
+      footerNote: 'If you have any questions, please contact our Admissions Office.',
+      logoUrl: appUrl ? `${appUrl}/images/logo.png` : ''
     });
 
     await sendEmail({
@@ -553,7 +575,8 @@ router.post('/resend-otp', async (req, res) => {
       statusMessage: `Your current verification code is ${otp} and it expires in 3 minutes.`,
       buttonText: appUrl ? 'Continue Verification' : '',
       buttonUrl: appUrl ? `${appUrl}/auth/verify-otp` : '',
-      footerNote: 'If you did not request this code, please ignore this message.'
+      footerNote: 'If you did not request this code, please ignore this message.',
+      logoUrl: appUrl ? `${appUrl}/images/logo.png` : ''
     });
 
     const emailSent = await sendEmail({

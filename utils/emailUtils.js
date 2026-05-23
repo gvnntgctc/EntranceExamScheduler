@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const nodemailer = require('nodemailer');
 
 /**
@@ -77,10 +79,13 @@ function buildEmailHtml({
   examDetails = [],
   statusLabel = '',
   statusMessage = '',
+  importantInstructions = '',
+  instructionItems = [],
   buttonText = '',
   buttonUrl = '',
   footerNote = 'If you have any questions, please contact our Admissions Office.',
-  logoUrl = ''
+  logoUrl = '',
+  preferEmbeddedLogo = true
 }) {
   const safeAppName = escapeHtml(appName);
   const safeSystemName = escapeHtml(systemName);
@@ -90,17 +95,34 @@ function buildEmailHtml({
   const safeStatusLabel = escapeHtml(statusLabel);
   const safeStatusMessage = escapeHtml(statusMessage);
   const safeFooterNote = escapeHtml(footerNote);
-  const logoImage = logoUrl && /^https?:\/\//i.test(logoUrl)
-    ? `<img src="${escapeHtml(logoUrl)}" width="80" alt="${safeAppName} logo" style="display:block;margin:0 auto 14px;max-width:80px;border-radius:16px;">`
+  const safeImportantInstructions = escapeHtml(importantInstructions);
+
+  const isLocalhostUrl = (url) => {
+    if (!url || typeof url !== 'string') return false;
+    return /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?/i.test(url);
+  };
+
+  const processedLogoUrl = !preferEmbeddedLogo && logoUrl && /^https?:\/\//i.test(logoUrl) && !isLocalhostUrl(logoUrl)
+    ? logoUrl
     : '';
+
+  const defaultUrlBase = process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : '';
+  const defaultLogoUrl = !preferEmbeddedLogo && defaultUrlBase && !isLocalhostUrl(defaultUrlBase)
+    ? `${defaultUrlBase}/images/logo.png`
+    : '';
+
+  const selectedLogoUrl = processedLogoUrl || defaultLogoUrl;
+  const logoSource = selectedLogoUrl || 'cid:ptc-logo@ptcadmission';
+  const logoImage = `<img src="${escapeHtml(logoSource)}" width="80" alt="${safeAppName} logo" style="display:block;max-width:80px;height:auto;border-radius:6px;">`;
+
   const detailsSection = applicantDetails.length > 0
     ? `
       <tr>
-        <td style="padding:0 0 18px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#f8fafc;border:1px solid #e6edf3;border-radius:14px;width:100%;">
+        <td style="padding:0 24px 18px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#ffffff;border:1px solid #dbe7ef;border-radius:14px;width:100%;">
             <tr>
-              <td style="padding:20px;">
-                <h3 style="font-size:16px;color:#1f2937;margin:0 0 12px;">Applicant Information</h3>
+              <td style="padding:18px 20px;">
+                <p style="margin:0 0 10px;color:#0f766e;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Applicant Information</p>
                 <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
                   ${formatDetailRows(applicantDetails)}
                 </table>
@@ -110,14 +132,15 @@ function buildEmailHtml({
         </td>
       </tr>`
     : '';
+
   const examSection = examDetails.length > 0
     ? `
       <tr>
-        <td style="padding:0 0 18px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#ffffff;border:1px solid #e0e8ef;border-radius:14px;width:100%;">
+        <td style="padding:0 24px 18px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#ffffff;border:1px solid #dbe7ef;border-radius:14px;width:100%;">
             <tr>
-              <td style="padding:20px;">
-                <h3 style="font-size:16px;color:#1f2937;margin:0 0 12px;">Exam Schedule Details</h3>
+              <td style="padding:18px 20px;">
+                <p style="margin:0 0 10px;color:#0f766e;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Exam Schedule Details</p>
                 <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
                   ${formatDetailRows(examDetails)}
                 </table>
@@ -127,14 +150,39 @@ function buildEmailHtml({
         </td>
       </tr>`
     : '';
+
+  const instructionsList = instructionItems.length > 0
+    ? `
+      <ul style="margin:12px 0 0 20px;padding:0;color:#4e6378;font-size:14px;line-height:1.75;">
+        ${instructionItems.map(item => `<li style="margin:0 0 10px;">${escapeHtml(item)}</li>`).join('')}
+      </ul>`
+    : '';
+
+  const instructionsSection = (safeImportantInstructions || instructionsList)
+    ? `
+      <tr>
+        <td style="padding:0 24px 18px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#ffffff;border:1px solid #dce7ef;border-radius:16px;width:100%;">
+            <tr>
+              <td style="padding:20px;">
+                <p style="margin:0 0 10px;color:#11998e;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Important Instructions</p>
+                ${safeImportantInstructions ? `<p style="margin:0 0 12px;color:#475569;font-size:15px;line-height:1.75;">${safeImportantInstructions}</p>` : ''}
+                ${instructionsList}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>`
+    : '';
+
   const buttonSection = buttonText && buttonUrl
     ? `
       <tr>
-        <td style="padding:0 0 18px;">
+        <td style="padding:0 24px 22px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
             <tr>
               <td align="center">
-                <a href="${escapeHtml(buttonUrl)}" target="_blank" style="display:inline-block;padding:12px 24px;background:#11998e;color:#ffffff;text-decoration:none;border-radius:10px;font-size:15px;font-weight:600;">${escapeHtml(buttonText)}</a>
+                <a href="${escapeHtml(buttonUrl)}" target="_blank" style="display:inline-block;padding:12px 24px;background:#11998e;color:#ffffff;text-decoration:none;border-radius:10px;font-size:15px;font-weight:700;">${escapeHtml(buttonText)}</a>
               </td>
             </tr>
           </table>
@@ -149,51 +197,71 @@ function buildEmailHtml({
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${safeHeading}</title>
+    <!--[if mso]>
+      <style type="text/css">
+        .email-container { width:920px !important; }
+        .rounded { border-radius:6px !important; }
+        .header-padding { padding:12px 20px !important; }
+        .section-pad { padding:14px 18px !important; }
+      </style>
+    <![endif]-->
   </head>
-  <body style="margin:0;padding:0;background-color:#eef2f7;font-family:Arial,Helvetica,sans-serif;">
+  <body style="margin:0;padding:0;background-color:#e9f2f5;font-family:'Roboto',Arial,sans-serif;color:#102a43;">
     <span style="display:none;max-height:0;overflow:hidden;mso-hide:all;">${escapeHtml(statusMessage || heroText)}</span>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eef2f7;padding:24px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e9f2f5;padding:8px 0;">
       <tr>
         <td align="center">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="max-width:600px;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(15,23,42,0.08);">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="max-width:920px;" class="email-container">
             <tr>
-              <td style="background:#11998e;padding:32px 24px;text-align:center;">
-                ${logoImage}
-                <p style="margin:0;font-size:14px;color:#d7f1ed;text-transform:uppercase;letter-spacing:1px;font-weight:700;">${safeSystemName}</p>
-                <h1 style="margin:12px 0 8px;font-size:26px;color:#ffffff;font-weight:700;line-height:1.1;">${safeAppName}</h1>
-                <p style="margin:0;font-size:15px;color:#e0f7f1;line-height:1.7;">${safeHeroText}</p>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:24px 24px 0;">
-                <p style="margin:0 0 6px;color:#6b8097;font-size:14px;text-transform:uppercase;letter-spacing:0.08em;">Hello ${safeGreetingName},</p>
-                <h2 style="margin:0 0 20px;font-size:22px;color:#1f2937;line-height:1.2;">${safeHeading}</h2>
-                ${formatParagraphs(introText)}
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:0 24px 24px;">
-                <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#f8fafc;border:1px solid #dce7ef;border-radius:16px;width:100%;">
+              <td style="padding:0 12px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#ffffff;border:1px solid #e6eef2;border-radius:6px;overflow:hidden;" class="rounded">
                   <tr>
-                    <td style="padding:20px;">
-                      <p style="margin:0;font-size:14px;color:#11998e;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Status</p>
-                      <h3 style="margin:10px 0 0;font-size:18px;color:#1f2937;line-height:1.4;">${safeStatusLabel || 'Update Available'}</h3>
-                      <p style="margin:12px 0 0;color:#48545f;font-size:15px;line-height:1.75;">${escapeHtml(statusMessage)}</p>
+                    <td style="background:linear-gradient(90deg,#0fa58c 0%,#26d07a 100%);padding:12px 20px;" class="header-padding">
+                      <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                        <tr>
+                          <td style="vertical-align:middle;padding-right:12px;width:96px;">${logoImage}</td>
+                          <td style="vertical-align:middle;">
+                            <p style="margin:0;font-size:12px;color:#eafaf4;text-transform:uppercase;letter-spacing:1px;font-weight:700;">${safeSystemName}</p>
+                            <h1 style="margin:4px 0 0;font-size:22px;color:#ffffff;font-weight:700;line-height:1.05;">${safeAppName}</h1>
+                            <p style="margin:8px 0 0;font-size:13px;color:#dff9ec;line-height:1.5;max-width:600px;">${safeHeroText}</p>
+                          </td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
-                </table>
-              </td>
-            </tr>
-            ${detailsSection}
-            ${examSection}
-            ${buttonSection}
-            <tr>
-              <td style="padding:0 24px 24px;">
-                <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-top:1px solid #e5edf4;">
                   <tr>
-                    <td style="padding:20px 0 0;color:#7a8a99;font-size:13px;line-height:1.7;text-align:center;">
-                      <p style="margin:0;">${safeFooterNote}</p>
-                      <p style="margin:12px 0 0;">${safeSystemName} | ${safeAppName}</p>
+                    <td style="padding:20px 24px 0;">
+                      <p style="margin:0 0 7px;color:#475569;font-size:13px;text-transform:uppercase;letter-spacing:0.11em;">Hello ${safeGreetingName},</p>
+                      <h2 style="margin:0 0 18px;font-size:24px;color:#102a43;line-height:1.2;">${safeHeading}</h2>
+                      ${formatParagraphs(introText)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 24px 16px;">
+                      <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#f7fcfb;border:1px solid #e3f2ef;border-radius:8px;width:100%;" class="rounded">
+                        <tr>
+                          <td style="padding:14px 18px;" class="section-pad">
+                            <p style="margin:0 0 8px;color:#0f766e;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Admission Status</p>
+                            <p style="margin:0;font-size:16px;color:#102a43;line-height:1.7;">${safeStatusMessage}</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  ${detailsSection.replace(/border-radius:14px/g, 'border-radius:8px').replace(/padding:18px 20px/g, 'padding:14px 18px')}
+                  ${examSection.replace(/border-radius:14px/g, 'border-radius:8px').replace(/padding:18px 20px/g, 'padding:14px 18px')}
+                  ${instructionsSection.replace(/border-radius:16px/g, 'border-radius:8px').replace(/padding:20px/g, 'padding:14px')}
+                  ${buttonSection}
+                  <tr>
+                    <td style="padding:0 24px 22px;">
+                      <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-top:1px solid #e8eef2;">
+                        <tr>
+                          <td style="padding:16px 0 0;color:#475569;font-size:13px;line-height:1.6;text-align:left;">
+                            <p style="margin:0;">${safeFooterNote}</p>
+                            <p style="margin:10px 0 0;color:#728398;font-size:12px;line-height:1.6;">${safeSystemName} | ${safeAppName}</p>
+                          </td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
                 </table>
@@ -222,14 +290,28 @@ async function sendEmail({ to, subject, text, html }) {
     return false;
   }
 
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    text,
+    html
+  };
+
+  const logoCid = 'ptc-logo@ptcadmission';
+  const logoPath = path.join(__dirname, '..', 'public', 'images', 'logo.png');
+  if (html && html.includes(`cid:${logoCid}`) && fs.existsSync(logoPath)) {
+    mailOptions.attachments = [
+      {
+        filename: 'logo.png',
+        path: logoPath,
+        cid: logoCid
+      }
+    ];
+  }
+
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to,
-      subject,
-      text,
-      html
-    });
+    await transporter.sendMail(mailOptions);
     console.log('Email sent:', { to, subject });
     return true;
   } catch (error) {

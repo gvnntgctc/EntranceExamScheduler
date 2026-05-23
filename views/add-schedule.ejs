@@ -7,6 +7,267 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .bulk-applicant-group {
+      grid-column: 1 / -1;
+    }
+
+    .bulk-selector {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid rgba(197, 214, 205, 0.9);
+      border-radius: 14px;
+      background: #fbfdfb;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .bulk-selector-toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .bulk-search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 12px;
+      border: 1px solid #dce8e2;
+      border-radius: 12px;
+      background: #ffffff;
+    }
+
+    .bulk-search-wrap i {
+      color: #11998e;
+    }
+
+    .bulk-search-wrap .search-input {
+      width: 100%;
+      height: 46px;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .bulk-select-all-btn,
+    .clear-selected-btn {
+      border: 0;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .bulk-select-all-btn {
+      min-height: 48px;
+      padding: 0 16px;
+      background: #1b6f28;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .bulk-select-all-btn:hover,
+    .clear-selected-btn:hover {
+      filter: brightness(0.98);
+      transform: translateY(-1px);
+    }
+
+    .bulk-selector-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      min-height: 34px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      color: #476052;
+      background: #f3f8f5;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .clear-selected-btn {
+      padding: 7px 12px;
+      background: #ffffff;
+      color: #1b6f28;
+      box-shadow: inset 0 0 0 1px #dce8e2;
+    }
+
+    .schedule-form .bulk-selector .bulk-applicant-list {
+      max-height: 250px;
+      overflow-y: auto;
+      display: grid;
+      gap: 8px;
+      padding: 4px 4px 4px 0;
+    }
+
+    .schedule-form .bulk-selector .bulk-applicant-option {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      min-height: 66px;
+      padding: 12px 14px;
+      border: 1px solid #e1ece5;
+      border-radius: 12px;
+      background: #ffffff;
+      cursor: pointer;
+      margin: 0;
+      color: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .schedule-form .bulk-selector .bulk-applicant-option:hover,
+    .schedule-form .bulk-selector .bulk-applicant-option.is-selected {
+      border-color: #1b6f28;
+      box-shadow: 0 10px 22px rgba(27, 111, 40, 0.09);
+    }
+
+    .schedule-form .bulk-selector .bulk-applicant-option.is-selected {
+      background: #f0faf3;
+    }
+
+    .schedule-form .bulk-selector .bulk-applicant-option input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: 0;
+      padding: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .bulk-applicant-name {
+      display: block;
+      color: #25342a;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .bulk-applicant-email {
+      display: block;
+      margin-top: 3px;
+      color: #64766b;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .bulk-applicant-status {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #eef8f2;
+      color: #11998e;
+      font-size: 14px;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .schedule-form .bulk-selector .bulk-applicant-option.is-selected .bulk-applicant-status {
+      background: #1b6f28;
+      color: #ffffff;
+      transform: scale(1.03);
+    }
+
+    .selected-applicants-panel {
+      border-top: 1px solid #e2ece6;
+      padding-top: 12px;
+    }
+
+    .selected-applicants-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: #25342a;
+      font-weight: 700;
+    }
+
+    .selected-applicants-title small {
+      color: #718279;
+      font-weight: 600;
+    }
+
+    .selected-applicants-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 40px;
+      max-height: 104px;
+      overflow-y: auto;
+    }
+
+    .selected-applicant-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 100%;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: #eaf7ef;
+      color: #1b5e20;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid #d2ead9;
+    }
+
+    .selected-applicant-chip span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .selected-applicant-chip button {
+      border: 0;
+      background: transparent;
+      color: #1b5e20;
+      cursor: pointer;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .bulk-empty {
+      width: 100%;
+      padding: 18px;
+      border: 1px dashed #d6e4dc;
+      border-radius: 12px;
+      text-align: center;
+      color: #718279;
+      background: #fbfdfb;
+      font-weight: 600;
+    }
+
+    @media (max-width: 720px) {
+      .bulk-selector-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .bulk-select-all-btn {
+        justify-content: center;
+        width: 100%;
+      }
+
+      .selected-applicants-title {
+        flex-direction: column;
+      }
+
+      .schedule-form .bulk-selector .bulk-applicant-option {
+        grid-template-columns: 1fr auto;
+      }
+    }
+  </style>
 </head>
 <body class="admin-page-bg">
   <%- include('partials/sidebar') %>
@@ -56,15 +317,35 @@
         <h2><i class="fas fa-calendar-plus"></i> Create Schedule</h2>
         <form action="/admin/add-schedule" method="POST" class="schedule-form" role="form" aria-label="Add schedule form">
           <div class="form-grid">
-            <div class="form-group">
-              <label for="studentSearch"><i class="fas fa-user"></i> Applicant</label>
+            <div class="form-group bulk-applicant-group">
+              <label for="studentSearch"><i class="fas fa-users"></i> Applicants</label>
               <% if (students && students.length > 0) { %>
-                <div class="suggestions-container">
-                  <input type="text" id="studentSearch" name="studentSearch" class="search-input" placeholder="Search applicant by name or email" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="studentSuggestions" aria-label="Search applicant" required />
-                  <input type="hidden" id="studentId" name="studentId" required />
-                  <div class="suggestions-list" id="studentSuggestions" role="listbox" aria-label="Applicant suggestions"></div>
+                <div class="bulk-selector" data-total-applicants="<%= students.length %>">
+                  <div class="bulk-selector-toolbar">
+                    <div class="bulk-search-wrap">
+                      <i class="fas fa-search"></i>
+                      <input type="search" id="studentSearch" class="search-input" placeholder="Search applicants by name or email" autocomplete="off" aria-label="Search applicants" />
+                    </div>
+                    <button type="button" class="bulk-select-all-btn" id="selectAllApplicantsBtn">
+                      <i class="fas fa-check-double"></i> Select All
+                    </button>
+                  </div>
+                  <div class="bulk-selector-meta">
+                    <span id="selectedApplicantCount">0 selected</span>
+                    <button type="button" id="clearSelectedApplicantsBtn" class="clear-selected-btn">Clear</button>
+                  </div>
+                  <div class="bulk-applicant-list" id="studentSuggestions" role="listbox" aria-label="Applicant options"></div>
+                  <div class="selected-applicants-panel" id="selectedApplicantsPanel">
+                    <div class="selected-applicants-title">
+                      <span><i class="fas fa-user-check"></i> Selected Applicants</span>
+                      <small id="selectedApplicantsHint">Choose one or more applicants.</small>
+                    </div>
+                    <div class="selected-applicants-list" id="selectedApplicantsList"></div>
+                  </div>
+                  <input type="hidden" name="bulkMode" value="1" />
+                  <div id="selectedStudentInputs"></div>
                 </div>
-                <small class="sub-text">Only applicants without an existing schedule will appear here.</small>
+                <small class="sub-text">Select one or more applicants without an existing schedule. All selected applicants receive the same date, time, and room.</small>
               <% } else { %>
                 <input type="text" id="studentId" name="studentId" placeholder="Enter applicant name or email" required aria-label="Applicant name or email" autocomplete="off" />
               <% } %>
@@ -74,9 +355,9 @@
               <label for="examDateDisplay"><i class="fas fa-calendar"></i> Exam Date</label>
               <div class="exam-date-card">
                 <input type="hidden" id="examDate" name="examDate" />
-                <input type="text" id="examDateDisplay" placeholder="Click to choose a date from March to August 2026" readonly required aria-label="Selected exam date" aria-describedby="holidayHelp" />
+                <input type="text" id="examDateDisplay" placeholder="Click to choose a date from March to August 2026" readonly required aria-label="Selected exam date" aria-describedby="holidayHelp capacityWarning" />
               </div>
-              <small class="sub-text">Click the field to open the exam date picker.</small>
+              <small class="sub-text" id="holidayHelp">Click the field to open the exam date picker.</small>
             </div>
 
             <div class="form-group">
@@ -93,9 +374,13 @@
 
             <div class="form-group">
               <label for="location"><i class="fas fa-map-marker-alt"></i> Location</label>
-              <input type="text" id="location" name="location" placeholder="3rd Floor PTC Main Campus" value="3rd Floor PTC Main Campus" disabled />
-              <input type="hidden" name="location" value="3rd Floor PTC Main Campus" />
-              <small class="sub-text">Fixed location for all exams</small>
+              <select id="location" name="location" required aria-required="true" aria-label="Select exam location">
+                <option value="">Select Exam Location</option>
+                <option value="3rd Floor Room 301 PTC Main Campus">3rd Floor Room 301 PTC Main Campus</option>
+                <option value="3rd Floor Room 302 PTC Main Campus">3rd Floor Room 302 PTC Main Campus</option>
+                <option value="3rd Floor Room 303 PTC Main Campus">3rd Floor Room 303 PTC Main Campus</option>
+              </select>
+              <small class="sub-text">Choose one of the predefined exam rooms.</small>
             </div>
           </div>
 
@@ -221,7 +506,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="deleteModalCancel">Cancel</button>
-        <button type="button" class="btn btn-primary" id="deleteModalConfirm">Delete Schedule</button>
+        <button type="button" class="btn delete-btn" id="deleteModalConfirm">Delete Schedule</button>
       </div>
     </div>
   </div>
@@ -280,92 +565,145 @@
       }
     });
 
-    // Live applicant search with hidden ID selection
+    // Bulk applicant multi-select
     const studentOptions = (scheduleData.students || []).filter(student => student.status === 'pending');
     const studentSearchInput = document.getElementById('studentSearch');
-    const studentIdInput = document.getElementById('studentId');
     const studentSuggestions = document.getElementById('studentSuggestions');
+    const selectedStudentInputs = document.getElementById('selectedStudentInputs');
+    const selectedApplicantsList = document.getElementById('selectedApplicantsList');
+    const selectedApplicantCount = document.getElementById('selectedApplicantCount');
+    const selectedApplicantsHint = document.getElementById('selectedApplicantsHint');
+    const selectAllApplicantsBtn = document.getElementById('selectAllApplicantsBtn');
+    const clearSelectedApplicantsBtn = document.getElementById('clearSelectedApplicantsBtn');
+    const selectedApplicantIds = new Set();
 
-    function buildSuggestionItem(student) {
-      const item = document.createElement('div');
-      item.className = 'suggestion-item';
-      item.textContent = `${student.fullName} (${student.email || 'no-email'})`;
-      item.dataset.id = student._id;
-      item.dataset.name = student.fullName;
-      item.dataset.email = student.email;
-      item.addEventListener('click', () => {
-        selectStudent(student);
+    function getFilteredApplicants() {
+      const normalized = (studentSearchInput?.value || '').trim().toLowerCase();
+      return studentOptions.filter(student => {
+        const label = `${student.fullName || ''} ${student.email || ''}`.toLowerCase();
+        return normalized === '' || label.includes(normalized);
       });
-      return item;
     }
 
-    function updateSuggestions(query) {
-      if (!studentSearchInput || !studentSuggestions) return;
-      studentSuggestions.innerHTML = '';
+    function syncSelectedInputs() {
+      if (!selectedStudentInputs) return;
+      selectedStudentInputs.innerHTML = '';
+      selectedApplicantIds.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'studentIds[]';
+        input.value = id;
+        selectedStudentInputs.appendChild(input);
+      });
+    }
 
-      const normalized = query.trim().toLowerCase();
-      const candidates = studentOptions
-        .filter(student => {
-          const label = `${student.fullName} ${student.email || ''}`.toLowerCase();
-          return normalized === '' ? true : label.includes(normalized);
-        })
-        .slice(0, 8);
+    function renderSelectedApplicants() {
+      if (!selectedApplicantsList || !selectedApplicantCount) return;
+      const selectedStudents = studentOptions.filter(student => selectedApplicantIds.has(String(student._id)));
+      selectedApplicantCount.textContent = `${selectedStudents.length} selected`;
+      if (selectedApplicantsHint) {
+        selectedApplicantsHint.textContent = selectedStudents.length
+          ? 'Remove anyone who should not receive this schedule.'
+          : 'Choose one or more applicants.';
+      }
 
-      if (candidates.length === 0) {
+      selectedApplicantsList.innerHTML = '';
+      if (selectedStudents.length === 0) {
         const empty = document.createElement('div');
-        empty.className = 'suggestion-empty';
-        empty.textContent = normalized ? 'No applicants match your search.' : 'No applicants available.';
-        studentSuggestions.appendChild(empty);
-      } else {
-        candidates.forEach(student => studentSuggestions.appendChild(buildSuggestionItem(student)));
+        empty.className = 'bulk-empty';
+        empty.textContent = 'No applicants selected yet.';
+        selectedApplicantsList.appendChild(empty);
+        syncSelectedInputs();
+        return;
       }
 
-      studentSuggestions.parentElement?.classList.add('has-suggestions');
-      studentSearchInput.setAttribute('aria-expanded', 'true');
-
-      if (normalized === '') {
-        studentIdInput.value = '';
-      }
+      selectedStudents.forEach(student => {
+        const chip = document.createElement('span');
+        chip.className = 'selected-applicant-chip';
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-user';
+        const label = document.createElement('span');
+        label.textContent = student.fullName || student.email;
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.setAttribute('aria-label', `Remove ${student.fullName || student.email}`);
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.addEventListener('click', () => {
+          selectedApplicantIds.delete(String(student._id));
+          renderApplicantOptions();
+          renderSelectedApplicants();
+        });
+        chip.appendChild(icon);
+        chip.appendChild(label);
+        chip.appendChild(removeBtn);
+        selectedApplicantsList.appendChild(chip);
+      });
+      syncSelectedInputs();
     }
 
-    function selectStudent(student) {
-      if (!studentSearchInput || !studentIdInput || !studentSuggestions) return;
-      studentSearchInput.value = `${student.fullName} (${student.email || 'no-email'})`;
-      studentIdInput.value = student._id;
+    function renderApplicantOptions() {
+      if (!studentSuggestions) return;
       studentSuggestions.innerHTML = '';
-      studentSuggestions.parentElement?.classList.remove('has-suggestions');
-      studentSearchInput.setAttribute('aria-expanded', 'false');
+      const filteredApplicants = getFilteredApplicants();
+
+      if (filteredApplicants.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'bulk-empty';
+        empty.textContent = 'No applicants match your search.';
+        studentSuggestions.appendChild(empty);
+        return;
+      }
+
+      filteredApplicants.forEach(student => {
+        const id = String(student._id);
+        const option = document.createElement('label');
+        option.className = `bulk-applicant-option${selectedApplicantIds.has(id) ? ' is-selected' : ''}`;
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = id;
+        checkbox.checked = selectedApplicantIds.has(id);
+        const textWrap = document.createElement('span');
+        const name = document.createElement('span');
+        name.className = 'bulk-applicant-name';
+        name.textContent = student.fullName || 'Unnamed Applicant';
+        const email = document.createElement('span');
+        email.className = 'bulk-applicant-email';
+        email.textContent = student.email || 'No email available';
+        const statusIcon = document.createElement('i');
+        statusIcon.className = `bulk-applicant-status fas ${selectedApplicantIds.has(id) ? 'fa-check' : 'fa-plus'}`;
+        statusIcon.setAttribute('aria-hidden', 'true');
+        textWrap.appendChild(name);
+        textWrap.appendChild(email);
+        option.appendChild(checkbox);
+        option.appendChild(textWrap);
+        option.appendChild(statusIcon);
+        checkbox.addEventListener('change', (event) => {
+          if (event.target.checked) {
+            selectedApplicantIds.add(id);
+          } else {
+            selectedApplicantIds.delete(id);
+          }
+          renderApplicantOptions();
+          renderSelectedApplicants();
+        });
+        studentSuggestions.appendChild(option);
+      });
     }
 
     if (studentSearchInput) {
-        studentSearchInput.addEventListener('focus', (event) => {
-          updateSuggestions(event.target.value);
-        });
-
-        studentSearchInput.addEventListener('input', (event) => {
-          updateSuggestions(event.target.value);
-        });
-
-        studentIdInput.value = '';
-
-        studentSuggestions.addEventListener('click', (event) => {
-          const target = event.target.closest('.suggestion-item');
-          if (!target) return;
-          selectStudent({
-            _id: target.dataset.id,
-            fullName: target.dataset.name,
-            email: target.dataset.email
-          });
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (event) => {
-          if (!studentSearchInput.contains(event.target) && !studentSuggestions.contains(event.target)) {
-            studentSuggestions.innerHTML = '';
-            studentSuggestions.parentElement?.classList.remove('has-suggestions');
-            studentSearchInput.setAttribute('aria-expanded', 'false');
-          }
-        });
+      studentSearchInput.addEventListener('input', renderApplicantOptions);
+      selectAllApplicantsBtn?.addEventListener('click', () => {
+        getFilteredApplicants().forEach(student => selectedApplicantIds.add(String(student._id)));
+        renderApplicantOptions();
+        renderSelectedApplicants();
+      });
+      clearSelectedApplicantsBtn?.addEventListener('click', () => {
+        selectedApplicantIds.clear();
+        renderApplicantOptions();
+        renderSelectedApplicants();
+      });
+      renderApplicantOptions();
+      renderSelectedApplicants();
     }
   </script>
   <script src="/js/script.js"></script>
@@ -669,13 +1007,28 @@
       if (!examDateInput || !examDateDisplay) return;
       examDateInput.value = dateValue;
       examDateDisplay.value = formatDisplayDate(dateValue);
-      clearExamDateValidity();
+      validateHolidayDate(dateValue);
+      validateCapacityDate(dateValue);
+      examDateDisplay.setCustomValidity('');
       renderDateGrid();
       closeExamDateModal();
     }
 
+    function initializeMonthIndex() {
+      if (!examDateInput || !examDateInput.value) return;
+      const [year, month] = examDateInput.value.split('-');
+      const monthNum = parseInt(month, 10);
+      const matchingIndex = allowedMonths.findIndex(m => m.year === parseInt(year, 10) && m.month + 1 === monthNum);
+      if (matchingIndex !== -1) {
+        activeMonthIndex = matchingIndex;
+      }
+    }
+
     function openExamDateModal() {
       if (!examDateModal) return;
+      initializeMonthIndex();
+      renderCalendarTitle();
+      renderDateGrid();
       examDateModal.classList.add('active');
       examDateModal.setAttribute('aria-hidden', 'false');
     }
@@ -720,15 +1073,37 @@
       renderDateGrid();
     }
 
+    if (examDateInput && examDateInput.value) {
+      examDateDisplay.value = formatDisplayDate(examDateInput.value);
+    }
+
     scheduleForm?.addEventListener('submit', function(event) {
+      if (selectedStudentInputs && selectedApplicantIds.size === 0) {
+        event.preventDefault();
+        alert('Please select at least one applicant.');
+        studentSearchInput?.focus();
+        return;
+      }
+
       if (!examDateInput || !examDateInput.value) {
         setExamDateInvalid('Please select an exam date between March and August 2026.');
         examDateDisplay?.reportValidity();
         event.preventDefault();
+        return;
+      }
+
+      const examTimeSelect = document.getElementById('examTime');
+      const locationSelect = document.getElementById('location');
+      if (!examTimeSelect?.value) {
+        event.preventDefault();
+        examTimeSelect?.reportValidity();
+        return;
+      }
+      if (!locationSelect?.value) {
+        event.preventDefault();
+        locationSelect?.reportValidity();
       }
     });
   </script>
 </body>
 </html>
-
-

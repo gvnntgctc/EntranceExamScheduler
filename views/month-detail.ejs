@@ -223,13 +223,12 @@
     .modal-overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
+      inset: 0;
+      background: rgba(15, 23, 42, 0.58);
+      backdrop-filter: blur(4px);
       z-index: 999;
       animation: fadeIn 0.2s ease;
+      padding: 24px;
     }
 
     .modal-overlay.active {
@@ -244,12 +243,14 @@
     }
 
     .modal-content {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      max-width: 520px;
-      width: min(520px, 90%);
-      height: 80vh;
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.32);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      max-width: 580px;
+      width: min(580px, 100%);
+      max-height: 82vh;
+      min-height: 520px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -268,31 +269,68 @@
     }
 
     .modal-header {
-      background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+      background: linear-gradient(135deg, #155f24 0%, #1f7a34 100%);
       color: white;
-      padding: 24px;
+      padding: 18px 20px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-radius: 16px 16px 0 0;
       flex: 0 0 auto;
+      gap: 16px;
     }
 
     .modal-header h3 {
       margin: 0;
-      font-size: 20px;
+      font-size: 19px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: white;
+    }
+
+    .modal-header-title {
+      min-width: 0;
+    }
+
+    .modal-kicker {
+      display: block;
+      margin-bottom: 5px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .modal-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .applicant-count-pill {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.13);
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      color: white;
+      font-size: 12px;
       font-weight: 700;
     }
 
     .modal-close-btn {
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       color: white;
-      font-size: 24px;
+      font-size: 16px;
       cursor: pointer;
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -300,18 +338,19 @@
     }
 
     .modal-close-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
     }
 
     .modal-body {
-      padding: 24px;
+      padding: 22px 24px 24px;
       display: flex;
       flex-direction: column;
       gap: 16px;
       flex: 1 1 auto;
       min-height: 0;
       overflow: hidden;
+      background: linear-gradient(180deg, #f8fbf9 0%, #ffffff 42%);
     }
 
     .export-status {
@@ -340,18 +379,27 @@
     }
 
     .export-btn {
-      background: #1b5e20;
+      background: rgba(255, 255, 255, 0.94);
       color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 10px;
-      font-size: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      padding: 0 15px;
+      border-radius: 12px;
+      min-height: 42px;
+      font-size: 13px;
       cursor: pointer;
-      transition: transform 0.2s ease, opacity 0.2s ease;
+      transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      font-weight: 700;
+      color: #166427;
+      box-shadow: 0 10px 22px rgba(4, 44, 15, 0.16);
+    }
+
+    .export-btn:hover:not(:disabled) {
+      filter: brightness(1.02);
+      transform: translateY(-1px);
     }
 
     .export-btn:disabled {
@@ -359,122 +407,227 @@
       cursor: not-allowed;
     }
 
-    .modal-header {
+    #modalBody {
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      padding-right: 4px;
+      gap: 10px;
+      padding: 2px 4px 4px 0;
     }
 
     .modal-search {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px;
-      border-radius: 12px;
-      margin-bottom: 16px;
+      padding: 0 14px;
+      min-height: 56px;
+      border-radius: 16px;
+      margin-bottom: 0;
       flex: 0 0 auto;
-      background: rgba(255,255,255,0.92);
-      border: 1px solid #e6ecee;
-      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+      background: #ffffff;
+      border: 1px solid #dce8e2;
+      box-shadow: 0 12px 28px rgba(15,23,42,0.06);
     }
 
     .modal-search i {
-      color: rgba(17,153,142,0.95);
-      font-size: 16px;
-      margin-left: 6px;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #138a7a;
+      background: #edf8f5;
+      font-size: 15px;
+      margin-left: 0;
     }
 
     .modal-search .search-input {
-      border: 1px solid #e0e0e0;
-      background: rgba(255,255,255,0.98);
+      border: none;
+      background: transparent;
       outline: none;
       width: 100%;
-      font-size: 15px;
-      color: #333;
-      padding: 10px 12px;
-      border-radius: 10px;
+      height: 54px;
+      font-size: 14px;
+      color: #26352a;
+      padding: 0;
       transition: box-shadow 0.16s ease, border-color 0.16s ease;
       -webkit-appearance: none;
       appearance: none;
     }
 
     .modal-search .search-input::placeholder {
-      color: #95a5a6;
-      font-weight: 500;
+      color: #8a9b93;
+      font-weight: 600;
     }
 
     .modal-search .search-input:focus {
-      box-shadow: 0 8px 28px rgba(17,153,142,0.12);
-      border-color: #11998e;
+      box-shadow: none;
     }
 
     .modal-filters {
-      display: flex;
+      display: inline-flex;
+      align-self: flex-start;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 4px;
+      margin: 0 0 4px;
+      padding: 4px;
+      border-radius: 13px;
+      background: #f2f7f3;
+      border: 1px solid #dce8df;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
     }
 
     .filter-btn {
-      background: #f1f1f1;
-      border: 1px solid #d6d6d6;
-      color: #333;
-      padding: 10px 16px;
-      border-radius: 8px;
+      background: transparent;
+      border: none;
+      color: #3d5942;
+      min-width: 48px;
+      padding: 9px 14px;
+      border-radius: 9px;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 13px;
       transition: all 0.2s ease;
     }
 
     .filter-btn:hover,
     .filter-btn.active {
-      background: #1b5e20;
-      border-color: #19611d;
+      background: #1b6f28;
       color: white;
+      box-shadow: 0 8px 18px rgba(27, 111, 40, 0.18);
     }
 
     .applicant-item {
-      padding: 16px;
-      margin-bottom: 12px;
-      background: #f9f9f9;
-      border-left: 4px solid #1B5E20;
-      border-radius: 6px;
+      padding: 13px 14px;
+      background: #ffffff;
+      border: 1px solid #e4eee7;
+      border-left: 5px solid #1B5E20;
+      border-radius: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 14px;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .applicant-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .applicant-main {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 12px;
+    }
+
+    .applicant-avatar {
+      flex: 0 0 auto;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #eaf7ef;
+      color: #1B5E20;
+      border: 1px solid #d2ead9;
     }
 
     .applicant-name {
-      font-size: 16px;
-      font-weight: 600;
-      color: #333;
+      font-size: 15px;
+      font-weight: 700;
+      color: #26352a;
+      overflow-wrap: anywhere;
     }
 
     .applicant-time {
-      background: white;
-      padding: 6px 12px;
-      border-radius: 6px;
+      background: #f8faf8;
+      padding: 8px 11px;
+      border-radius: 999px;
       font-size: 12px;
-      color: #666;
-      border: 1px solid #e0e0e0;
+      color: #51605a;
+      border: 1px solid #dfe8e2;
       white-space: nowrap;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
 
     .empty-applicants {
       text-align: center;
-      padding: 30px 20px;
-      color: #999;
+      padding: 44px 20px;
+      color: #7a8a83;
+      background: #ffffff;
+      border: 1px dashed #d8e5dc;
+      border-radius: 14px;
     }
 
     .empty-applicants i {
       font-size: 40px;
-      color: #ddd;
+      color: #b7c7bd;
       margin-bottom: 12px;
       display: block;
+    }
+
+    #applicantModal .modal-content {
+      max-width: 580px;
+      width: min(580px, 100%);
+      max-height: 82vh;
+      min-height: 520px;
+      border-radius: 18px;
+    }
+
+    #applicantModal .modal-header {
+      padding: 18px 20px;
+      min-height: auto;
+      gap: 16px;
+      background: linear-gradient(135deg, #155f24 0%, #1f7a34 100%);
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+      font-size: initial;
+    }
+
+    #applicantModal .modal-header-title {
+      display: block;
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0;
+      line-height: 1.2;
+      font-size: initial;
+    }
+
+    #applicantModal .modal-header-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex: 0 0 auto;
+      padding: 4px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    #applicantModal .modal-header-actions .btn {
+      width: auto !important;
+      min-width: 0;
+      padding: 0 15px;
+      border-radius: 12px;
+    }
+
+    #applicantModal .modal-close-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
     }
 
     .schedule-details {
@@ -604,6 +757,51 @@
       .weekday-header {
         padding: 8px;
         font-size: 11px;
+      }
+
+      .modal-overlay {
+        padding: 12px;
+      }
+
+      #applicantModal .modal-content {
+        width: 100%;
+        min-height: 0;
+        max-height: 88vh;
+        border-radius: 16px;
+      }
+
+      #applicantModal .modal-header {
+        padding: 16px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      #applicantModal .modal-header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      #applicantModal .modal-header-actions .btn {
+        flex: 1 1 auto;
+      }
+
+      .modal-body {
+        padding: 16px;
+      }
+
+      .modal-title-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .applicant-item {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .applicant-time {
+        align-self: flex-start;
       }
     }
   </style>
@@ -735,7 +933,14 @@
     <div class="modal-content">
       <div class="modal-header">
         <div class="modal-header-title">
-          <h3 id="modalDateTitle">Applicants for Date</h3>
+          <span class="modal-kicker">Scheduled Applicants</span>
+          <div class="modal-title-row">
+            <h3 id="modalDateTitle">Applicants for Date</h3>
+            <span class="applicant-count-pill" id="applicantCountPill">
+              <i class="fas fa-users"></i>
+              <span>0</span>
+            </span>
+          </div>
         </div>
         <div class="modal-header-actions">
           <button class="btn btn-primary export-btn" id="exportExcelBtn" onclick="exportScheduleExcel()" type="button">
@@ -817,13 +1022,21 @@
 
       const titleText = 'Applicants';
       document.getElementById('modalDateTitle').textContent = `${titleText} - ${formattedDate}`;
+      const countPill = document.getElementById('applicantCountPill');
+      if (countPill) {
+        const countText = `${filteredCount} ${filteredCount === 1 ? 'applicant' : 'applicants'}`;
+        countPill.querySelector('span').textContent = countText;
+      }
 
       let modalBodyHTML = '';
       if (filteredApplicants.length > 0) {
         filteredApplicants.forEach(applicant => {
           modalBodyHTML += `
             <div class="applicant-item">
-              <span class="applicant-name"><i class="fas fa-user"></i> ${applicant.fullName}</span>
+              <div class="applicant-main">
+                <span class="applicant-avatar"><i class="fas fa-user"></i></span>
+                <span class="applicant-name">${applicant.fullName}</span>
+              </div>
               <span class="applicant-time"><i class="fas fa-clock"></i> ${applicant.examTime}</span>
             </div>
           `;
