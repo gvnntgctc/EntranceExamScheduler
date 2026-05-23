@@ -286,7 +286,8 @@
       }
 
       .search-bar {
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: 1fr;
         gap: 8px;
         align-items: stretch;
         margin-bottom: 12px;
@@ -299,7 +300,10 @@
       }
 
       .search-bar input,
-      .search-bar select {
+      .search-bar select,
+      .search-bar .btn {
+        width: 100%;
+        min-width: 0;
         padding: 10px 12px;
         font-size: 13px;
       }
@@ -322,12 +326,13 @@
 
       .notifications-table tr {
         display: grid;
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: minmax(0, 1fr) auto;
         grid-template-areas:
-          "index recipient manage"
-          "action action action"
-          "details details details"
-          "status sent sent";
+          "index manage"
+          "recipient recipient"
+          "action action"
+          "details details"
+          "status sent";
         gap: 6px 10px;
         margin-bottom: 10px;
         border: 1px solid #e5e7eb;
@@ -345,6 +350,14 @@
         box-sizing: border-box;
         line-height: 1.35;
         color: #334155;
+      }
+
+      .admin-notifications-page .notifications-table td,
+      .admin-notifications-page .notifications-table td:nth-child(n) {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        white-space: normal !important;
       }
 
       .notifications-table td:first-child {
@@ -378,6 +391,7 @@
         color: #64748b;
         font-size: 13px;
         padding-top: 4px;
+        overflow-wrap: anywhere;
       }
 
       .notifications-table td:last-child {
@@ -425,13 +439,14 @@
 
     @media (max-width: 600px) {
       .notifications-table tr {
-        grid-template-columns: auto 1fr;
+        grid-template-columns: minmax(0, 1fr) auto;
         grid-template-areas:
           "index manage"
           "recipient recipient"
           "action action"
           "details details"
-          "status sent";
+          "status status"
+          "sent sent";
         padding: 9px 10px;
         gap: 5px 8px;
       }
@@ -444,6 +459,11 @@
         width: auto;
         padding: 7px 10px;
         font-size: 12px;
+      }
+
+      .status-pill {
+        width: fit-content;
+        max-width: 100%;
       }
 
       .search-bar {
